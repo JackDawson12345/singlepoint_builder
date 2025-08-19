@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  domain_name: MyString
+  package_type: MyString
+  support_option: MyString
+  payment_status: MyString
+  stripe_payment_intent_id: MyString
+  paid_at: MyString
+  theme: one
+  built_website: MyString
+  published: false
+
+two:
+  user: two
+  domain_name: MyString
+  package_type: MyString
+  support_option: MyString
+  payment_status: MyString
+  stripe_payment_intent_id: MyString
+  paid_at: MyString
+  theme: two
+  built_website: MyString
+  published: false

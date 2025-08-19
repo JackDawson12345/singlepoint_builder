@@ -1,0 +1,16 @@
+<!-- app/views/admin/themes/edit.html.erb -->
+<div class="container">
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h2>Edit Theme</h2>
+          <%= link_to "View Theme", admin_theme_path(@theme), class: "btn btn-outline-primary" %>
+        </div>
+        <div class="card-body">
+          <%= render 'form', theme: @theme %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

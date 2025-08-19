@@ -1,0 +1,49 @@
+<!-- app/views/admin/themes/_form.html.erb -->
+<%= form_with model: [:admin, @theme], local: true, html: { multipart: true, class: "space-y-6" } do |form| %>
+  <% if @theme.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><%= pluralize(@theme.errors.count, "error") %> prohibited this theme from being saved:</h4>
+      <ul>
+        <% @theme.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= form.label :name, class: "form-label" %>
+    <%= form.text_field :name, class: "form-control" %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :description, class: "form-label" %>
+    <%= form.text_area :description, rows: 4, class: "form-control" %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :image, class: "form-label" %>
+    <%= form.file_field :image, class: "form-control", accept: "image/*" %>
+    <% if @theme.persisted? && @theme.image.attached? %>
+      <div class="mt-2">
+        <p class="text-muted">Current image:</p>
+        <%= image_tag @theme.image, class: "img-thumbnail", style: "max-width: 200px;" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :pages, class: "form-label" %>
+    <small class="form-text text-muted">Enter page names separated by commas (e.g., "home, about, contact")</small>
+    <%= form.text_area :pages,
+                       value: (@theme.pages.is_a?(Array) ? @theme.pages.join(", ") : @theme.pages),
+                       rows: 3,
+                       class: "form-control",
+                       placeholder: "home, about, contact, services" %>
+  </div>
+
+  <div class="form-actions">
+    <%= form.submit class: "btn btn-primary" %>
+    <%= link_to "Cancel", admin_themes_path, class: "btn btn-secondary" %>
+  </div>
+<% end %>

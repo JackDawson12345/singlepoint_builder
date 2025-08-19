@@ -1,0 +1,63 @@
+.w-1\/10{
+    width: 10%;
+}
+.w-2\/10{
+    width: 20%;
+}
+.w-3\/10{
+    width: 30%;
+}
+.w-4\/10{
+    width: 40%;
+}
+.w-5\/10{
+    width: 50%;
+}
+.w-6\/10{
+    width: 60%;
+}
+.w-7\/10{
+    width: 70%;
+}
+.w-8\/10{
+    width: 80%;
+}
+.w-9\/10{
+    width: 90%;
+}
+.bg-black-gray{
+    background: #1A1A1A;
+}
+
+.setup-bar{
+    background: #e2e2e2;
+}
+
+.sidebar-navigation{
+    font-size: 14px
+}
+
+.choose-theme > div > .background-overlay{
+    opacity: 0;
+    transition: 0.5s;
+}
+
+.choose-theme:hover > div > .background-overlay{
+    opacity: 1;
+    transition: 0.5s;
+}
+
+.nata-sans{
+    font-family: "Nata Sans", sans-serif;
+}
+.page-title{
+    font-size: 28px;
+    font-weight: 700;
+}
+.fill-blue-500{
+    fill: rgba(59,130,246)
+}
+
+.fill-green-500{
+    fill: rgba(16,185,129)
+}
