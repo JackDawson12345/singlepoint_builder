@@ -34,6 +34,11 @@ Rails.application.routes.draw do
     post "/setup/package", to: "setup#package", as: "setup_package"
     post "/setup/support", to: "setup#support", as: "setup_support"
 
+    # Add these payment routes
+    post "/setup/create-payment-intent", to: "setup#create_payment_intent", as: "setup_create_payment_intent"
+    post "/setup/confirm-payment", to: "setup#confirm_payment", as: "setup_confirm_payment"
+
+
     # Settings
     get "/settings", to: "settings#index", as: "settings"
     get "/settings/website-settings", to: "settings#website_settings", as: "website_settings"

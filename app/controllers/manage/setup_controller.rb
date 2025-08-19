@@ -147,7 +147,76 @@ class Manage::SetupController < Manage::BaseController
     domains
   end
 
+  # Add this action to handle payment processing
+  def create_payment_intent
+    begin
+      # Create the payment intent with Stripe
+      intent = Stripe::PaymentIntent.create({
+                                              amount: 20000, # £200.00 in pence
+                                              currency: 'gbp',
+                                              metadata: {
+                                                user_id: current_user.id,
+                                                user_email: current_user.email
+                                              }
+                                            })
+
+      # Store the payment intent ID in the user setup
+      current_user.user_setup.update(
+        stripe_payment_intent_id: intent.id,
+        payment_status: 'pending'
+      )
+
+      render json: { client_secret: intent.client_secret }
+    rescue Stripe::StripeError => e
+      Rails.logger.error "Stripe error: #{e.message}"
+      render json: { error: e.message }, status: :unprocessable_entity
+    rescue => e
+      Rails.logger.error "Payment intent creation error: #{e.message}"
+      render json: { error: 'Something went wrong. Please try again.' }, status: :internal_server_error
+    end
+  end
+
+  # Add this action to handle successful payments
+  def confirm_payment
+    payment_intent_id = params[:payment_intent_id]
+
+    begin
+      # Retrieve the payment intent from Stripe
+      intent = Stripe::PaymentIntent.retrieve(payment_intent_id)
+
+      if intent.status == 'succeeded'
+        # Update the user setup with payment confirmation
+        user_setup = current_user.user_setup
+        user_setup.update!(
+          payment_status: 'completed',
+          paid_at: Time.current
+        )
+
+        render json: {
+          success: true,
+          message: 'Payment successful!',
+          redirect_url: manage_setup_path
+        }
+      else
+        render json: {
+          success: false,
+          message: 'Payment was not successful. Please try again.'
+        }
+      end
+    rescue Stripe::StripeError => e
+      Rails.logger.error "Stripe confirmation error: #{e.message}"
+      render json: {
+        success: false,
+        message: 'Unable to confirm payment. Please contact support.'
+      }
+    end
+  end
+
   private
+
+  def stripe_publishable_key
+    Rails.application.credentials.dig(:stripe, :publishable_key) || ENV['STRIPE_PUBLISHABLE_KEY']
+  end
 
   def process_domain_response(response_data, base_query = nil)
     Rails.logger.info "Processing response data type: #{response_data.class.name}"
