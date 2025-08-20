@@ -63,4 +63,4 @@ end
 gem 'devise'
 gem 'byebug'
 gem 'image_processing', '~> 1.2'
-gem 'stripe', '~> 13.0'
+gem 'stripe', '~> 15.4'
