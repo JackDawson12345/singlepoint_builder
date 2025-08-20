@@ -93,7 +93,6 @@
           </div>
         </div>
       <% end %>
-
       <!-- Package Type -->
       <% if @user.user_setup.domain_name.nil? %>
         <div class="border rounded-lg p-3 flex gap-3">
@@ -162,7 +161,6 @@
           </div>
         </div>
       <% end %>
-
       <!-- How do you want it to work? -->
       <% if @user.user_setup.package_type.nil? %>
         <div class="border rounded-lg p-3 flex gap-3">
@@ -231,7 +229,6 @@
           </div>
         </div>
       <% end %>
-
       <!-- Payment -->
       <% if @user.user_setup.support_option.nil? %>
         <div class="border rounded-lg p-3 flex gap-3">
@@ -274,16 +271,42 @@
           <div class="w-full">
             <h5 class="nata-sans font-bold text-sm">Payment</h5>
             <% if @user.user_setup.paid_at.nil? %>
+              <!-- Replace the payment form section in your setup/index.html.erb with this -->
+
+              <% payment_info = @user.user_setup.payment_summary %>
+
               <div class="payment-form">
                 <div class="mb-4">
+                  <!-- Package Summary -->
+                  <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                    <h6 class="nata-sans font-semibold text-gray-800 mb-2">Package Summary</h6>
+                    <div class="flex justify-between items-center mb-2">
+                      <span class="nata-sans text-sm text-gray-600">Package Type:</span>
+                      <span class="nata-sans text-sm font-semibold text-gray-800"><%= @user.user_setup.package_type&.titleize || 'Standard' %></span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                      <span class="nata-sans text-sm text-gray-600">Support Option:</span>
+                      <span class="nata-sans text-sm font-semibold text-gray-800"><%= @user.user_setup.support_option %></span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="nata-sans text-sm text-gray-600">Total Package Price:</span>
+                      <span class="nata-sans text-sm font-semibold text-gray-800">£<%= number_with_precision(payment_info[:base_price], precision: 0) %></span>
+                    </div>
+                  </div>
+
+                  <!-- Payment Amount -->
                   <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <div class="flex items-center justify-between">
                       <div>
-                        <h6 class="nata-sans font-semibold text-blue-800">Setup Fee</h6>
-                        <p class="nata-sans text-sm text-blue-600">One-time payment to get your website up and running</p>
+                        <h6 class="nata-sans font-semibold text-blue-800"><%= payment_info[:payment_type] %></h6>
+                        <% if payment_info[:is_deposit] %>
+                          <p class="nata-sans text-sm text-blue-600">Pay remaining £<%= number_with_precision(payment_info[:remaining_amount], precision: 0) %> after completion</p>
+                        <% else %>
+                          <p class="nata-sans text-sm text-blue-600">Complete payment for your website setup</p>
+                        <% end %>
                       </div>
                       <div class="text-right">
-                        <span class="nata-sans text-2xl font-bold text-blue-800">£200</span>
+                        <span class="nata-sans text-2xl font-bold text-blue-800">£<%= number_with_precision(payment_info[:payment_amount], precision: 0) %></span>
                         <p class="nata-sans text-xs text-blue-600">inc. VAT</p>
                       </div>
                     </div>
@@ -294,9 +317,42 @@
                     <div class="border rounded-lg p-4">
                       <h6 class="nata-sans font-semibold text-gray-800 mb-3">Payment Details</h6>
 
-                      <!-- Stripe Elements will be mounted here -->
-                      <div id="card-element" class="p-3 border border-gray-300 rounded-md bg-white">
-                        <!-- A Stripe Element will be inserted here. -->
+                      <!-- Card Number -->
+                      <div class="mb-4">
+                        <label class="nata-sans block text-sm font-medium text-gray-700 mb-2">Card Number</label>
+                        <div id="card-number-element" class="p-3 border border-gray-300 rounded-md bg-white">
+                          <!-- Stripe Card Number Element will be inserted here -->
+                        </div>
+                      </div>
+
+                      <!-- Card Expiry and CVC -->
+                      <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label class="nata-sans block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                          <div id="card-expiry-element" class="p-3 border border-gray-300 rounded-md bg-white">
+                            <!-- Stripe Card Expiry Element will be inserted here -->
+                          </div>
+                        </div>
+                        <div>
+                          <label class="nata-sans block text-sm font-medium text-gray-700 mb-2">CVC</label>
+                          <div id="card-cvc-element" class="p-3 border border-gray-300 rounded-md bg-white">
+                            <!-- Stripe Card CVC Element will be inserted here -->
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Postcode -->
+                      <div class="mb-4">
+                        <label class="nata-sans block text-sm font-medium text-gray-700 mb-2">Postcode</label>
+                        <input
+                          type="text"
+                          id="postcode-input"
+                          class="w-full p-3 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="e.g. SW1A 1AA"
+                          maxlength="8"
+                          style="text-transform: uppercase;"
+                          />
+                        <div id="postcode-error" class="text-red-600 text-sm mt-1"></div>
                       </div>
 
                       <!-- Error messages -->
@@ -310,7 +366,7 @@
                       class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled
                     >
-                      <span id="button-text">Pay £200</span>
+                      <span id="button-text">Pay £<%= number_with_precision(payment_info[:payment_amount], precision: 0) %></span>
                       <span id="spinner" class="hidden">
           <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -331,36 +387,77 @@
                 </div>
               </div>
             <% else %>
-              <p>Payment Made At : <%= @user.user_setup.paid_at %></p>
+              <p class="nata-sans text-sm text-blue-500">Payment made on : <%= @user.user_setup.paid_at.to_datetime.strftime("%m/%d/%Y at %I:%M%p") %></p>
             <% end %>
 
           </div>
         </div>
       <% end %>
-
-
       <!-- Choose Theme -->
-      <div class="border rounded-lg p-3 flex gap-3">
-        <% unless @user.user_setup.theme_id.nil? %>
-          <div class="w-5 h-5 flex items-center justify-center">
-            <svg class="fill-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Check--Streamline-Phosphor" height="12" width="12">
-              <path d="M15.65620625 3.426275 5.62145 13.46103125c-0.24498125 0.24525 -0.64246875 0.24525 -0.88745 0L0.34379375 9.070825c-0.341575 -0.34158125 -0.18529375 -0.9248375 0.2813125 -1.0498625 0.21655 -0.058025 0.4476125 0.0038875 0.6061375 0.1624125l3.94648125 3.9472625 9.59103125 -9.5918125c0.341575 -0.341575 0.9248375 -0.18529375 1.0498625 0.2813125 0.058025 0.21655 -0.0038875 0.4476125 -0.1624125 0.6061375Z" stroke-width="0.0625"></path>
-            </svg>
+      <% if @user.user_setup.paid_at.nil? %>
+        <div class="border rounded-lg p-3 flex gap-3">
+          <% unless @user.user_setup.theme_id.nil? %>
+            <div class="w-5 h-5 flex items-center justify-center">
+              <svg class="fill-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Check--Streamline-Phosphor" height="12" width="12">
+                <path d="M15.65620625 3.426275 5.62145 13.46103125c-0.24498125 0.24525 -0.64246875 0.24525 -0.88745 0L0.34379375 9.070825c-0.341575 -0.34158125 -0.18529375 -0.9248375 0.2813125 -1.0498625 0.21655 -0.058025 0.4476125 0.0038875 0.6061375 0.1624125l3.94648125 3.9472625 9.59103125 -9.5918125c0.341575 -0.341575 0.9248375 -0.18529375 1.0498625 0.2813125 0.058025 0.21655 -0.0038875 0.4476125 -0.1624125 0.6061375Z" stroke-width="0.0625"></path>
+              </svg>
+            </div>
+          <% else %>
+            <div class="w-5 h-5 flex items-center justify-center">
+              <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Dot-Outline--Streamline-Phosphor" height="20" width="20">
+                <g id="dot-outline-regular">
+                  <path id="Vector" fill="" d="M8 6c-0.39553333333333335 0 -0.7822666666666667 0.11729999999999999 -1.1111333333333333 0.33705999999999997 -0.3289066666666667 0.21976666666666667 -0.5852466666666667 0.53214 -0.7366266666666667 0.8975399999999999 -0.15137333333333333 0.36546666666666666 -0.19097999999999998 0.7676 -0.11380666666666667 1.1556 0.07716666666666666 0.3879333333333333 0.26764666666666664 0.7443333333333333 0.5473533333333334 1.024 0.27968 0.2797333333333333 0.63608 0.4702 1.0240133333333332 0.5474 0.38799999999999996 0.07713333333333333 0.7901333333333334 0.037533333333333335 1.1556 -0.11386666666666667 0.3654 -0.15133333333333332 0.6778 -0.4076666666666667 0.8975333333333333 -0.7365999999999999C9.882733333333332 8.782266666666667 10 8.395533333333333 10 8c0 -0.5304 -0.21073333333333333 -1.0391333333333332 -0.5858 -1.414213333333333C9.039133333333332 6.210713333333333 8.530466666666666 6 8 6Zm0 3c-0.1978 0 -0.39113333333333333 -0.05866666666666666 -0.5556 -0.16853333333333334 -0.1644 -0.10986666666666667 -0.29259999999999997 -0.2660666666666667 -0.36826666666666663 -0.4488 -0.07566666666666666 -0.18273333333333333 -0.09553333333333333 -0.3838 -0.056933333333333336 -0.5777333333333333 0.038599999999999995 -0.19399999999999998 0.13386666666666666 -0.3722 0.2736666666666666 -0.5120666666666667 0.13986666666666664 -0.13979999999999998 0.31806666666666666 -0.23506666666666667 0.5120666666666667 -0.2736666666666666 0.19393333333333332 -0.038599999999999995 0.395 -0.018799999999999997 0.5777333333333333 0.056933333333333336 0.18273333333333333 0.07566666666666666 0.3389333333333333 0.20386666666666667 0.4488 0.36826666666666663 0.10986666666666667 0.16446666666666665 0.16853333333333334 0.35779999999999995 0.16853333333333334 0.5556 0 0.2652 -0.10533333333333333 0.5196 -0.29286666666666666 0.7071333333333333S8.2652 9 8 9Z" stroke-width="0.6667"></path>
+                </g>
+              </svg>
+            </div>
+          <% end %>
+          <div class="w-full">
+            <h5 class="nata-sans font-bold text-sm">Choose your theme</h5>
           </div>
-        <% else %>
-          <div class="w-5 h-5 flex items-center justify-center">
-            <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Dot-Outline--Streamline-Phosphor" height="20" width="20">
-              <g id="dot-outline-regular">
-                <path id="Vector" fill="" d="M8 6c-0.39553333333333335 0 -0.7822666666666667 0.11729999999999999 -1.1111333333333333 0.33705999999999997 -0.3289066666666667 0.21976666666666667 -0.5852466666666667 0.53214 -0.7366266666666667 0.8975399999999999 -0.15137333333333333 0.36546666666666666 -0.19097999999999998 0.7676 -0.11380666666666667 1.1556 0.07716666666666666 0.3879333333333333 0.26764666666666664 0.7443333333333333 0.5473533333333334 1.024 0.27968 0.2797333333333333 0.63608 0.4702 1.0240133333333332 0.5474 0.38799999999999996 0.07713333333333333 0.7901333333333334 0.037533333333333335 1.1556 -0.11386666666666667 0.3654 -0.15133333333333332 0.6778 -0.4076666666666667 0.8975333333333333 -0.7365999999999999C9.882733333333332 8.782266666666667 10 8.395533333333333 10 8c0 -0.5304 -0.21073333333333333 -1.0391333333333332 -0.5858 -1.414213333333333C9.039133333333332 6.210713333333333 8.530466666666666 6 8 6Zm0 3c-0.1978 0 -0.39113333333333333 -0.05866666666666666 -0.5556 -0.16853333333333334 -0.1644 -0.10986666666666667 -0.29259999999999997 -0.2660666666666667 -0.36826666666666663 -0.4488 -0.07566666666666666 -0.18273333333333333 -0.09553333333333333 -0.3838 -0.056933333333333336 -0.5777333333333333 0.038599999999999995 -0.19399999999999998 0.13386666666666666 -0.3722 0.2736666666666666 -0.5120666666666667 0.13986666666666664 -0.13979999999999998 0.31806666666666666 -0.23506666666666667 0.5120666666666667 -0.2736666666666666 0.19393333333333332 -0.038599999999999995 0.395 -0.018799999999999997 0.5777333333333333 0.056933333333333336 0.18273333333333333 0.07566666666666666 0.3389333333333333 0.20386666666666667 0.4488 0.36826666666666663 0.10986666666666667 0.16446666666666665 0.16853333333333334 0.35779999999999995 0.16853333333333334 0.5556 0 0.2652 -0.10533333333333333 0.5196 -0.29286666666666666 0.7071333333333333S8.2652 9 8 9Z" stroke-width="0.6667"></path>
-              </g>
-            </svg>
-          </div>
-        <% end %>
-        <div class="w-full">
-          <h5 class="nata-sans font-bold text-sm">Choose Theme</h5>
         </div>
-      </div>
+      <% else %>
+        <div class="border rounded-lg p-3 flex gap-3">
+          <% unless @user.user_setup.theme_id.nil? %>
+            <div class="w-5 h-5 flex items-center justify-center">
+              <svg class="fill-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Check--Streamline-Phosphor" height="12" width="12">
+                <path d="M15.65620625 3.426275 5.62145 13.46103125c-0.24498125 0.24525 -0.64246875 0.24525 -0.88745 0L0.34379375 9.070825c-0.341575 -0.34158125 -0.18529375 -0.9248375 0.2813125 -1.0498625 0.21655 -0.058025 0.4476125 0.0038875 0.6061375 0.1624125l3.94648125 3.9472625 9.59103125 -9.5918125c0.341575 -0.341575 0.9248375 -0.18529375 1.0498625 0.2813125 0.058025 0.21655 -0.0038875 0.4476125 -0.1624125 0.6061375Z" stroke-width="0.0625"></path>
+              </svg>
+            </div>
+          <% else %>
+            <div class="w-5 h-5 flex items-center justify-center">
+              <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Dot-Outline--Streamline-Phosphor" height="20" width="20">
+                <g id="dot-outline-regular">
+                  <path id="Vector" fill="" d="M8 6c-0.39553333333333335 0 -0.7822666666666667 0.11729999999999999 -1.1111333333333333 0.33705999999999997 -0.3289066666666667 0.21976666666666667 -0.5852466666666667 0.53214 -0.7366266666666667 0.8975399999999999 -0.15137333333333333 0.36546666666666666 -0.19097999999999998 0.7676 -0.11380666666666667 1.1556 0.07716666666666666 0.3879333333333333 0.26764666666666664 0.7443333333333333 0.5473533333333334 1.024 0.27968 0.2797333333333333 0.63608 0.4702 1.0240133333333332 0.5474 0.38799999999999996 0.07713333333333333 0.7901333333333334 0.037533333333333335 1.1556 -0.11386666666666667 0.3654 -0.15133333333333332 0.6778 -0.4076666666666667 0.8975333333333333 -0.7365999999999999C9.882733333333332 8.782266666666667 10 8.395533333333333 10 8c0 -0.5304 -0.21073333333333333 -1.0391333333333332 -0.5858 -1.414213333333333C9.039133333333332 6.210713333333333 8.530466666666666 6 8 6Zm0 3c-0.1978 0 -0.39113333333333333 -0.05866666666666666 -0.5556 -0.16853333333333334 -0.1644 -0.10986666666666667 -0.29259999999999997 -0.2660666666666667 -0.36826666666666663 -0.4488 -0.07566666666666666 -0.18273333333333333 -0.09553333333333333 -0.3838 -0.056933333333333336 -0.5777333333333333 0.038599999999999995 -0.19399999999999998 0.13386666666666666 -0.3722 0.2736666666666666 -0.5120666666666667 0.13986666666666664 -0.13979999999999998 0.31806666666666666 -0.23506666666666667 0.5120666666666667 -0.2736666666666666 0.19393333333333332 -0.038599999999999995 0.395 -0.018799999999999997 0.5777333333333333 0.056933333333333336 0.18273333333333333 0.07566666666666666 0.3389333333333333 0.20386666666666667 0.4488 0.36826666666666663 0.10986666666666667 0.16446666666666665 0.16853333333333334 0.35779999999999995 0.16853333333333334 0.5556 0 0.2652 -0.10533333333333333 0.5196 -0.29286666666666666 0.7071333333333333S8.2652 9 8 9Z" stroke-width="0.6667"></path>
+                </g>
+              </svg>
+            </div>
+          <% end %>
+          <div class="w-full">
+            <h5 class="nata-sans font-bold text-sm">Choose your theme</h5>
+            <% unless @user.user_setup.theme_id.nil? %>
+              <% theme = Theme.find(@user.user_setup.theme_id) %>
+              <p class="nata-sans text-sm text-blue-500">Theme selected: <%= theme.name %></p>
+            <% else %>
+              <div class="grid grid-cols-3 gap-5 mt-2">
 
+                <% @themes.each do |theme| %>
+                  <div class="choose-theme flex flex-col gap-2">
+                    <div class="relative bg-cover bg-no-repeat bg-center" style="min-height: 200px; max-height: 200px; background-image: url('<%= theme.image.attached? ? url_for(theme.image) : 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg' %>')">
+                      <div class="background-overlay absolute w-full flex items-center justify-center" style="min-height: 200px; max-height: 200px; background: #ffffffba">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                          <%= link_to 'Choose Theme', manage_website_set_website_theme_path(theme_id: theme.id), class: 'nata-sans bg-blue-500 rounded-full py-1 px-3 text-white' %>
+                          <button class="nata-sans bg-white rounded-full py-1 px-3">View Theme</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="nata-sans font-normal text-base"><%= theme.name %></div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
       <!-- Build Website -->
       <div class="border rounded-lg p-3 flex gap-3">
         <% unless @user.user_setup.built_website == 'Not Started' %>
@@ -382,7 +479,6 @@
           <h5 class="nata-sans font-bold text-sm">Build your website</h5>
         </div>
       </div>
-
       <!-- Publish Website -->
       <div class="border rounded-lg p-3 flex gap-3">
         <% unless @user.user_setup.published == false %>
@@ -408,415 +504,502 @@
   </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('domain-search-form');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const domainResults = document.getElementById('domain-results');
-        const domainList = document.getElementById('domain-list');
-        const errorMessage = document.getElementById('error-message');
-        const searchButton = document.getElementById('search-button');
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(form);
-            const query = formData.get('name');
-
-            if (!query || query.trim() === '') {
-                showError('Please enter a domain name');
-                return;
-            }
-
-            // Show loading state
-            loadingIndicator.classList.remove('hidden');
-            domainResults.classList.add('hidden');
-            errorMessage.classList.add('hidden');
-            searchButton.disabled = true;
-            searchButton.textContent = 'Searching...';
-
-            fetch('<%= manage_setup_search_domain_path %>', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response ok:', response.ok);
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('API Response:', data);
-
-                    if (data.error) {
-                        console.error('API Error:', data.error);
-                        if (data.debug_info) {
-                            console.error('Debug Info:', data.debug_info);
-                        }
-                        showError(data.error + (data.debug_info ? ' (Check console for details)' : ''));
-                    } else {
-                        console.log('Domains found:', data.domains);
-                        showDomains(data.domains);
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch Error Details:', error);
-                    showError('An error occurred while searching. Please try again. (Check console for details)');
-                })
-                .finally(() => {
-                    // Reset loading state
-                    loadingIndicator.classList.add('hidden');
-                    searchButton.disabled = false;
-                    searchButton.textContent = "Let's Go";
-                });
-        });
-
-        function selectDomain(domainName) {
-            // Show loading state for the specific button
-            const button = document.querySelector(`[data-domain="${domainName}"]`);
-            if (button) {
-                button.disabled = true;
-                button.textContent = 'Selecting...';
-            }
-
-            // Create a form and submit it
-            const newForm = document.createElement('form');
-            newForm.method = 'POST';
-            newForm.action = '<%= manage_setup_select_domain_path %>';
-
-            // Add CSRF token
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = 'authenticity_token';
-            csrfInput.value = csrfToken;
-            newForm.appendChild(csrfInput);
-
-            // Add domain name
-            const domainInput = document.createElement('input');
-            domainInput.type = 'hidden';
-            domainInput.name = 'domain_name';
-            domainInput.value = domainName;
-            newForm.appendChild(domainInput);
-
-            // Submit the form
-            document.body.appendChild(newForm);
-            newForm.submit();
-        }
-
-        function showDomains(domains) {
-            if (!domains || domains.length === 0) {
-                showError('No available domains found for your search.');
-                return;
-            }
-
-            // Clear existing domain cards
-            domainList.innerHTML = '';
-
-            // Create domain cards
-            domains.forEach(domain => {
-                const domainCard = document.createElement('div');
-                domainCard.className = 'border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-50';
-
-                const domainInfo = document.createElement('div');
-                domainInfo.className = 'flex-1';
-
-                const domainName = document.createElement('h6');
-                domainName.className = 'nata-sans font-semibold text-sm text-gray-900';
-                domainName.textContent = domain.name;
-                domainInfo.appendChild(domainName);
-
-                if (domain.price) {
-                    const domainPrice = document.createElement('p');
-                    domainPrice.className = 'nata-sans text-xs text-gray-600 mt-1';
-                    domainPrice.textContent = `$${domain.price}/year`;
-                    domainInfo.appendChild(domainPrice);
-                }
-
-                if (!domain.available) {
-                    const unavailableText = document.createElement('p');
-                    unavailableText.className = 'nata-sans text-xs text-red-600 mt-1';
-                    unavailableText.textContent = 'Unavailable';
-                    domainInfo.appendChild(unavailableText);
-                }
-
-                const selectButton = document.createElement('button');
-                selectButton.className = domain.available
-                    ? 'nata-sans bg-blue-500 border border-blue-500 text-white h-8 px-4 text-sm font-semibold rounded-full hover:bg-blue-600'
-                    : 'nata-sans bg-gray-300 border border-gray-300 text-gray-500 h-8 px-4 text-sm font-semibold rounded-full cursor-not-allowed';
-                selectButton.textContent = domain.available ? 'Select' : 'Unavailable';
-                selectButton.disabled = !domain.available;
-                selectButton.setAttribute('data-domain', domain.name);
-
-                if (domain.available) {
-                    selectButton.addEventListener('click', () => selectDomain(domain.name));
-                }
-
-                domainCard.appendChild(domainInfo);
-                domainCard.appendChild(selectButton);
-                domainList.appendChild(domainCard);
-            });
-
-            domainResults.classList.remove('hidden');
-            errorMessage.classList.add('hidden');
-        }
-
-        function showError(message) {
-            errorMessage.querySelector('p').textContent = message;
-            errorMessage.classList.remove('hidden');
-            domainResults.classList.add('hidden');
-        }
-
-        // Make selectDomain available globally for the click handlers
-        window.selectDomain = selectDomain;
-    });
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const buttons = document.querySelectorAll('.package-type-btn');
-        const form = document.querySelector('.package-type-form');
-        const hiddenField = document.getElementById('package_type_field');
-
-        buttons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                console.log('Button clicked:', this.dataset.packageType);
-
-                // Update the hidden field value
-                hiddenField.value = this.dataset.packageType;
-                console.log('Hidden field value set to:', hiddenField.value);
-
-                // Update button styles to show selection
-                buttons.forEach(btn => {
-                    if (btn === this) {
-                        btn.classList.remove('border-blue-500', 'text-blue-500');
-                        btn.classList.add('bg-blue-500', 'text-white');
-                    } else {
-                        btn.classList.remove('bg-blue-500', 'text-white');
-                        btn.classList.add('border-blue-500', 'text-blue-500');
-                    }
-                });
-
-                console.log('About to submit form...');
-                // Submit the form via AJAX
-                if (typeof Rails !== 'undefined' && Rails.fire) {
-                    Rails.fire(form, 'submit');
-                } else {
-                    // Fallback method
-                    form.submit();
-                }
-            });
-        });
-    });
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const buttons = document.querySelectorAll('.support-option-btn');
-        const form = document.querySelector('.support-option-form');
-        const hiddenField = document.getElementById('support_option_field');
-
-        buttons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                console.log('Button clicked:', this.dataset.packageType);
-
-                // Update the hidden field value
-                hiddenField.value = this.dataset.packageType;
-                console.log('Hidden field value set to:', hiddenField.value);
-
-                // Update button styles to show selection
-                buttons.forEach(btn => {
-                    if (btn === this) {
-                        btn.classList.remove('border-blue-500', 'text-blue-500');
-                        btn.classList.add('bg-blue-500', 'text-white');
-                    } else {
-                        btn.classList.remove('bg-blue-500', 'text-white');
-                        btn.classList.add('border-blue-500', 'text-blue-500');
-                    }
-                });
-
-                console.log('About to submit form...');
-                // Submit the form via AJAX
-                if (typeof Rails !== 'undefined' && Rails.fire) {
-                    Rails.fire(form, 'submit');
-                } else {
-                    // Fallback method
-                    form.submit();
-                }
-            });
-        });
-    });
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const buttons = document.querySelectorAll('.support-option-btn');
-        const form = document.querySelector('.support-option-form');
-        const hiddenField = document.getElementById('support_option_field');
-
-        buttons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                console.log('Button clicked:', this.dataset.supportOption);
-
-                // Update the hidden field value
-                hiddenField.value = this.dataset.supportOption;
-                console.log('Hidden field value set to:', hiddenField.value);
-
-                // Update button styles to show selection
-                buttons.forEach(btn => {
-                    if (btn === this) {
-                        btn.classList.remove('border-blue-500', 'text-blue-500');
-                        btn.classList.add('bg-blue-500', 'text-white');
-                    } else {
-                        btn.classList.remove('bg-blue-500', 'text-white');
-                        btn.classList.add('border-blue-500', 'text-blue-500');
-                    }
-                });
-
-                console.log('About to submit form...');
-                // Submit the form via AJAX
-                if (typeof Rails !== 'undefined' && Rails.fire) {
-                    Rails.fire(form, 'submit');
-                } else {
-                    // Fallback method
-                    form.submit();
-                }
-            });
-        });
-    });
-</script>
-
 <!-- Include Stripe.js -->
 <script src="https://js.stripe.com/v3/"></script>
 
 <script>
-    // Initialize Stripe
-    const stripe = Stripe('<%= Rails.application.credentials.dig(:stripe, :publishable_key) || ENV["STRIPE_PUBLISHABLE_KEY"] %>');
-    const elements = stripe.elements();
+    document.addEventListener('DOMContentLoaded', function() {
 
-    // Create an instance of the card Element
-    const cardElement = elements.create('card', {
-        style: {
-            base: {
-                fontSize: '16px',
-                color: '#424770',
-                '::placeholder': {
-                    color: '#aab7c4',
-                },
-            },
-            invalid: {
-                color: '#9e2146',
-            },
-        },
-    });
+        // ==========================================
+        // DOMAIN SEARCH FUNCTIONALITY
+        // ==========================================
 
-    // Add an instance of the card Element into the card-element div
-    cardElement.mount('#card-element');
+        const domainForm = document.getElementById('domain-search-form');
+        if (domainForm) {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const domainResults = document.getElementById('domain-results');
+            const domainList = document.getElementById('domain-list');
+            const errorMessage = document.getElementById('error-message');
+            const searchButton = document.getElementById('search-button');
 
-    // Handle real-time validation errors from the card Element
-    cardElement.on('change', ({error}) => {
-        const displayError = document.getElementById('card-errors');
-        const submitButton = document.getElementById('submit-payment');
+            domainForm.addEventListener('submit', function(e) {
+                e.preventDefault();
 
-        if (error) {
-            displayError.textContent = error.message;
-            submitButton.disabled = true;
-        } else {
-            displayError.textContent = '';
-            submitButton.disabled = false;
-        }
-    });
+                const formData = new FormData(domainForm);
+                const query = formData.get('name');
 
-    // Handle form submission
-    const form = document.getElementById('payment-form');
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const submitButton = document.getElementById('submit-payment');
-        const buttonText = document.getElementById('button-text');
-        const spinner = document.getElementById('spinner');
-
-        // Disable button and show loading state
-        submitButton.disabled = true;
-        buttonText.classList.add('hidden');
-        spinner.classList.remove('hidden');
-
-        try {
-            // Create payment intent on the server
-            const response = await fetch('<%= manage_setup_create_payment_intent_path %>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                if (!query || query.trim() === '') {
+                    showError('Please enter a domain name');
+                    return;
                 }
+
+                // Show loading state
+                loadingIndicator.classList.remove('hidden');
+                domainResults.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+                searchButton.disabled = true;
+                searchButton.textContent = 'Searching...';
+
+                fetch('<%= manage_setup_search_domain_path %>', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        console.log('Response ok:', response.ok);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('API Response:', data);
+
+                        if (data.error) {
+                            console.error('API Error:', data.error);
+                            if (data.debug_info) {
+                                console.error('Debug Info:', data.debug_info);
+                            }
+                            showError(data.error + (data.debug_info ? ' (Check console for details)' : ''));
+                        } else {
+                            console.log('Domains found:', data.domains);
+                            showDomains(data.domains);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch Error Details:', error);
+                        showError('An error occurred while searching. Please try again. (Check console for details)');
+                    })
+                    .finally(() => {
+                        // Reset loading state
+                        loadingIndicator.classList.add('hidden');
+                        searchButton.disabled = false;
+                        searchButton.textContent = "Let's Go";
+                    });
             });
 
-            const data = await response.json();
+            function selectDomain(domainName) {
+                // Show loading state for the specific button
+                const button = document.querySelector(`[data-domain="${domainName}"]`);
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = 'Selecting...';
+                }
 
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to create payment intent');
+                // Create a form and submit it
+                const newForm = document.createElement('form');
+                newForm.method = 'POST';
+                newForm.action = '<%= manage_setup_select_domain_path %>';
+
+                // Add CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'authenticity_token';
+                csrfInput.value = csrfToken;
+                newForm.appendChild(csrfInput);
+
+                // Add domain name
+                const domainInput = document.createElement('input');
+                domainInput.type = 'hidden';
+                domainInput.name = 'domain_name';
+                domainInput.value = domainName;
+                newForm.appendChild(domainInput);
+
+                // Submit the form
+                document.body.appendChild(newForm);
+                newForm.submit();
             }
 
-            // Confirm the payment with Stripe
-            const {error, paymentIntent} = await stripe.confirmCardPayment(data.client_secret, {
-                payment_method: {
-                    card: cardElement,
-                    billing_details: {
-                        email: '<%= current_user.email %>'
-                    }
+            function showDomains(domains) {
+                if (!domains || domains.length === 0) {
+                    showError('No available domains found for your search.');
+                    return;
                 }
-            });
 
-            if (error) {
-                // Show error to customer
-                const errorElement = document.getElementById('card-errors');
-                errorElement.textContent = error.message;
-            } else if (paymentIntent.status === 'succeeded') {
-                // Payment succeeded, confirm on server
-                const confirmResponse = await fetch('<%= manage_setup_confirm_payment_path %>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        payment_intent_id: paymentIntent.id
-                    })
+                // Clear existing domain cards
+                domainList.innerHTML = '';
+
+                // Create domain cards
+                domains.forEach(domain => {
+                    const domainCard = document.createElement('div');
+                    domainCard.className = 'border rounded-lg p-3 flex justify-between items-center bg-white hover:bg-gray-50';
+
+                    const domainInfo = document.createElement('div');
+                    domainInfo.className = 'flex-1';
+
+                    const domainName = document.createElement('h6');
+                    domainName.className = 'nata-sans font-semibold text-sm text-gray-900';
+                    domainName.textContent = domain.name;
+                    domainInfo.appendChild(domainName);
+
+                    if (domain.price) {
+                        const domainPrice = document.createElement('p');
+                        domainPrice.className = 'nata-sans text-xs text-gray-600 mt-1';
+                        domainPrice.textContent = `$${domain.price}/year`;
+                        domainInfo.appendChild(domainPrice);
+                    }
+
+                    if (!domain.available) {
+                        const unavailableText = document.createElement('p');
+                        unavailableText.className = 'nata-sans text-xs text-red-600 mt-1';
+                        unavailableText.textContent = 'Unavailable';
+                        domainInfo.appendChild(unavailableText);
+                    }
+
+                    const selectButton = document.createElement('button');
+                    selectButton.className = domain.available
+                        ? 'nata-sans bg-blue-500 border border-blue-500 text-white h-8 px-4 text-sm font-semibold rounded-full hover:bg-blue-600'
+                        : 'nata-sans bg-gray-300 border border-gray-300 text-gray-500 h-8 px-4 text-sm font-semibold rounded-full cursor-not-allowed';
+                    selectButton.textContent = domain.available ? 'Select' : 'Unavailable';
+                    selectButton.disabled = !domain.available;
+                    selectButton.setAttribute('data-domain', domain.name);
+
+                    if (domain.available) {
+                        selectButton.addEventListener('click', () => selectDomain(domain.name));
+                    }
+
+                    domainCard.appendChild(domainInfo);
+                    domainCard.appendChild(selectButton);
+                    domainList.appendChild(domainCard);
                 });
 
-                const confirmData = await confirmResponse.json();
+                domainResults.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
+            }
 
-                if (confirmData.success) {
-                    // Show success message and redirect
-                    alert('Payment successful! Your website setup is now complete.');
-                    window.location.reload();
+            function showError(message) {
+                errorMessage.querySelector('p').textContent = message;
+                errorMessage.classList.remove('hidden');
+                domainResults.classList.add('hidden');
+            }
+
+            // Make selectDomain available globally for the click handlers
+            window.selectDomain = selectDomain;
+        }
+
+        // ==========================================
+        // PACKAGE TYPE SELECTION FUNCTIONALITY
+        // ==========================================
+
+        const packageButtons = document.querySelectorAll('.package-type-btn');
+        const packageForm = document.querySelector('.package-type-form');
+        const packageHiddenField = document.getElementById('package_type_field');
+
+        if (packageButtons.length > 0 && packageForm && packageHiddenField) {
+            packageButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    console.log('Package button clicked:', this.dataset.packageType);
+
+                    // Update the hidden field value
+                    packageHiddenField.value = this.dataset.packageType;
+                    console.log('Package hidden field value set to:', packageHiddenField.value);
+
+                    // Update button styles to show selection
+                    packageButtons.forEach(btn => {
+                        if (btn === this) {
+                            btn.classList.remove('border-blue-500', 'text-blue-500');
+                            btn.classList.add('bg-blue-500', 'text-white');
+                        } else {
+                            btn.classList.remove('bg-blue-500', 'text-white');
+                            btn.classList.add('border-blue-500', 'text-blue-500');
+                        }
+                    });
+
+                    console.log('About to submit package form...');
+                    // Submit the form via AJAX
+                    if (typeof Rails !== 'undefined' && Rails.fire) {
+                        Rails.fire(packageForm, 'submit');
+                    } else {
+                        // Fallback method
+                        packageForm.submit();
+                    }
+                });
+            });
+        }
+
+        // ==========================================
+        // SUPPORT OPTION SELECTION FUNCTIONALITY
+        // ==========================================
+
+        const supportButtons = document.querySelectorAll('.support-option-btn');
+        const supportForm = document.querySelector('.support-option-form');
+        const supportHiddenField = document.getElementById('support_option_field');
+
+        if (supportButtons.length > 0 && supportForm && supportHiddenField) {
+            supportButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Use supportOption if available, fallback to packageType for compatibility
+                    const optionValue = this.dataset.supportOption || this.dataset.packageType;
+                    console.log('Support button clicked:', optionValue);
+
+                    // Update the hidden field value
+                    supportHiddenField.value = optionValue;
+                    console.log('Support hidden field value set to:', supportHiddenField.value);
+
+                    // Update button styles to show selection
+                    supportButtons.forEach(btn => {
+                        if (btn === this) {
+                            btn.classList.remove('border-blue-500', 'text-blue-500');
+                            btn.classList.add('bg-blue-500', 'text-white');
+                        } else {
+                            btn.classList.remove('bg-blue-500', 'text-white');
+                            btn.classList.add('border-blue-500', 'text-blue-500');
+                        }
+                    });
+
+                    console.log('About to submit support form...');
+                    // Submit the form via AJAX
+                    if (typeof Rails !== 'undefined' && Rails.fire) {
+                        Rails.fire(supportForm, 'submit');
+                    } else {
+                        // Fallback method
+                        supportForm.submit();
+                    }
+                });
+            });
+        }
+
+        // ==========================================
+        // STRIPE PAYMENT FUNCTIONALITY
+        // ==========================================
+
+        const paymentForm = document.getElementById('payment-form');
+        if (paymentForm && typeof Stripe !== 'undefined') {
+            // Initialize Stripe
+            const stripe = Stripe('<%= Rails.application.credentials.dig(:stripe, :publishable_key) || ENV["STRIPE_PUBLISHABLE_KEY"] %>');
+            const elements = stripe.elements();
+
+            // Create separate elements for better UK customization
+            const cardNumberElement = elements.create('cardNumber', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#424770',
+                        '::placeholder': {
+                            color: '#aab7c4',
+                        },
+                    },
+                    invalid: {
+                        color: '#9e2146',
+                    },
+                },
+            });
+
+            const cardExpiryElement = elements.create('cardExpiry', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#424770',
+                        '::placeholder': {
+                            color: '#aab7c4',
+                        },
+                    },
+                    invalid: {
+                        color: '#9e2146',
+                    },
+                },
+            });
+
+            const cardCvcElement = elements.create('cardCvc', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#424770',
+                        '::placeholder': {
+                            color: '#aab7c4',
+                        },
+                    },
+                    invalid: {
+                        color: '#9e2146',
+                    },
+                },
+            });
+
+            // Mount the elements (no postal code element - we'll use a regular input)
+            const cardNumberEl = document.getElementById('card-number-element');
+            const cardExpiryEl = document.getElementById('card-expiry-element');
+            const cardCvcEl = document.getElementById('card-cvc-element');
+
+            if (cardNumberEl) cardNumberElement.mount('#card-number-element');
+            if (cardExpiryEl) cardExpiryElement.mount('#card-expiry-element');
+            if (cardCvcEl) cardCvcElement.mount('#card-cvc-element');
+
+            // Handle real-time validation errors
+            const stripeElements = [cardNumberElement, cardExpiryElement, cardCvcElement];
+
+            stripeElements.forEach(element => {
+                element.on('change', ({error}) => {
+                    const displayError = document.getElementById('card-errors');
+                    const submitButton = document.getElementById('submit-payment');
+
+                    if (error) {
+                        displayError.textContent = error.message;
+                        submitButton.disabled = true;
+                    } else {
+                        displayError.textContent = '';
+                        // Check if all elements are complete before enabling button
+                        checkFormCompleteness();
+                    }
+                });
+            });
+
+            // Add postcode validation
+            const postcodeInput = document.getElementById('postcode-input');
+            if (postcodeInput) {
+                postcodeInput.addEventListener('input', function() {
+                    validatePostcode();
+                    checkFormCompleteness();
+                });
+            }
+
+            function validatePostcode() {
+                if (!postcodeInput) return true;
+
+                const postcode = postcodeInput.value.trim().toUpperCase();
+                const postcodeRegex = /^[A-Z]{1,2}[0-9R][0-9A-Z]?\s*[0-9][A-Z]{2}$/;
+                const errorElement = document.getElementById('postcode-error');
+
+                if (postcode && !postcodeRegex.test(postcode)) {
+                    if (errorElement) errorElement.textContent = 'Please enter a valid UK postcode (e.g. SW1A 1AA)';
+                    return false;
                 } else {
-                    throw new Error(confirmData.message || 'Payment confirmation failed');
+                    if (errorElement) errorElement.textContent = '';
+                    return true;
                 }
             }
-        } catch (error) {
-            // Show error to customer
-            const errorElement = document.getElementById('card-errors');
-            errorElement.textContent = error.message || 'An unexpected error occurred.';
-        } finally {
-            // Re-enable button and hide loading state
-            submitButton.disabled = false;
-            buttonText.classList.remove('hidden');
-            spinner.classList.add('hidden');
+
+            function checkFormCompleteness() {
+                const submitButton = document.getElementById('submit-payment');
+                if (!submitButton) return;
+
+                // Check if there are any errors and if postcode is valid
+                const cardErrorsEl = document.getElementById('card-errors');
+                const postcodeErrorEl = document.getElementById('postcode-error');
+
+                const hasCardErrors = cardErrorsEl ? cardErrorsEl.textContent.length > 0 : false;
+                const hasPostcodeErrors = postcodeErrorEl ? postcodeErrorEl.textContent.length > 0 : false;
+                const postcodeValue = postcodeInput ? postcodeInput.value.trim() : '';
+
+                submitButton.disabled = hasCardErrors || hasPostcodeErrors || (postcodeInput && !postcodeValue);
+            }
+
+            // Handle form submission
+            paymentForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const submitButton = document.getElementById('submit-payment');
+                const buttonText = document.getElementById('button-text');
+                const spinner = document.getElementById('spinner');
+
+                // Disable button and show loading state
+                if (submitButton) submitButton.disabled = true;
+                if (buttonText) buttonText.classList.add('hidden');
+                if (spinner) spinner.classList.remove('hidden');
+
+                try {
+                    console.log('Making request to:', '<%= manage_setup_create_payment_intent_path %>');
+
+                    // Create payment intent on the server
+                    const response = await fetch('<%= manage_setup_create_payment_intent_path %>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    });
+
+                    console.log('Response status:', response.status);
+
+                    // Log the raw response text first
+                    const responseText = await response.text();
+                    console.log('Raw response:', responseText);
+
+                    // Try to parse as JSON
+                    let data;
+                    try {
+                        data = JSON.parse(responseText);
+                        console.log('Parsed JSON:', data);
+                    } catch (parseError) {
+                        console.error('JSON parse error:', parseError);
+                        console.error('Response was:', responseText);
+                        throw new Error('Server returned invalid JSON response. Check console for details.');
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Failed to create payment intent');
+                    }
+
+                    // Get the postcode value
+                    const postcodeValue = postcodeInput ? postcodeInput.value.trim() : '';
+
+                    // Confirm the payment with Stripe using the card number element
+                    const {error, paymentIntent} = await stripe.confirmCardPayment(data.client_secret, {
+                        payment_method: {
+                            card: cardNumberElement,
+                            billing_details: {
+                                email: '<%= current_user.email %>',
+                                address: {
+                                    country: 'GB',
+                                    postal_code: postcodeValue
+                                }
+                            }
+                        }
+                    });
+
+                    if (error) {
+                        // Show error to customer
+                        const errorElement = document.getElementById('card-errors');
+                        if (errorElement) errorElement.textContent = error.message;
+                    } else if (paymentIntent.status === 'succeeded') {
+                        // Payment succeeded, confirm on server
+                        const confirmResponse = await fetch('<%= manage_setup_confirm_payment_path %>', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                payment_intent_id: paymentIntent.id
+                            })
+                        });
+
+                        const confirmText = await confirmResponse.text();
+                        console.log('Confirm response:', confirmText);
+
+                        const confirmData = JSON.parse(confirmText);
+
+                        if (confirmData.success) {
+                            // Show success message and redirect
+                            const paymentType = data.payment_details?.is_deposit ? 'deposit' : 'payment';
+                            alert(`${paymentType.charAt(0).toUpperCase() + paymentType.slice(1)} successful! Your website setup is progressing.`);
+                            window.location.reload();
+                        } else {
+                            throw new Error(confirmData.message || 'Payment confirmation failed');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Payment error:', error);
+                    // Show error to customer
+                    const errorElement = document.getElementById('card-errors');
+                    if (errorElement) errorElement.textContent = error.message || 'An unexpected error occurred.';
+                } finally {
+                    // Re-enable button and hide loading state
+                    if (submitButton) submitButton.disabled = false;
+                    if (buttonText) buttonText.classList.remove('hidden');
+                    if (spinner) spinner.classList.add('hidden');
+                }
+            });
         }
     });
 </script>

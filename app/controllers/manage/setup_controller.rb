@@ -8,6 +8,7 @@ class Manage::SetupController < Manage::BaseController
   skip_before_action :has_website
   def index
     @user = current_user
+    @themes = Theme.all
   end
 
   def search_domain
@@ -86,7 +87,144 @@ class Manage::SetupController < Manage::BaseController
     end
   end
 
+  # Add this action to handle payment processing
+  def create_payment_intent
+    Rails.logger.info "=== Payment Intent Creation Started ==="
+    Rails.logger.info "Current user: #{current_user&.id}"
+
+    user_setup = current_user.user_setup
+    payment_summary = user_setup.payment_summary
+
+    Rails.logger.info "Package type: #{user_setup.package_type}"
+    Rails.logger.info "Support option: #{user_setup.support_option}"
+    Rails.logger.info "Payment summary: #{payment_summary}"
+    Rails.logger.info "Stripe API key present: #{Stripe.api_key.present?}"
+
+    begin
+      # Create the payment intent with Stripe
+      intent = Stripe::PaymentIntent.create({
+                                              amount: payment_summary[:payment_amount_pence],
+                                              currency: 'gbp',
+                                              metadata: {
+                                                user_id: current_user.id,
+                                                user_email: current_user.email,
+                                                package_type: user_setup.package_type,
+                                                support_option: user_setup.support_option,
+                                                base_price_pounds: payment_summary[:base_price],
+                                                payment_type: payment_summary[:payment_type],
+                                                is_deposit: payment_summary[:is_deposit]
+                                              }
+                                            })
+
+      Rails.logger.info "Payment intent created successfully: #{intent.id}"
+      Rails.logger.info "Amount: #{payment_summary[:payment_amount_pence]} pence (£#{payment_summary[:payment_amount]})"
+
+      # Store the payment intent ID in the user setup
+      user_setup.update(
+        stripe_payment_intent_id: intent.id,
+        payment_status: 'pending'
+      )
+
+      Rails.logger.info "User setup updated successfully"
+
+      render json: {
+        client_secret: intent.client_secret,
+        payment_details: payment_summary
+      }
+    rescue Stripe::StripeError => e
+      Rails.logger.error "Stripe error: #{e.message}"
+      render json: { error: e.message }, status: :unprocessable_entity
+    rescue => e
+      Rails.logger.error "Payment intent creation error: #{e.message}"
+      Rails.logger.error "Error backtrace: #{e.backtrace.join("\n")}"
+      render json: { error: 'Something went wrong. Please try again.' }, status: :internal_server_error
+    end
+  end
+
+  # Add this action to handle successful payments
+  def confirm_payment
+    payment_intent_id = params[:payment_intent_id]
+
+    begin
+      # Retrieve the payment intent from Stripe
+      intent = Stripe::PaymentIntent.retrieve(payment_intent_id)
+
+      if intent.status == 'succeeded'
+        # Update the user setup with payment confirmation
+        user_setup = current_user.user_setup
+        user_setup.update!(
+          payment_status: 'completed',
+          paid_at: Time.current
+        )
+
+        render json: {
+          success: true,
+          message: 'Payment successful!',
+          redirect_url: manage_setup_path
+        }
+      else
+        render json: {
+          success: false,
+          message: 'Payment was not successful. Please try again.'
+        }
+      end
+    rescue Stripe::StripeError => e
+      Rails.logger.error "Stripe confirmation error: #{e.message}"
+      render json: {
+        success: false,
+        message: 'Unable to confirm payment. Please contact support.'
+      }
+    end
+  end
+
   private
+
+  def calculate_payment_amount
+    user_setup = current_user.user_setup
+
+    # Base prices based on package type
+    base_price = case user_setup.package_type&.downcase
+                 when 'bespoke'
+                   500.00
+                 when 'e-commerce'
+                   1000.00
+                 else
+                   200.00 # Default fallback price
+                 end
+
+    # Determine if it's full payment or deposit
+    is_full_payment = user_setup.support_option == 'Do It Myself'
+
+    if is_full_payment
+      # Take full payment
+      amount = base_price
+      amount_type = 'full_payment'
+      is_deposit = false
+    else
+      # Take 20% deposit
+      amount = (base_price * 0.20).round(2)
+      amount_type = 'deposit'
+      is_deposit = true
+    end
+
+    # Convert to pence for Stripe (Stripe works in smallest currency unit)
+    amount_pence = (amount * 100).to_i
+
+    {
+      total_price: base_price,
+      amount: amount,
+      amount_pence: amount_pence,
+      amount_type: amount_type,
+      is_deposit: is_deposit,
+      deposit_percentage: is_deposit ? 20 : nil,
+      remaining_amount: is_deposit ? (base_price - amount).round(2) : nil
+    }
+  end
+
+  # Add this helper method to get payment details for the view
+  def get_payment_details_for_user
+    calculate_payment_amount
+  end
 
   def search_available_domains(query)
     Rails.logger.info "Starting domain search for: #{query}"
@@ -146,73 +284,6 @@ class Manage::SetupController < Manage::BaseController
 
     domains
   end
-
-  # Add this action to handle payment processing
-  def create_payment_intent
-    begin
-      # Create the payment intent with Stripe
-      intent = Stripe::PaymentIntent.create({
-                                              amount: 20000, # £200.00 in pence
-                                              currency: 'gbp',
-                                              metadata: {
-                                                user_id: current_user.id,
-                                                user_email: current_user.email
-                                              }
-                                            })
-
-      # Store the payment intent ID in the user setup
-      current_user.user_setup.update(
-        stripe_payment_intent_id: intent.id,
-        payment_status: 'pending'
-      )
-
-      render json: { client_secret: intent.client_secret }
-    rescue Stripe::StripeError => e
-      Rails.logger.error "Stripe error: #{e.message}"
-      render json: { error: e.message }, status: :unprocessable_entity
-    rescue => e
-      Rails.logger.error "Payment intent creation error: #{e.message}"
-      render json: { error: 'Something went wrong. Please try again.' }, status: :internal_server_error
-    end
-  end
-
-  # Add this action to handle successful payments
-  def confirm_payment
-    payment_intent_id = params[:payment_intent_id]
-
-    begin
-      # Retrieve the payment intent from Stripe
-      intent = Stripe::PaymentIntent.retrieve(payment_intent_id)
-
-      if intent.status == 'succeeded'
-        # Update the user setup with payment confirmation
-        user_setup = current_user.user_setup
-        user_setup.update!(
-          payment_status: 'completed',
-          paid_at: Time.current
-        )
-
-        render json: {
-          success: true,
-          message: 'Payment successful!',
-          redirect_url: manage_setup_path
-        }
-      else
-        render json: {
-          success: false,
-          message: 'Payment was not successful. Please try again.'
-        }
-      end
-    rescue Stripe::StripeError => e
-      Rails.logger.error "Stripe confirmation error: #{e.message}"
-      render json: {
-        success: false,
-        message: 'Unable to confirm payment. Please contact support.'
-      }
-    end
-  end
-
-  private
 
   def stripe_publishable_key
     Rails.application.credentials.dig(:stripe, :publishable_key) || ENV['STRIPE_PUBLISHABLE_KEY']
