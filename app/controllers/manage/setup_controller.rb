@@ -112,7 +112,8 @@ class Manage::SetupController < Manage::BaseController
                                                 support_option: user_setup.support_option,
                                                 base_price_pounds: payment_summary[:base_price],
                                                 payment_type: payment_summary[:payment_type],
-                                                is_deposit: payment_summary[:is_deposit]
+                                                is_deposit: payment_summary[:is_deposit],
+                                                domain_name: user_setup.domain_name
                                               }
                                             })
 
@@ -141,28 +142,69 @@ class Manage::SetupController < Manage::BaseController
     end
   end
 
-  # Add this action to handle successful payments
+  # Updated action to handle successful payments and domain purchase
   def confirm_payment
     payment_intent_id = params[:payment_intent_id]
+
+    Rails.logger.info "=== Payment Confirmation Started ==="
+    Rails.logger.info "Payment Intent ID: #{payment_intent_id}"
 
     begin
       # Retrieve the payment intent from Stripe
       intent = Stripe::PaymentIntent.retrieve(payment_intent_id)
+      Rails.logger.info "Payment Intent Status: #{intent.status}"
 
       if intent.status == 'succeeded'
-        # Update the user setup with payment confirmation
         user_setup = current_user.user_setup
+
+        Rails.logger.info "Payment succeeded for user: #{current_user.id}"
+        Rails.logger.info "Domain to purchase: #{user_setup.domain_name}"
+
+        # Update payment status first
         user_setup.update!(
           payment_status: 'completed',
           paid_at: Time.current
         )
 
-        render json: {
-          success: true,
-          message: 'Payment successful!',
-          redirect_url: manage_setup_path
-        }
+        # Now attempt to purchase the domain
+        domain_purchase_result = purchase_domain_for_user(user_setup)
+
+        if domain_purchase_result[:success]
+          Rails.logger.info "Domain purchase successful"
+
+          # Update user setup with domain purchase details
+          user_setup.update!(
+            domain_purchased: true,
+            domain_purchase_details: domain_purchase_result[:details]
+          )
+
+          render json: {
+            success: true,
+            message: 'Payment successful and domain purchased!',
+            domain_purchased: true,
+            domain_details: domain_purchase_result[:details],
+            redirect_url: manage_setup_path
+          }
+        else
+          Rails.logger.warn "Domain purchase failed: #{domain_purchase_result[:error]}"
+
+          # Payment succeeded but domain purchase failed
+          # Store the error for later retry
+          user_setup.update!(
+            domain_purchased: false,
+            domain_purchase_error: domain_purchase_result[:error]
+          )
+
+          render json: {
+            success: true,
+            message: 'Payment successful! Domain purchase encountered an issue - we will retry shortly.',
+            domain_purchased: false,
+            domain_error: domain_purchase_result[:error],
+            redirect_url: manage_setup_path
+          }
+        end
       else
+        Rails.logger.warn "Payment not successful: #{intent.status}"
         render json: {
           success: false,
           message: 'Payment was not successful. Please try again.'
@@ -174,6 +216,51 @@ class Manage::SetupController < Manage::BaseController
         success: false,
         message: 'Unable to confirm payment. Please contact support.'
       }
+    rescue => e
+      Rails.logger.error "Payment confirmation error: #{e.message}"
+      Rails.logger.error "Error backtrace: #{e.backtrace.join("\n")}"
+      render json: {
+        success: false,
+        message: 'An error occurred during confirmation. Please contact support.'
+      }
+    end
+  end
+
+  def set_website_theme
+    theme = Theme.find(params[:theme_id])
+    @website = Website.create(user_id: current_user.id, theme_id: theme.id, name: 'My Website', description: 'Description Of My Website', pages: theme.pages, domain_name: current_user.user_setup.domain_name)
+    @user_setup = current_user.user_setup.update(theme_id: theme.id)
+    redirect_to manage_website_website_path
+  end
+
+  # New action to manually retry domain purchase (optional)
+  def retry_domain_purchase
+    user_setup = current_user.user_setup
+
+    unless user_setup.payment_status == 'completed'
+      redirect_to manage_setup_path, alert: "Payment must be completed before purchasing domain"
+      return
+    end
+
+    if user_setup.domain_purchased?
+      redirect_to manage_setup_path, notice: "Domain has already been purchased"
+      return
+    end
+
+    Rails.logger.info "Retrying domain purchase for user: #{current_user.id}"
+
+    result = purchase_domain_for_user(user_setup)
+
+    if result[:success]
+      user_setup.update!(
+        domain_purchased: true,
+        domain_purchase_details: result[:details],
+        domain_purchase_error: nil
+      )
+      redirect_to manage_setup_path, notice: "Domain purchased successfully!"
+    else
+      user_setup.update!(domain_purchase_error: result[:error])
+      redirect_to manage_setup_path, alert: "Domain purchase failed: #{result[:error]}"
     end
   end
 
@@ -224,6 +311,93 @@ class Manage::SetupController < Manage::BaseController
   # Add this helper method to get payment details for the view
   def get_payment_details_for_user
     calculate_payment_amount
+  end
+
+  # New method to handle domain purchasing
+  def purchase_domain_for_user(user_setup)
+    Rails.logger.info "=== Starting Domain Purchase ==="
+    Rails.logger.info "Domain: #{user_setup.domain_name}"
+    Rails.logger.info "User: #{user_setup.user.email}"
+
+    unless user_setup.domain_name.present?
+      return {
+        success: false,
+        error: "No domain name selected"
+      }
+    end
+
+    begin
+      # Load the TwentyIClient exactly like the rake task does
+      require_relative Rails.root.join('lib', 'twenty_i_client')
+      client = TwentyIClient.new
+
+      # Use the exact same contact info as the rake task
+      contact = {
+        "organisation" => "Unitel Direct Limited",
+        "name" => "Unitel Direct Limited",
+        "address" => "Unitel Direct LTD, 2nd Floor",
+        "city" => "Cavendish House",
+        "sp" => "Princes Wharf",
+        "pc" => "TS17 6QY",
+        "cc" => "GB",
+        "telephone" => "+44.3301247118",
+        "email" => "support@uniteldirect.co.uk",
+        "extension" => {}
+      }
+
+      # Build payload exactly like the rake task
+      payload = {
+        "name" => user_setup.domain_name,
+        "years" => 1,
+        "caRegistryAgreement" => true,
+        "contact" => contact,
+        "privacyService" => false
+      }
+
+      Rails.logger.info "Domain registration payload prepared"
+      Rails.logger.info "Payload: #{payload.inspect}"
+
+      # Register the domain
+      result = client.register_domain!(payload)
+
+      Rails.logger.info "Domain registration completed successfully"
+      Rails.logger.info "Registration result: #{result.inspect}"
+
+      {
+        success: true,
+        details: {
+          domain: user_setup.domain_name,
+          registered_at: Time.current,
+          years: 1,
+          privacy_enabled: true,
+          api_response: result
+        }
+      }
+
+    rescue TwentyIClient::Error => e
+      Rails.logger.error "20i API error during domain purchase: #{e.message}"
+
+      # Handle specific error cases
+      error_message = if e.message.include?("Payment required") || e.message.include?("402")
+                        "Insufficient credit in reseller account. Please contact support to add credit for domain registration."
+                      elsif e.message.include?("already registered") || e.message.include?("unavailable")
+                        "Domain is no longer available for registration."
+                      else
+                        "Domain registration failed: #{e.message}"
+                      end
+
+      {
+        success: false,
+        error: error_message
+      }
+    rescue => e
+      Rails.logger.error "Unexpected error during domain purchase: #{e.message}"
+      Rails.logger.error "Backtrace: #{e.backtrace.join("\n")}"
+      {
+        success: false,
+        error: "An unexpected error occurred during domain registration"
+      }
+    end
   end
 
   def search_available_domains(query)

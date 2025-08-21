@@ -1,0 +1,44 @@
+<div class="min-h-screen ">
+  <div>
+    <% content_for :title, "Edit #{@component.name}" %>
+
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="nata-sans page-title">Edit Component</h1>
+          <p class="nata-sans font-normal text-base">Update the details for <strong class="text-gray-900"><%= @component.name %></strong>.</p>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="flex" aria-label="Breadcrumb">
+          <ol class="flex items-center space-x-2 text-sm text-gray-500">
+            <li>
+              <%= link_to "Components", admin_components_path, class: "nata-sans hover:text-gray-700 transition-colors" %>
+            </li>
+            <li class="flex items-center">
+              <svg class="flex-shrink-0 h-4 w-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <%= link_to @component.name, admin_components_show_path(@component), class: "nata-sans hover:text-gray-700 transition-colors" %>
+            </li>
+            <li class="flex items-center">
+              <svg class="flex-shrink-0 h-4 w-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="nata-sans text-gray-900 font-medium">Edit</span>
+            </li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="bg-white overflow-hidden">
+      <div class="">
+        <%= render 'form' %>
+      </div>
+    </div>
+
+  </div>
+</div>

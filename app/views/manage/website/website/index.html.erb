@@ -1,132 +1,92 @@
-<% if current_user.website.nil? %>
-  <div class="space-y-5">
-    <div><h1 class="nata-sans page-title">Website</h1></div>
-    <div class="flex bg-gray-50 rounded-lg py-4 px-6">
-      <div class="w-1/2">
-        <p class="nata-sans font-normal text-base">Domain not connected yet <span class="text-blue-500">Connect Domain</span></p>
-      </div>
-      <div class="w-1/2 flex justify-end">
-        <p class="nata-sans font-normal text-base">Free Plan <span class="text-blue-500">Compare Plans</span></p>
-      </div>
+<div class="space-y-5">
+  <div class="flex">
+    <div class="w-1/2">
+      <h1 class="nata-sans page-title">Website Overview</h1>
+      <p class="nata-sans font-normal text-base">Manage your website, domains, SEO and more</p>
     </div>
-    <div class="bg-gray-50 rounded-lg">
-      <div class="flex py-4 px-6">
-        <div class="w-1/2">
-          <h2 class="nata-sans font-semibold text-lg">Start designing your site from a template</h2>
-          <p class="nata-sans font-normal text-base">Recommended templates for Design Portfolio</p>
+    <div class="w-1/2 flex justify-end gap-5 items-center">
+      <button class="nata-sans text-sm border rounded-full px-5 py-1">Site Actions</button>
+      <button class="nata-sans text-sm bg-blue-500 text-white border border-blue-500 rounded-full px-5 py-1">Design Site</button>
+    </div>
+  </div>
+
+  <div class="py-4 px-6 bg-gray-50 rounded-lg flex gap-5">
+    <div class="w-1/10">
+      <%= image_tag current_user.website.theme.image.attached? ? url_for(current_user.website.theme.image) : 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg' %>
+    </div>
+    <div class="w-9/10">
+      <div class="px-4 pb-2 border-b flex">
+        <div class="w-1/2 flex gap-5 items-center">
+          <h2 class="nata-sans text-lg font-bold"><%= current_user.website.name %></h2>
+          <p class="nata-sans font-bold text-xs text-gray-400">Not Published</p>
         </div>
         <div class="w-1/2 flex justify-end items-center">
-          <button class="nata-sans font-normal text-base">Generate a Site Design</button>
+          <%= link_to 'Site Settings', manage_website_settings_path, class: 'nata-sans font-normal text-xs text-blue-500' %>
         </div>
       </div>
-      <div class="py-4 px-6 border-t grid grid-cols-3 gap-5">
-
-        <% @themes.each do |theme| %>
-          <div class="choose-theme flex flex-col gap-2">
-            <div class="relative bg-cover bg-no-repeat bg-center" style="min-height: 200px; max-height: 200px; background-image: url('<%= theme.image.attached? ? url_for(theme.image) : 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg' %>')">
-              <div class="background-overlay absolute w-full flex items-center justify-center" style="min-height: 200px; max-height: 200px; background: #ffffffba">
-                <div class="flex flex-col items-center justify-center gap-2">
-                  <%= link_to 'Choose Theme', manage_website_set_website_theme_path(theme_id: theme.id), class: 'nata-sans bg-blue-500 rounded-full py-1 px-3 text-white' %>
-                  <button class="nata-sans bg-white rounded-full py-1 px-3">View Theme</button>
-                </div>
-              </div>
-            </div>
-            <div class="nata-sans font-normal text-base"><%= theme.name %></div>
+      <div class="px-4 pt-2 flex gap-5">
+        <div>
+          <p class="nata-sans font-normal text-xs">Free plan <span class="text-blue-500">Compare Plans</span></p>
+        </div>
+        <% if current_user.user_setup.domain_name %>
+          <div>
+            <p class="nata-sans font-normal text-xs">Website Address: <span class="text-blue-500"><%= link_to 'https://' + current_user.user_setup.domain_name, 'https://' + current_user.user_setup.domain_name, target: blank? %></span></p>
           </div>
         <% end %>
-      </div>
-    </div>
-  </div>
-  <% else %>
-  <div class="space-y-5">
-    <div class="flex">
-      <div class="w-1/2">
-        <h1 class="nata-sans page-title">Website Overview</h1>
-        <p class="nata-sans font-normal text-base">Manage your website, domains, SEO and more</p>
-      </div>
-      <div class="w-1/2 flex justify-end gap-5 items-center">
-        <button class="nata-sans text-sm border rounded-full px-5 py-1">Site Actions</button>
-        <button class="nata-sans text-sm bg-blue-500 text-white border border-blue-500 rounded-full px-5 py-1">Design Site</button>
-      </div>
-    </div>
-
-    <div class="py-4 px-6 bg-gray-50 rounded-lg flex gap-5">
-      <div class="w-1/10">
-        <%= image_tag current_user.website.theme.image.attached? ? url_for(current_user.website.theme.image) : 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg' %>
-      </div>
-      <div class="w-9/10">
-        <div class="px-4 pb-2 border-b flex">
-          <div class="w-1/2 flex gap-5 items-center">
-            <h2 class="nata-sans text-lg font-bold"><%= current_user.website.name %></h2>
-            <p class="nata-sans font-bold text-xs text-gray-400">Not Published</p>
-          </div>
-          <div class="w-1/2 flex justify-end items-center">
-            <%= link_to 'Site Settings', manage_website_settings_path, class: 'nata-sans font-normal text-xs text-blue-500' %>
-          </div>
-        </div>
-        <div class="px-4 pt-2 flex gap-5">
-          <div>
-            <p class="nata-sans font-normal text-xs">Free plan <span class="text-blue-500">Compare Plans</span></p>
-          </div>
-          <div>
-            <p class="nata-sans font-normal text-xs">https://jackdawson1234.s... <span class="text-blue-500">Connect Domain</span></p>
-          </div>
-          <div>
-            <p class="nata-sans font-normal text-xs">No business email <span class="text-blue-500">Connect</span></p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="py-4 px-6 bg-gray-50 rounded-lg">
-      <div class="w-2/3 flex justify-between flex-col" style="min-height: 200px">
         <div>
-          <h2 class="nata-sans text-lg font-bold ">Start Your SEO Journey to get found on google</h2>
-          <p class="nata-sans font-normal text-sm">Follow a personalised SEO checklist to start getting more traffic to your site from <br> search engines like Google.</p>
-        </div>
-        <div class="flex gap-5">
-          <button>Get Started</button>
-          <button>Go to SEO dashboard</button>
-        </div>
-      </div>
-      <div class="w-1/3">
-
-      </div>
-    </div>
-
-    <div class="flex gap-5">
-      <div class="w-2/3 bg-gray-50 rounded-lg">
-        <div class="py-4 px-6 border-b">
-          <h2 class="nata-sans text-lg font-bold">Site Performance</h2>
-          <p class="nata-sans font-normal text-xs">Monitor the performance of your site and ensure a smooth experience for your visitors. To see your site speed and uptime, <span class="text-blue-500">publish your website in the editor.</span></p>
-        </div>
-        <div class="py-4 px-6 flex gap-3">
-          <div class="w-1/2 border rounded-lg p-3">
-            <h3 class="nata-sans text-sm font-semibold mb-2">Monitor your site speed</h3>
-            <p class="nata-sans font-normal text-xs mb-2">Once your site has enough traffic, you can check its loading time and optimize it.</p>
-            <a class="nata-sans font-normal text-xs text-blue-500">Learn More</a>
-          </div>
-          <div class="w-1/2 border rounded-lg p-3">
-            <h3 class="nata-sans text-sm font-semibold mb-2">Track your site uptime</h3>
-            <p class="nata-sans font-normal text-xs mb-2">Track your published site's availability and learn how Wix provides business continuity at all times.</p>
-            <a class="nata-sans font-normal text-xs text-blue-500">Learn More</a>
-          </div>
-        </div>
-      </div>
-      <div class="w-1/3 bg-gray-50 rounded-lg">
-        <div class="py-4 px-6 border-b">
-          <h2 class="nata-sans text-lg font-bold">Accessibility</h2>
-          <p class="nata-sans font-normal text-xs">Help people with disabilities use your site. <span class="text-blue-500">About your site's accessibility status</span><br></p>
-        </div>
-        <div class="py-4 px-6">
-          <div class="border rounded-lg p-3">
-            <h3 class="nata-sans text-sm font-semibold mb-2">Make your site accessible</h3>
-            <p class="nata-sans font-normal text-xs mb-2">Scan your site to find and fix any accessibility issues.</p>
-            <a class="nata-sans font-normal text-xs text-blue-500">Scan for Issues</a>
-          </div>
+          <p class="nata-sans font-normal text-xs">No business email <span class="text-blue-500">Connect</span></p>
         </div>
       </div>
     </div>
   </div>
-<% end %>
 
+  <div class="py-4 px-6 bg-gray-50 rounded-lg">
+    <div class="w-2/3 flex justify-between flex-col" style="min-height: 200px">
+      <div>
+        <h2 class="nata-sans text-lg font-bold ">Start Your SEO Journey to get found on google</h2>
+        <p class="nata-sans font-normal text-sm">Follow a personalised SEO checklist to start getting more traffic to your site from <br> search engines like Google.</p>
+      </div>
+      <div class="flex gap-5">
+        <button>Get Started</button>
+        <button>Go to SEO dashboard</button>
+      </div>
+    </div>
+    <div class="w-1/3">
+
+    </div>
+  </div>
+
+  <div class="flex gap-5">
+    <div class="w-2/3 bg-gray-50 rounded-lg">
+      <div class="py-4 px-6 border-b">
+        <h2 class="nata-sans text-lg font-bold">Site Performance</h2>
+        <p class="nata-sans font-normal text-xs">Monitor the performance of your site and ensure a smooth experience for your visitors. To see your site speed and uptime, <span class="text-blue-500">publish your website in the editor.</span></p>
+      </div>
+      <div class="py-4 px-6 flex gap-3">
+        <div class="w-1/2 border rounded-lg p-3">
+          <h3 class="nata-sans text-sm font-semibold mb-2">Monitor your site speed</h3>
+          <p class="nata-sans font-normal text-xs mb-2">Once your site has enough traffic, you can check its loading time and optimize it.</p>
+          <a class="nata-sans font-normal text-xs text-blue-500">Learn More</a>
+        </div>
+        <div class="w-1/2 border rounded-lg p-3">
+          <h3 class="nata-sans text-sm font-semibold mb-2">Track your site uptime</h3>
+          <p class="nata-sans font-normal text-xs mb-2">Track your published site's availability and learn how Wix provides business continuity at all times.</p>
+          <a class="nata-sans font-normal text-xs text-blue-500">Learn More</a>
+        </div>
+      </div>
+    </div>
+    <div class="w-1/3 bg-gray-50 rounded-lg">
+      <div class="py-4 px-6 border-b">
+        <h2 class="nata-sans text-lg font-bold">Accessibility</h2>
+        <p class="nata-sans font-normal text-xs">Help people with disabilities use your site. <span class="text-blue-500">About your site's accessibility status</span><br></p>
+      </div>
+      <div class="py-4 px-6">
+        <div class="border rounded-lg p-3">
+          <h3 class="nata-sans text-sm font-semibold mb-2">Make your site accessible</h3>
+          <p class="nata-sans font-normal text-xs mb-2">Scan your site to find and fix any accessibility issues.</p>
+          <a class="nata-sans font-normal text-xs text-blue-500">Scan for Issues</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

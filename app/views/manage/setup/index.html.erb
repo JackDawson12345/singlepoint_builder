@@ -30,7 +30,15 @@
   <div class="w-full bg-gray-50 rounded-lg">
     <div class="py-4 px-6 border-b flex justify-between items-center">
       <h2 class="nata-sans text-lg font-bold">Let's set up your business</h2>
-      <p class="nata-sans text-xs text-green-500">View Your Site Analytics</p>
+      <div class="w-1/5 flex justify-end items-center gap-2">
+        <div class="relative w-4/5 flex h-2">
+          <div class="setup-bar w-full h-2 rounded"></div>
+          <div class="setup-bar-colour h-2 bg-blue-500 rounded absolute top-0" style="width: <%= current_user.user_setup.steps_percentage %>%"></div>
+        </div>
+        <div>
+          <p class="sidebar-navigation nata-sans text-xs"><%= current_user.user_setup.steps_completed %>/7</p>
+        </div>
+      </div>
     </div>
     <div class="py-4 px-6 flex flex-col gap-3">
       <!-- Choose Domain -->
@@ -445,7 +453,7 @@
                     <div class="relative bg-cover bg-no-repeat bg-center" style="min-height: 200px; max-height: 200px; background-image: url('<%= theme.image.attached? ? url_for(theme.image) : 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/396e9/MainBefore.jpg' %>')">
                       <div class="background-overlay absolute w-full flex items-center justify-center" style="min-height: 200px; max-height: 200px; background: #ffffffba">
                         <div class="flex flex-col items-center justify-center gap-2">
-                          <%= link_to 'Choose Theme', manage_website_set_website_theme_path(theme_id: theme.id), class: 'nata-sans bg-blue-500 rounded-full py-1 px-3 text-white' %>
+                          <%= link_to 'Choose Theme', manage_set_website_theme_path(theme_id: theme.id), class: 'nata-sans bg-blue-500 rounded-full py-1 px-3 text-white' %>
                           <button class="nata-sans bg-white rounded-full py-1 px-3">View Theme</button>
                         </div>
                       </div>
@@ -477,6 +485,7 @@
         <% end %>
         <div class="w-full">
           <h5 class="nata-sans font-bold text-sm">Build your website</h5>
+          <p class="nata-sans text-sm text-blue-500">Status: <%= @user.user_setup.built_website %></p>
         </div>
       </div>
       <!-- Publish Website -->

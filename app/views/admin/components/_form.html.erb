@@ -1,0 +1,226 @@
+<%= form_with model: @component, url: (@component.new_record? ? admin_components_path : admin_components_show_path(@component)), method: (@component.new_record? ? :post : :patch), local: true do |form| %>
+  <% if @component.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800 nata-sans ">Please fix the following errors:</h3>
+          <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+            <% @component.errors.full_messages.each do |message| %>
+              <li class="nata-sans"><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="space-y-8">
+    <!-- Component Information Card -->
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900 nata-sans">Component Information</h3>
+      </div>
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="md:col-span-3">
+            <%= form.label :name, class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.text_field :name, class: "nata-sans block w-full h-10 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:name].any?}", required: true %>
+            <% if @component.errors[:name].any? %>
+              <p class="mt-1 text-sm text-red-600"><%= @component.errors[:name].first %></p>
+            <% end %>
+          </div>
+
+          <div>
+            <%= form.label :component_type, "Type", class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.select :component_type,
+                            options_for_select([
+                                                 ['Navbar', 'Navbar'],
+                                                 ['Hero Section', 'Hero Section'],
+                                                 ['Content Section', 'Content Section'],
+                                                 ['CTA Section', 'CTA Section'],
+                                                 ['Form Element', 'form_element'],
+                                                 ['Footer', 'Footer']
+                                               ], @component.component_type),
+                            { prompt: 'Select type' },
+                            { class: "nata-sans block w-full h-10 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:component_type].any?}" } %>
+            <% if @component.errors[:component_type].any? %>
+              <p class="nata-sans mt-1 text-sm text-red-600"><%= @component.errors[:component_type].first %></p>
+            <% end %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :global, "Is This Component Global?", class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.select :global,
+                          options_for_select([
+                                               ['True', true],
+                                               ['False', false],
+                                             ], @component.global),
+                          { prompt: 'Select' },
+                          { class: "nata-sans block w-full h-10 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:global].any?}" } %>
+        </div>
+
+        <div>
+          <%= form.label :editable_fields, "Editable Fields", class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_area :editable_fields,
+                             value: (@component.editable_fields.is_a?(String) ? @component.editable_fields : JSON.pretty_generate(@component.editable_fields || {})),
+                             class: "nata-sans block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-mono #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:editable_fields].any?}",
+                             rows: 4,
+                             placeholder: 'JSON format: {"title": "Main heading", "subtitle": "Secondary text"}' %>
+          <p class="nata-sans mt-1 text-sm text-gray-500">JSON object describing the editable fields. Leave empty for plain text description.</p>
+          <p class="nata-sans mt-1 text-xs text-gray-400">Example: <code>{ "title_one": "Title One" }</code></p>
+          <% if @component.errors[:editable_fields].any? %>
+            <p class="nata-sans mt-1 text-sm text-red-600"><%= @component.errors[:editable_fields].first %></p>
+          <% end %>
+        </div>
+
+        <div>
+          <%= form.label :field_types, "Field Types", class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_area :field_types,
+                             value: (@component.field_types.is_a?(String) ? @component.field_types : JSON.pretty_generate(@component.field_types || {})),
+                             class: "nata-sans block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-mono #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:field_types].any?}",
+                             rows: 4,
+                             placeholder: '{"title": "text", "subtitle": "textarea", "background_color": "color", "image_url": "image"}' %>
+          <p class="nata-sans mt-1 text-sm text-gray-500">JSON object defining field types for the editor interface.</p>
+          <p class="nata-sans mt-1 text-xs text-gray-400">Example: <code>{ "title_one": "text" }</code></p>
+          <p class="nata-sans mt-1 text-xs text-gray-400">
+            Available types: <code>text</code>, <code>textarea</code>, <code>color</code>, <code>image</code>
+          </p>
+          <% if @component.errors[:field_types].any? %>
+            <p class="nata-sans mt-1 text-sm text-red-600"><%= @component.errors[:field_types].first %></p>
+          <% end %>
+        </div>
+
+        <div>
+          <%= form.label :template_patterns, "Template Patterns", class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_area :template_patterns,
+                             value: (@component.template_patterns.is_a?(String) ? @component.template_patterns : JSON.pretty_generate(@component.template_patterns || {})),
+                             class: "nata-sans block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-mono #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:template_patterns].any?}",
+                             rows: 4,
+                             placeholder: '{"nav_items": "<a href=\\"#\\" class=\\"nav-link\\">{{nav_item}}</a>"}' %>
+          <p class="nata-sans mt-1 text-sm text-gray-500">JSON object defining template patterns. Use <code>{{placeholder}}</code> for dynamic content.</p>
+          <p class="nata-sans mt-1 text-xs text-gray-400">Example: <code>{"nav_items": "&lt;a href=&quot;{{nav_item_link}}&quot; class=&quot;text-gray-900 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors duration-200&quot;&gt;{{nav_item}}&lt;/a&gt;"}</code></p>
+          <% if @component.errors[:template_patterns].any? %>
+            <p class="nata-sans mt-1 text-sm text-red-600"><%= @component.errors[:template_patterns].first %></p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Content Card -->
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="nata-sans text-lg font-medium text-gray-900">Code Content</h3>
+      </div>
+      <div class="p-6">
+        <!-- Tab Navigation -->
+        <div class="border-b border-gray-200 mb-6">
+          <nav class="-mb-px flex space-x-8">
+            <button type="button" onclick="showFormTab('html')" id="html-form-tab" class="nata-sans form-tab-button py-2 px-1 border-b-2 font-medium text-sm transition-colors border-blue-500 text-blue-600">
+              HTML
+            </button>
+            <button type="button" onclick="showFormTab('css')" id="css-form-tab" class="nata-sans form-tab-button py-2 px-1 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+              CSS
+            </button>
+            <button type="button" onclick="showFormTab('js')" id="js-form-tab" class="nata-sans form-tab-button py-2 px-1 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+              JavaScript
+            </button>
+          </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="form-tab-content">
+          <div id="html-form-content" class="form-tab-pane">
+            <%= label_tag 'component_content_html', "HTML Content", class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
+            <%= text_area_tag 'component[content][html]',
+                              (@component.content&.dig('html') || ''),
+                              class: "nata-sans block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-mono #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:content].any?}",
+                              rows: 15,
+                              placeholder: "Enter HTML content..." %>
+            <% if @component.errors[:content].any? %>
+              <p class="nata-sans mt-1 text-sm text-red-600"><%= @component.errors[:content].first %></p>
+            <% end %>
+          </div>
+
+          <div id="css-form-content" class="form-tab-pane hidden">
+            <%= label_tag 'component_content_css', "CSS Content", class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
+            <%= text_area_tag 'component[content][css]',
+                              (@component.content&.dig('css') || ''),
+                              class: "nata-sans block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-mono #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:content].any?}",
+                              rows: 15,
+                              placeholder: "Enter CSS styles..." %>
+            <% if @component.errors[:content].any? %>
+              <p class="nata-sans mt-1 text-sm text-red-600"><%= @component.errors[:content].first %></p>
+            <% end %>
+          </div>
+
+          <div id="js-form-content" class="form-tab-pane hidden">
+            <%= label_tag 'component_content_js', "JavaScript Content", class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
+            <%= text_area_tag 'component[content][js]',
+                              (@component.content&.dig('js') || ''),
+                              class: "nata-sans block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-mono #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:content].any?}",
+                              rows: 15,
+                              placeholder: "Enter JavaScript code..." %>
+            <% if @component.errors[:content].any? %>
+              <p class="nata-sans mt-1 text-sm text-red-600"><%= @component.errors[:content].first %></p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-8">
+    <div class="flex space-x-3">
+      <%= form.submit @component.new_record? ? "Create Component" : "Update Component", class: "nata-sans bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors" %>
+      <%= link_to "Cancel", @component.new_record? ? admin_components_path : admin_components_show_path(@component), class: "nata-sans bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors" %>
+    </div>
+  </div>
+<% end %>
+
+<script>
+    function showFormTab(tabName) {
+        // Hide all tab content
+        document.querySelectorAll('.form-tab-pane').forEach(pane => {
+            pane.classList.add('hidden');
+        });
+
+        // Reset all tab buttons
+        document.querySelectorAll('.form-tab-button').forEach(button => {
+            button.classList.remove('border-blue-500', 'text-blue-600');
+            button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        });
+
+        // Show selected tab content
+        document.getElementById(tabName + '-form-content').classList.remove('hidden');
+
+        // Activate selected tab button
+        const activeButton = document.getElementById(tabName + '-form-tab');
+        activeButton.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        activeButton.classList.add('border-blue-500', 'text-blue-600');
+
+        // Store active tab (using sessionStorage instead of localStorage for better compatibility)
+        try {
+            sessionStorage.setItem('activeFormTab', tabName);
+        } catch (e) {
+            // Ignore storage errors
+        }
+    }
+
+    // Restore active tab on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const activeTab = sessionStorage.getItem('activeFormTab');
+            if (activeTab && document.getElementById(activeTab + '-form-tab')) {
+                showFormTab(activeTab);
+            }
+        } catch (e) {
+            // Ignore storage errors, default to HTML tab
+        }
+    });
+</script>

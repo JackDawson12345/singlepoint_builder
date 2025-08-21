@@ -4,7 +4,6 @@ class Theme < ApplicationRecord
 
   validates :name, presence: true
   validates :description, presence: true
-  validates :pages, presence: true
 
   # Custom validation for image
   validate :acceptable_image

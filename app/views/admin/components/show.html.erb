@@ -1,0 +1,234 @@
+<div class="min-h-screen">
+  <div>
+    <% content_for :title, @component.name %>
+
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="flex items-center space-x-3 mb-2">
+            <h1 class="nata-sans page-title"><%= @component.name %></h1>
+            <span class="nata-sans inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              <%= @component.component_type&.humanize %>
+            </span>
+          </div>
+          <p class="nata-sans font-normal text-base">Component details and code content</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <%= link_to admin_components_edit_path(@component), class: "nata-sans inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-600 border border-transparent rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            Edit
+          <% end %>
+          <%= button_to admin_components_path(@component), method: :delete, data: { confirm: "Are you sure you want to delete this component?" }, class: "nata-sans inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            Delete
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Breadcrumb -->
+      <nav class="flex mt-4" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm text-gray-500">
+          <li>
+            <%= link_to "Components", admin_components_path, class: "nata-sans hover:text-gray-700 transition-colors" %>
+          </li>
+          <li class="flex items-center">
+            <svg class="flex-shrink-0 h-4 w-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-gray-900 font-mediu mnata-sans "><%= @component.name %></span>
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-8">
+        <!-- Component Details Card -->
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900 nata-sans">Component Details</h3>
+          </div>
+          <div class="p-6 space-y-6">
+            <% if @component.editable_fields.present? && @component.editable_fields != {} %>
+              <div>
+                <label class="nata-sans block text-sm font-medium text-gray-700 mb-2">Editable Fields</label>
+                <div class="nata-sans text-gray-900 whitespace-pre-wrap bg-gray-50 rounded-md p-3 text-sm font-mono"><%= JSON.pretty_generate(@component.editable_fields) %></div>
+              </div>
+            <% end %>
+
+            <% if @component.field_types.present? && @component.field_types != {} %>
+              <div>
+                <label class="nata-sans block text-sm font-medium text-gray-700 mb-2">Field Types</label>
+                <div class="nata-sans text-gray-900 whitespace-pre-wrap bg-gray-50 rounded-md p-3 text-sm font-mono"><%= JSON.pretty_generate(@component.field_types) %></div>
+              </div>
+            <% end %>
+
+            <% if @component.template_patterns.present? && @component.template_patterns != {} %>
+              <div>
+                <label class="nata-sans block text-sm font-medium text-gray-700 mb-2">Template Patterns</label>
+                <div class="nata-sans text-gray-900 whitespace-pre-wrap bg-gray-50 rounded-md p-3 text-sm font-mono"><%= JSON.pretty_generate(@component.template_patterns) %></div>
+              </div>
+            <% end %>
+
+            <% unless (@component.editable_fields.present? && @component.editable_fields != {}) || (@component.template_patterns.present? && @component.template_patterns != {}) %>
+              <div class="text-center py-8">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h3 class="nata-sans mt-2 text-sm font-medium text-gray-900">No additional details</h3>
+                <p class="nata-sans mt-1 text-sm text-gray-500">This component doesn't have editable fields or template patterns defined.</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Code Content Card -->
+        <% if @component.content&.dig('html').present? || @component.content&.dig('css').present? || @component.content&.dig('js').present? %>
+          <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="nata-sans text-lg font-medium text-gray-900">Code Content</h3>
+            </div>
+            <div class="p-6">
+              <!-- Tab Navigation -->
+              <div class="border-b border-gray-200 mb-6">
+                <nav class="-mb-px flex space-x-8">
+                  <% if @component.content&.dig('html').present? %>
+                    <button onclick="showTab('html')" id="html-tab" class="nata-sans tab-button py-2 px-1 border-b-2 font-medium text-sm transition-colors border-blue-500 text-blue-600">
+                      HTML
+                    </button>
+                  <% end %>
+                  <% if @component.content&.dig('css').present? %>
+                    <button onclick="showTab('css')" id="css-tab" class="nata-sans tab-button py-2 px-1 border-b-2 font-medium text-sm transition-colors <%= @component.content&.dig('html').present? ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' : 'border-blue-500 text-blue-600' %>">
+                      CSS
+                    </button>
+                  <% end %>
+                  <% if @component.content&.dig('js').present? %>
+                    <button onclick="showTab('js')" id="js-tab" class="nata-sans tab-button py-2 px-1 border-b-2 font-medium text-sm transition-colors <%= (@component.content&.dig('html').present? || @component.content&.dig('css').present?) ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' : 'border-blue-500 text-blue-600' %>">
+                      JavaScript
+                    </button>
+                  <% end %>
+                </nav>
+              </div>
+
+              <!-- Tab Content -->
+              <div class="tab-content">
+                <% if @component.content&.dig('html').present? %>
+                  <div id="html-content" class="tab-pane">
+                    <pre class="nata-sans bg-gray-900 text-gray-100 rounded-md p-4 overflow-x-auto text-sm"><code class="language-html"><%= @component.content['html'] %></code></pre>
+                  </div>
+                <% end %>
+                <% if @component.content&.dig('css').present? %>
+                  <div id="css-content" class="tab-pane <%= 'hidden' if @component.content&.dig('html').present? %>">
+                    <pre class="nata-sans bg-gray-900 text-gray-100 rounded-md p-4 overflow-x-auto text-sm"><code class="language-css"><%= @component.content['css'] %></code></pre>
+                  </div>
+                <% end %>
+                <% if @component.content&.dig('js').present? %>
+                  <div id="js-content" class="tab-pane <%= 'hidden' if @component.content&.dig('html').present? || @component.content&.dig('css').present? %>">
+                    <pre class="nata-sans bg-gray-900 text-gray-100 rounded-md p-4 overflow-x-auto text-sm"><code class="language-javascript"><%= @component.content['js'] %></code></pre>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Content Status Card -->
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h4 class="nata-sans text-lg font-medium text-gray-900">Content Status</h4>
+          </div>
+          <div class="p-6 space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="nata-sans text-sm text-gray-700">HTML Content</span>
+              <span class="nata-sans inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @component.content&.dig('html').present? ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                <%= @component.content&.dig('html').present? ? 'Present' : 'Empty' %>
+              </span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="nata-sans text-sm text-gray-700">CSS Content</span>
+              <span class="nata-sans inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @component.content&.dig('css').present? ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                <%= @component.content&.dig('css').present? ? 'Present' : 'Empty' %>
+              </span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="nata-sans text-sm text-gray-700">JavaScript Content</span>
+              <span class="nata-sans inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @component.content&.dig('js').present? ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                <%= @component.content&.dig('js').present? ? 'Present' : 'Empty' %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metadata Card -->
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h4 class="nata-sans text-lg font-medium text-gray-900">Metadata</h4>
+          </div>
+          <div class="p-6 space-y-4">
+            <div>
+              <span class="nata-sans text-sm text-gray-500">Global Component</span>
+              <p class="text-sm text-gray-900">
+                <span class="nata-sans inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @component.global ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                  <%= @component.global ? 'Yes' : 'No' %>
+                </span>
+              </p>
+            </div>
+            <div>
+              <span class="nata-sans text-sm text-gray-500">Created</span>
+              <p class="nata-sans text-sm text-gray-900"><%= @component.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+            </div>
+            <div>
+              <span class="nata-sans text-sm text-gray-500">Last Updated</span>
+              <p class="nata-sans text-sm text-gray-900"><%= @component.updated_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back Link Section -->
+    <div class="mt-8">
+      <%= link_to admin_components_path, class: "nata-sans inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200" do %>
+        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Components
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+    function showTab(tabName) {
+        // Hide all tab content
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.add('hidden');
+        });
+
+        // Reset all tab buttons
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('border-blue-500', 'text-blue-600');
+            button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        });
+
+        // Show selected tab content
+        document.getElementById(tabName + '-content').classList.remove('hidden');
+
+        // Activate selected tab button
+        const activeButton = document.getElementById(tabName + '-tab');
+        activeButton.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+        activeButton.classList.add('border-blue-500', 'text-blue-600');
+    }
+</script>

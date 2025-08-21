@@ -1,0 +1,226 @@
+<!-- Main Theme Page Layout -->
+<div class="">
+  <div class="bg-white shadow-sm border border-gray-200 overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      <div class="flex-1">
+        <h3 class="text-xl leading-6 font-semibold text-gray-900 capitalize"><%= @theme.name %> - <%= @pageName %></h3>
+        <p class="mt-2 max-w-2xl text-sm text-gray-600"><%= @theme.description %></p>
+      </div>
+      <div class="flex flex-wrap gap-2 sm:gap-3">
+        <%= link_to "Edit Theme", edit_admin_theme_path(@theme),
+                    class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" %>
+        <%= link_to "Preview", admin_dashboard_path(id: @theme.id, theme_page_id: @themePage['theme_page_id']),
+                    class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" %>
+        <%= link_to "Back To Theme", admin_theme_path(id: @theme.id),
+                    class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <!-- Available Components -->
+    <div class="bg-white shadow-sm border border-gray-200 overflow-hidden sm:rounded-lg">
+      <div class="px-5 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-900">Available Components</h2>
+        <p class="mt-1 text-sm text-gray-600">Drag and drop or click to add components</p>
+      </div>
+      <div class="p-5">
+        <div id="available-components" class="space-y-3">
+          <% @components.each do |component| %>
+            <%= render 'component',
+                       component: component %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page Components -->
+    <div class="bg-white shadow-sm border border-gray-200 overflow-hidden sm:rounded-lg">
+      <div class="px-5 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-900">Page Components</h2>
+        <p class="mt-1 text-sm text-gray-600">Components currently on this page</p>
+      </div>
+      <div class="p-5">
+        <div id="page-components" class="space-y-3">
+          <% if @themePage['components'].any? %>
+            <% @themePage['components'].sort_by { |component| component[:position] || component['position'] || 0 }.each do |theme_page_component| %>
+              <%= render 'theme_page_component', theme_page_component: theme_page_component %>
+            <% end %>
+          <% else %>
+            <div id="empty-components-message" class="text-center py-8">
+              <div class="w-12 h-12 mx-auto mb-4 text-gray-400">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+              </div>
+              <p class="text-gray-500 text-sm">No components added yet.</p>
+              <p class="text-gray-400 text-xs mt-1">Add components from the left panel to get started</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="mt-8 flex justify-between items-center">
+    <%= link_to admin_theme_path(id: @theme.id),
+                class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back to Theme
+    <% end %>
+
+    <div id="component-stats" class="text-sm text-gray-500">
+      <%= pluralize(@components.count, 'component') %> available •
+      <%= pluralize(@themePage['components'].count, 'component') %> added
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let draggedElement = null;
+        let placeholder = null;
+
+        document.addEventListener('dragstart', function(e) {
+            if (e.target.classList.contains('draggable-component')) {
+                draggedElement = e.target;
+                e.target.style.opacity = '0.5';
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', '');
+
+                placeholder = document.createElement('div');
+                placeholder.className = 'border-2 border-dashed border-blue-400 rounded-lg p-4 bg-blue-50';
+                placeholder.innerHTML = '<div class="text-center text-blue-600 text-sm">Drop here</div>';
+                placeholder.style.height = draggedElement.offsetHeight + 'px';
+            }
+        });
+
+        document.addEventListener('dragend', function(e) {
+            if (e.target.classList.contains('draggable-component')) {
+                e.target.style.opacity = '';
+                if (placeholder && placeholder.parentNode) {
+                    placeholder.parentNode.removeChild(placeholder);
+                }
+                placeholder = null;
+                draggedElement = null;
+            }
+        });
+
+        document.addEventListener('dragover', function(e) {
+            const pageComponents = document.getElementById('page-components');
+            if (!pageComponents || !draggedElement) return;
+
+            let container = pageComponents.querySelector('.space-y-3');
+            if (!container) {
+                container = pageComponents;
+            }
+
+            if (container.contains(e.target) || e.target === container) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+
+                if (placeholder && placeholder.parentNode) {
+                    placeholder.parentNode.removeChild(placeholder);
+                }
+
+                const afterElement = getElementAfter(container, e.clientY);
+
+                if (afterElement) {
+                    container.insertBefore(placeholder, afterElement);
+                } else {
+                    container.appendChild(placeholder);
+                }
+            }
+        });
+
+        document.addEventListener('drop', function(e) {
+            const pageComponents = document.getElementById('page-components');
+            if (!pageComponents || !draggedElement || !placeholder) return;
+
+            let container = pageComponents.querySelector('.space-y-3');
+            if (!container) {
+                container = pageComponents;
+            }
+
+            if (container.contains(e.target) || e.target === container) {
+                e.preventDefault();
+
+                if (placeholder.parentNode) {
+                    placeholder.parentNode.insertBefore(draggedElement, placeholder);
+                    placeholder.parentNode.removeChild(placeholder);
+                }
+
+                updateComponentPositions();
+            }
+        });
+
+        document.addEventListener('dragenter', function(e) {
+            const pageComponents = document.getElementById('page-components');
+            if (pageComponents && (pageComponents.contains(e.target) || e.target === pageComponents)) {
+                e.preventDefault();
+            }
+        });
+
+        function getElementAfter(container, y) {
+            const draggableElements = [...container.querySelectorAll('.draggable-component')].filter(child => {
+                return child !== draggedElement;
+            });
+
+            let closestElement = null;
+            let closestDistance = Number.POSITIVE_INFINITY;
+
+            draggableElements.forEach((child) => {
+                const box = child.getBoundingClientRect();
+                const distance = y - (box.top + box.height / 2);
+
+                if (distance < 0 && Math.abs(distance) < closestDistance) {
+                    closestDistance = Math.abs(distance);
+                    closestElement = child;
+                }
+            });
+
+            return closestElement;
+        }
+
+        function updateComponentPositions() {
+            const pageComponents = document.getElementById('page-components');
+            if (!pageComponents) return;
+
+            let container = pageComponents.querySelector('.space-y-3');
+            if (!container) {
+                container = pageComponents;
+            }
+
+            const components = container.querySelectorAll('.draggable-component');
+            const positions = [];
+
+            components.forEach((component, index) => {
+                const componentId = component.dataset.componentId;
+                if (componentId) {
+                    positions.push({
+                        component_id: componentId,
+                        position: index + 1
+                    });
+                }
+            });
+
+            const themeId = '<%= @theme.id %>';
+            const themePageId = '<%= @themePage["theme_page_id"] %>';
+
+            fetch(`/admin/themes/${themeId}/theme-pages/${themePageId}/reorder_components`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ positions: positions })
+            }).finally(() => {
+                draggedElement = null;
+            });
+        }
+    });
+</script>

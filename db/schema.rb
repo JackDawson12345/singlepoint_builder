@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_19_111017) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_21_103216) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_19_111017) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "components", force: :cascade do |t|
+    t.string "name"
+    t.string "component_type"
+    t.boolean "global"
+    t.json "content"
+    t.json "editable_fields"
+    t.json "field_types"
+    t.json "template_patterns"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "themes", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -63,6 +75,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_19_111017) do
     t.boolean "published", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "domain_purchased", default: false
+    t.json "domain_purchase_details"
+    t.text "domain_purchase_error"
     t.index ["theme_id"], name: "index_user_setups_on_theme_id"
     t.index ["user_id"], name: "index_user_setups_on_user_id"
   end

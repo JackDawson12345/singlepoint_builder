@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  component_type: MyString
+  global: false
+  content: 
+  editable_fields: 
+  field_types: 
+  template_patterns: 
+
+two:
+  name: MyString
+  component_type: MyString
+  global: false
+  content: 
+  editable_fields: 
+  field_types: 
+  template_patterns: 
