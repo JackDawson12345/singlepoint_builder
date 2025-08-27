@@ -1,0 +1,15 @@
+<div class="space-y-5">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="nata-sans page-title">Edit Product</h1>
+      <p class="nata-sans font-normal text-base">A list of all products on your website including their name, image, status and Inventory.</p>
+    </div>
+  </div>
+
+  <div>
+    <%= render 'form',
+               form_url: manage_website_products_path,
+               form_method: :post,
+               submit_text: "Save Changes" %>
+  </div>
+</div>

@@ -1,0 +1,415 @@
+<!-- app/views/manage/website/products/_variants_form.html.erb -->
+<div id="variants-container">
+  <!-- Button to add new option -->
+  <button type="button" id="add-option-btn" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 nata-sans">
+    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+    </svg>
+    Add Option
+  </button>
+
+  <!-- Container for dynamic options -->
+  <div id="options-list" class="mt-4 space-y-4">
+    <!-- Existing options will be rendered here if editing -->
+    <% if @product && @product.dig('variants', 'options')&.any? %>
+      <% @product.dig('variants', 'options').each_with_index do |option, option_index| %>
+        <div class="option-group border border-gray-200 rounded-lg p-4" data-option-index="<%= option_index %>">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-medium text-gray-900 nata-sans">Option <%= option_index + 1 %></h4>
+            <button type="button" class="remove-option text-red-600 hover:text-red-800 text-sm nata-sans">Remove</button>
+          </div>
+
+          <!-- Option Name -->
+          <div class="mb-3">
+            <label class="block text-sm font-medium text-gray-700 nata-sans">Option Name</label>
+            <input type="text"
+                   name="product[variants][options][<%= option_index %>][name]"
+                   value="<%= option['name'] %>"
+                   placeholder="e.g., Size, Color, Material"
+                   class="mt-1 w-full p-2 border rounded text-sm nata-sans option-name-input"
+                   required>
+          </div>
+
+          <!-- Option Values -->
+          <div class="option-values">
+            <label class="block text-sm font-medium text-gray-700 nata-sans mb-2">Option Values</label>
+            <div class="values-list space-y-2">
+              <% if option['values']&.any? %>
+                <% option['values'].each_with_index do |value, value_index| %>
+                  <div class="value-row flex items-center gap-2">
+                    <input type="text"
+                           name="product[variants][options][<%= option_index %>][values][]"
+                           value="<%= value %>"
+                           placeholder="e.g., Small, Medium, Large"
+                           class="flex-1 p-2 border rounded text-sm nata-sans option-value-input"
+                           required>
+                    <button type="button" class="remove-value text-red-600 hover:text-red-800 text-sm nata-sans">Remove</button>
+                  </div>
+                <% end %>
+              <% else %>
+                <div class="value-row flex items-center gap-2">
+                  <input type="text"
+                         name="product[variants][options][<%= option_index %>][values][]"
+                         value=""
+                         placeholder="e.g., Small, Medium, Large"
+                         class="flex-1 p-2 border rounded text-sm nata-sans option-value-input"
+                         required>
+                  <button type="button" class="remove-value text-red-600 hover:text-red-800 text-sm nata-sans">Remove</button>
+                </div>
+              <% end %>
+            </div>
+            <button type="button" class="add-value mt-2 text-indigo-600 hover:text-indigo-800 text-sm nata-sans">+ Add Value</button>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <!-- Generated Variants Section -->
+  <div id="generated-variants-section" class="mt-8" style="display: none;">
+    <h3 class="text-lg font-medium text-gray-900 nata-sans mb-4">Product Variants</h3>
+    <div id="variants-list" class="space-y-3">
+      <!-- Generated variants will appear here -->
+    </div>
+  </div>
+</div>
+
+<!-- Option Template (hidden, used for cloning) -->
+<template id="option-template">
+  <div class="option-group border border-gray-200 rounded-lg p-4" data-option-index="__OPTION_INDEX__">
+    <div class="flex items-center justify-between mb-3">
+      <h4 class="text-sm font-medium text-gray-900 nata-sans">Option <span class="option-number">__OPTION_NUMBER__</span></h4>
+      <button type="button" class="remove-option text-red-600 hover:text-red-800 text-sm nata-sans">Remove</button>
+    </div>
+
+    <!-- Option Name -->
+    <div class="mb-3">
+      <label class="block text-sm font-medium text-gray-700 nata-sans">Option Name</label>
+      <input type="text"
+             name="product[variants][options][__OPTION_INDEX__][name]"
+             placeholder="e.g., Size, Color, Material"
+             class="mt-1 w-full p-2 border rounded text-sm nata-sans option-name-input"
+             required>
+    </div>
+
+    <!-- Option Values -->
+    <div class="option-values">
+      <label class="block text-sm font-medium text-gray-700 nata-sans mb-2">Option Values</label>
+      <div class="values-list space-y-2">
+        <div class="value-row flex items-center gap-2">
+          <input type="text"
+                 name="product[variants][options][__OPTION_INDEX__][values][]"
+                 placeholder="e.g., Small, Medium, Large"
+                 class="flex-1 p-2 border rounded text-sm nata-sans option-value-input"
+                 required>
+          <button type="button" class="remove-value text-red-600 hover:text-red-800 text-sm nata-sans">Remove</button>
+        </div>
+      </div>
+      <button type="button" class="add-value mt-2 text-indigo-600 hover:text-indigo-800 text-sm nata-sans">+ Add Value</button>
+    </div>
+  </div>
+</template>
+
+<!-- Value Template (hidden, used for cloning) -->
+<template id="value-template">
+  <div class="value-row flex items-center gap-2">
+    <input type="text"
+           name="__VALUE_NAME__"
+           placeholder="e.g., Small, Medium, Large"
+           class="flex-1 p-2 border rounded text-sm nata-sans option-value-input">
+    <button type="button" class="remove-value text-red-600 hover:text-red-800 text-sm nata-sans">Remove</button>
+  </div>
+</template>
+
+<!-- Variant Template (hidden, used for cloning) -->
+<template id="variant-template">
+  <div class="variant-row border border-gray-200 rounded-lg p-4 bg-gray-50">
+    <div class="grid grid-cols-12 gap-4 items-start">
+      <!-- Variant Name/Combination -->
+      <div class="col-span-3">
+        <label class="block text-sm font-medium text-gray-700 nata-sans mb-1">Variant</label>
+        <div class="text-sm text-gray-900 nata-sans font-medium variant-combination">__VARIANT_NAME__</div>
+        <input type="hidden" name="product[variants][combinations][]" value="__VARIANT_COMBINATION__" class="variant-combination-input">
+      </div>
+
+      <!-- Variant Image -->
+      <div class="col-span-2">
+        <label class="block text-sm font-medium text-gray-700 nata-sans mb-1">Image</label>
+        <div class="variant-image-upload">
+          <input type="file"
+                 name="product[variants][images][]"
+                 accept="image/*"
+                 class="w-full text-xs nata-sans block text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 variant-image-input">
+          <div class="variant-image-preview mt-2" style="display: none;">
+            <img src="" alt="Variant preview" class="h-16 w-16 rounded object-cover variant-preview-img">
+            <button type="button" class="text-xs text-red-600 hover:text-red-800 remove-variant-image">Remove</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="col-span-2">
+        <label class="block text-sm font-medium text-gray-700 nata-sans mb-1">Price</label>
+        <input type="number"
+               name="product[variants][prices][]"
+               placeholder="0.00"
+               step="0.01"
+               min="0"
+               class="w-full p-2 border rounded text-sm nata-sans variant-price-input">
+      </div>
+
+      <!-- Quantity -->
+      <div class="col-span-2">
+        <label class="block text-sm font-medium text-gray-700 nata-sans mb-1">Quantity</label>
+        <input type="number"
+               name="product[variants][quantities][]"
+               placeholder="0"
+               min="0"
+               class="w-full p-2 border rounded text-sm nata-sans variant-quantity-input">
+      </div>
+
+      <!-- SKU -->
+      <div class="col-span-3">
+        <label class="block text-sm font-medium text-gray-700 nata-sans mb-1">SKU</label>
+        <input type="text"
+               name="product[variants][skus][]"
+               placeholder="SKU"
+               class="w-full p-2 border rounded text-sm nata-sans variant-sku-input">
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let optionIndex = document.querySelectorAll('.option-group').length;
+
+        // Add Option functionality
+        document.getElementById('add-option-btn').addEventListener('click', function() {
+            const template = document.getElementById('option-template');
+            const clone = template.content.cloneNode(true);
+
+            // Replace placeholders with actual values
+            const html = clone.firstElementChild.outerHTML
+                .replace(/__OPTION_INDEX__/g, optionIndex)
+                .replace(/__OPTION_NUMBER__/g, optionIndex + 1);
+
+            const optionsList = document.getElementById('options-list');
+            optionsList.insertAdjacentHTML('beforeend', html);
+
+            optionIndex++;
+            generateVariants();
+        });
+
+        // Event delegation for dynamic elements
+        document.getElementById('options-list').addEventListener('click', function(e) {
+            // Remove Option
+            if (e.target.classList.contains('remove-option')) {
+                e.preventDefault();
+                const optionGroup = e.target.closest('.option-group');
+                optionGroup.remove();
+                updateOptionNumbers();
+                generateVariants();
+            }
+
+            // Add Value
+            if (e.target.classList.contains('add-value')) {
+                e.preventDefault();
+                const optionGroup = e.target.closest('.option-group');
+                const optionIndex = optionGroup.getAttribute('data-option-index');
+                const valuesList = optionGroup.querySelector('.values-list');
+
+                const valueTemplate = document.getElementById('value-template');
+                const valueClone = valueTemplate.content.cloneNode(true);
+                const valueName = `product[variants][options][${optionIndex}][values][]`;
+
+                const html = valueClone.firstElementChild.outerHTML
+                    .replace(/__VALUE_NAME__/g, valueName);
+
+                valuesList.insertAdjacentHTML('beforeend', html);
+                generateVariants();
+            }
+
+            // Remove Value
+            if (e.target.classList.contains('remove-value')) {
+                e.preventDefault();
+                const valueRow = e.target.closest('.value-row');
+                const valuesList = valueRow.parentElement;
+
+                // Don't remove if it's the last value
+                if (valuesList.children.length > 1) {
+                    valueRow.remove();
+                } else {
+                    // Just clear the input if it's the last one
+                    valueRow.querySelector('input').value = '';
+                }
+                generateVariants();
+            }
+        });
+
+        // Listen for input changes to regenerate variants
+        document.getElementById('options-list').addEventListener('input', function(e) {
+            console.log('Input detected:', e.target);
+            if (e.target.matches('input[type="text"]')) {
+                console.log('Regenerating variants...');
+                generateVariants();
+            }
+        });
+
+        // Also listen for keyup to catch all text changes
+        document.getElementById('options-list').addEventListener('keyup', function(e) {
+            if (e.target.matches('input[type="text"]')) {
+                generateVariants();
+            }
+        });
+
+        // Manual trigger for testing
+        window.testGenerateVariants = function() {
+            console.log('Manual test triggered');
+            generateVariants();
+        };
+
+        // Update option numbers after removal
+        function updateOptionNumbers() {
+            const optionGroups = document.querySelectorAll('.option-group');
+            optionGroups.forEach((group, index) => {
+                group.setAttribute('data-option-index', index);
+                group.querySelector('.option-number').textContent = index + 1;
+
+                // Update input names
+                const nameInput = group.querySelector('input[name*="[name]"]');
+                nameInput.name = `product[variants][options][${index}][name]`;
+
+                const valueInputs = group.querySelectorAll('input[name*="[values]"]');
+                valueInputs.forEach(input => {
+                    input.name = `product[variants][options][${index}][values][]`;
+                });
+            });
+
+            // Update the global option index
+            optionIndex = optionGroups.length;
+        }
+
+        // Generate all possible variant combinations
+        function generateVariants() {
+            console.log('generateVariants() called');
+            const optionGroups = document.querySelectorAll('.option-group');
+            const variantsList = document.getElementById('variants-list');
+            const variantsSection = document.getElementById('generated-variants-section');
+
+            console.log('Found option groups:', optionGroups.length);
+
+            // Clear existing variants
+            variantsList.innerHTML = '';
+
+            if (optionGroups.length === 0) {
+                console.log('No option groups, hiding section');
+                variantsSection.style.display = 'none';
+                return;
+            }
+
+            // Collect all options and their values
+            const options = [];
+            let hasValidOptions = false;
+
+            optionGroups.forEach((group, index) => {
+                console.log('Processing group:', index);
+                const nameInput = group.querySelector('input[name*="[name]"]');
+                const valueInputs = group.querySelectorAll('input[name*="[values]"]');
+
+                const optionName = nameInput ? nameInput.value.trim() : '';
+                const values = Array.from(valueInputs)
+                    .map(input => input.value.trim())
+                    .filter(value => value !== '');
+
+                console.log('Option name:', optionName, 'Values:', values);
+
+                if (optionName && values.length > 0) {
+                    options.push({
+                        name: optionName,
+                        values: values
+                    });
+                    hasValidOptions = true;
+                }
+            });
+
+            console.log('Collected options:', options);
+            console.log('Has valid options:', hasValidOptions);
+
+            if (!hasValidOptions || options.length === 0) {
+                console.log('No valid options, hiding section');
+                variantsSection.style.display = 'none';
+                return;
+            }
+
+            // Generate all combinations
+            const combinations = generateCombinations(options);
+            console.log('Generated combinations:', combinations);
+
+            if (combinations.length === 0) {
+                console.log('No combinations, hiding section');
+                variantsSection.style.display = 'none';
+                return;
+            }
+
+            // Show the variants section
+            console.log('Showing variants section');
+            variantsSection.style.display = 'block';
+
+            // Create variant elements for each combination
+            combinations.forEach((combination, index) => {
+                const template = document.getElementById('variant-template');
+                const clone = template.content.cloneNode(true);
+
+                const variantName = combination.map(c => c.value).join(' / ');
+                const variantCombination = JSON.stringify(combination);
+
+                console.log('Creating variant:', variantName);
+                console.log('Combination JSON:', variantCombination);
+
+                // Create the variant HTML
+                const variantDiv = clone.firstElementChild;
+
+                // Set the variant name
+                variantDiv.querySelector('.variant-combination').textContent = variantName;
+
+                // Set the hidden input value properly
+                variantDiv.querySelector('.variant-combination-input').value = variantCombination;
+
+                // Append to the list
+                variantsList.appendChild(variantDiv);
+            });
+
+            console.log('Variants generation complete');
+        }
+
+        // Helper function to generate all combinations
+        function generateCombinations(options) {
+            if (options.length === 0) return [];
+            if (options.length === 1) {
+                return options[0].values.map(value => [{
+                    option: options[0].name,
+                    value: value
+                }]);
+            }
+
+            const result = [];
+            const firstOption = options[0];
+            const restCombinations = generateCombinations(options.slice(1));
+
+            firstOption.values.forEach(value => {
+                restCombinations.forEach(restCombination => {
+                    result.push([{
+                        option: firstOption.name,
+                        value: value
+                    }].concat(restCombination));
+                });
+            });
+
+            return result;
+        }
+
+        // Generate variants on page load if editing existing product
+        generateVariants();
+    });
+</script>

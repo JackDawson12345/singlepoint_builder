@@ -68,3 +68,12 @@
 .fill-green-500{
     fill: rgba(16,185,129)
 }
+
+.edit-content-button{
+    opacity: 0;
+}
+
+.edit-content-section:hover .edit-content-button{
+    opacity: 1;
+    transition: 1s;
+}

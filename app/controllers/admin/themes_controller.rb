@@ -18,6 +18,10 @@ class Admin::ThemesController < Admin::BaseController
   def add_page
     @theme = Theme.find(params[:id])
 
+    if @theme.website_count(@theme) >= 1
+      redirect_to admin_theme_path(@theme), alert: 'You cant edit a theme with websites attached'
+    end
+
     # Get existing pages to display in the form
     @existing_pages = []
     if @theme.pages && @theme.pages["theme_pages"]
@@ -110,6 +114,11 @@ class Admin::ThemesController < Admin::BaseController
   end
 
   def edit
+    @theme = Theme.find(params[:id])
+
+    if @theme.website_count(@theme) >= 1
+      redirect_to admin_themes_path, alert: 'You cant edit a theme with websites attached'
+    end
   end
 
   def update

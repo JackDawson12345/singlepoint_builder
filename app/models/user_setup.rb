@@ -8,7 +8,6 @@ class UserSetup < ApplicationRecord
       !package_type.nil?,
       !support_option.nil?,
       !paid_at.nil?,
-      domain_purchased?, # Updated to check if domain was purchased
       !theme_id.nil?,
       built_website != 'Not Started',
       published == true
@@ -18,7 +17,7 @@ class UserSetup < ApplicationRecord
   end
 
   def steps_percentage
-    total_steps = 8 # Updated to 8 steps including domain purchase
+    total_steps = 7 # Updated to 8 steps including domain purchase
     return 0 if total_steps.zero?
 
     (steps_completed.to_f / total_steps * 100).round

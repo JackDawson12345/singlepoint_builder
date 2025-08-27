@@ -250,6 +250,28 @@
                 <li><a href="#" class="block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Uptime & Security</a></li>
               </ul>
             </li>
+
+            <% if current_user.is_ecommerce == true %>
+              <!-- Shop with Dropdown -->
+              <li>
+                <button onclick="toggleDropdown('shop')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="currentColor" id="Shopping-Cart--Streamline-Phosphor" height="18" width="18">
+                    <path d="M15.70323125 3.27169375c-0.11035 -0.13205 -0.27358125 -0.20835 -0.44566875 -0.20831875H3.54825625l-0.4413125 -2.42649375c-0.0501625 -0.2761125 -0.2906125 -0.4768375 -0.5712375 -0.47688125H0.74069375C0.2936875 0.1604625 0.0148125 0.64465 0.23871875 1.03153125c0.10369375 0.17918125 0.29495 0.2896 0.501975 0.28981875h1.30651875l1.85525625 10.18285625c0.05465 0.30199375 0.18810625 0.5841875 0.386875 0.818025 -1.14335625 1.06791875 -0.70189375 2.97308125 0.794625 3.42929375 1.49651875 0.4562125 2.92570625 -0.87868125 2.57254375 -2.4028125 -0.03308125 -0.1427625 -0.08150625 -0.281525 -0.144425 -0.41386875h3.29678125c-0.1299125 0.2719625 -0.19713125 0.56961875 -0.19670625 0.8710125 0 1.5645125 1.6936375 2.5423375 3.04854375 1.760075 1.35490625 -0.78225625 1.35490625 -2.73789375 0 -3.52015 -0.30893125 -0.1783625 -0.65945625 -0.27226875 -1.01618125 -0.2722875H5.61618125c-0.28063125 -0.0000375 -0.521075 -0.20076875 -0.5712375 -0.476875l-0.23009375 -1.26515h8.4197875c0.8418875 -0.000125 1.563225 -0.60230625 1.7137125 -1.4306375l0.882625 -4.8529875c0.03025 -0.1698125 -0.01655625 -0.3442875 -0.12774375 -0.47615ZM6.5474375 13.80585625c0 0.67050625 -0.72584375 1.089575 -1.30651875 0.75431875 -0.580675 -0.33525 -0.580675 -1.17338125 0 -1.5086375 0.1324125 -0.07644375 0.2826125 -0.11669375 0.43550625 -0.11669375 0.48105 0 0.8710125 0.38996875 0.8710125 0.8710125Zm6.9681 0c0 0.67050625 -0.72584375 1.089575 -1.30651875 0.75431875 -0.580675 -0.33525 -0.580675 -1.17338125 0 -1.5086375 0.1324125 -0.07644375 0.2826125 -0.11669375 0.43550625 -0.11669375 0.48105 0 0.8710125 0.38996875 0.8710125 0.8710125Zm0.2903375 -5.4126125c-0.05030625 0.27691875 -0.2919625 0.47789375 -0.57341875 0.47688125H4.60363125L3.759475 4.224725h10.80200625Z" stroke-width="0.0625"></path>
+                  </svg>
+                  <span class="font-medium sidebar-navigation pl-4 nata-sans">Shop</span>
+                  <svg class="w-3 h-3 ml-auto transform transition-transform duration-200" id="shop-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <ul class="mt-2 space-y-1 ml-8 hidden" id="shop-dropdown">
+                  <li><%= link_to 'Products', manage_website_products_path, class: 'block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                  <li><a href="#" class="block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Categories</a></li>
+                  <li><a href="#" class="block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Orders</a></li>
+                  <li><a href="#" class="block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Customers</a></li>
+                </ul>
+              </li>
+            <% end %>
+
             <!-- Home without Dropdown -->
             <li>
               <button class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">
@@ -354,12 +376,12 @@
         </div>
 
         <% if current_user.website %>
-          <div class="flex items-center justify-center py-5 border-t">
+          <%= link_to manage_website_editor_website_editor_path, class: 'flex items-center justify-center py-5 border-t' do %>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="#000000" id="Pencil-Line-Light--Streamline-Phosphor" height="18" width="18">
               <path d="m17.4509296875 4.5713953125 -4.0218750000000005 -4.0218750000000005c-0.49203984375 -0.49209609375 -1.2898546875 -0.49209609375 -1.78189453125 0L0.54897890625 11.64679453125c-0.23677734375 0.23596875 -0.36959765625 0.55667109375 -0.36897890625 0.89095078125v4.0218750000000005c0 0.695840625 0.5640890625 1.2599296875000001 1.2599296875000001 1.2599296875000001h15.11914921875c0.41566640624999995 0 0.6754640625 -0.44997890625000003 0.46762734375 -0.8099578125 -0.0964546875 -0.1670625 -0.2747109375 -0.2699859375 -0.46762734375 -0.2699859375H7.063713281249999L17.4509296875 6.353296875c0.49209609375 -0.492046875 0.49209609375 -1.2898617187499999 0 -1.7819015625ZM4.0038890625 14.75971875 11.879346093750002 6.88336171875l1.7567015625 1.7567015625L5.759690625 16.5155203125Zm-0.7640578125 -0.7631578125 -1.7558015624999999 -1.7566945312500002L9.359486718749999 4.364409375l1.7567015625 1.7558015624999999Zm-1.9798875 2.563059375v-3.0166312499999997l3.1966171875000002 3.19662421875H1.4399296874999998c-0.0994078125 0 -0.1799859375 -0.08058515625 -0.1799859375 -0.17999296874999998ZM16.686871875 5.5892390625l-2.28766640625 2.28766640625 -4.2756609375 -4.27655390625 2.28676640625 -2.2867734375000004c0.0703125 -0.07038281249999999 0.18438046875 -0.07038281249999999 0.2546859375 0l4.0218750000000005 4.020975c0.07038281249999999 0.07030546875 0.07038281249999999 0.18438046875 0 0.2546859375Z" stroke-width="0.0703"></path>
             </svg>
             <p class="pl-4 sidebar-navigation nata-sans">Design Site</p>
-          </div>
+          <% end %>
         <% end %>
 
 

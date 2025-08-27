@@ -16,6 +16,10 @@ class User < ApplicationRecord
     email.split('@')[0]
   end
 
+  def is_ecommerce
+    user_setup.package_type == 'e-commerce'
+  end
+
   private
 
   def create_default_user_setup

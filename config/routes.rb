@@ -41,6 +41,13 @@ Rails.application.routes.draw do
       end
 
       get "/", to: "website#index", as: "website"
+
+      resources :products do
+        member do
+          delete :remove_image
+        end
+      end
+
     end
 
     get "/", to: "dashboard#index", as: "dashboard"

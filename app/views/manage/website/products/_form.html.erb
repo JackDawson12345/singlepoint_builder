@@ -1,0 +1,391 @@
+<!-- app/views/manage/website/products/_form.html.erb -->
+<%= form_with scope: :product, url: form_url, method: form_method, local: true, multipart: true do |form| %>
+
+  <div class="flex gap-5">
+    <div class="w-3/4 space-y-5">
+      <!-- Basic Product Info -->
+      <div class="py-4 px-6 bg-gray-50 rounded-lg flex flex-col gap-5">
+        <div>
+          <%= form.label :name, 'Title', class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.text_field :name,
+                                value: @product ? @product.dig('data', 'name') : '',
+                                required: true,
+                                class: "w-full p-2 border rounded text-sm nata-sans",
+                                placeholder: "Short sleeve t-shirt"
+            %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :description, class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.text_area :description,
+                               value: @product ? @product.dig('data', 'description') : '',
+                               rows: 3,
+                               class: "w-full p-2 border rounded text-sm nata-sans" %>
+          </div>
+        </div>
+
+        <!-- Image Upload Section -->
+        <div>
+          <%= form.label :images, "Media", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-2 p-6 border border-dashed rounded-lg flex flex-col items-center justify-center">
+            <%= form.file_field :images,
+                                multiple: true,
+                                accept: "image/*",
+                                class: "w-auto text-sm nata-sans block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" %>
+            <p class="mt-2 text-sm text-gray-500 text-sm nata-sans">Upload multiple images for your product. PNG, JPG, GIF up to 10MB each.</p>
+          </div>
+        </div>
+
+        <!-- Display existing images if editing -->
+        <% if @product && @product_images&.any? %>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 nata-sans">Current Images</label>
+            <div class="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              <% @product_images.each_with_index do |image_url, index| %>
+                <div class="relative">
+                  <%= image_tag image_url, class: "h-24 w-24 rounded-lg object-cover" %>
+                  <%= link_to "×",
+                              remove_image_manage_website_product_path(@product['id'], image_index: index),
+                              method: :delete,
+                              data: { confirm: "Remove this image?" },
+                              class: "absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <div>
+          <%= form.label :category, class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.text_field :category,
+                                value: @product ? @product.dig('data', 'category') : '',
+                                class: "w-full p-2 border rounded text-sm nata-sans" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing Section -->
+      <div class="py-4 px-6 bg-gray-50 rounded-lg flex flex-col gap-5">
+        <h3 class="text-lg font-medium text-gray-900 nata-sans">Pricing</h3>
+        <div class="flex gap-5">
+          <div class="w-1/3">
+            <%= form.label :price, "Price", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+            <div class="mt-1">
+              <%= form.number_field :price,
+                                    value: @product ? @product.dig('price', 'price') : '',
+                                    step: 0.01,
+                                    required: true,
+                                    class: "w-full p-2 border rounded text-sm nata-sans" %>
+            </div>
+          </div>
+          <div class="w-1/3">
+            <%= form.label :sale_price, "Sale Price", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+            <div class="mt-1">
+              <%= form.number_field :sale_price,
+                                    value: @product ? @product.dig('price', 'sale_price') : '',
+                                    step: 0.01,
+                                    class: "w-full p-2 border rounded text-sm nata-sans" %>
+            </div>
+          </div>
+        </div>
+        <div class="w-1/3">
+          <div>
+            <%= form.label :cost_per_item, "Cost per Item", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+            <div class="mt-1">
+              <%= form.number_field :cost_per_item,
+                                    value: @product ? @product.dig('price', 'cost_per_item') : '',
+                                    step: 0.01,
+                                    class: "w-full p-2 border rounded text-sm nata-sans" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Section -->
+      <div class="py-4 px-6 bg-gray-50 rounded-lg flex flex-col gap-5">
+        <h3 class="text-lg font-medium text-gray-900 nata-sans">Inventory</h3>
+
+        <div class="flex items-center">
+          <%= form.check_box :track_quantity,
+                             checked: @product ? @product.dig('inventory', 'track_quantity') : true,
+                             class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded",
+                             id: "track_quantity_checkbox" %>
+          <%= form.label :track_quantity, "Track quantity", class: "ml-2 block text-sm text-gray-900 nata-sans" %>
+        </div>
+
+        <div id="quantity_field">
+          <%= form.label :quantity, "Quantity", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.number_field :quantity,
+                                  value: @product ? @product.dig('inventory', 'quantity') : 0,
+                                  min: 0,
+                                  class: "w-full p-2 border rounded text-sm nata-sans" %>
+          </div>
+        </div>
+
+        <div class="flex items-center" id="sell_out_of_stock_field">
+          <%= form.check_box :sell_out_of_stock,
+                             checked: @product ? @product.dig('inventory', 'sell_out_of_stock') : false,
+                             class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
+          <%= form.label :sell_out_of_stock, "Continue selling when out of stock", class: "ml-2 block text-sm text-gray-900 nata-sans" %>
+        </div>
+
+        <div class="flex items-center">
+          <%= form.check_box :has_sku_or_barcode,
+                             checked: @product ? @product.dig('inventory', 'has_sku_or_barcode') : true,
+                             class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded",
+                             id: "has_sku_or_barcode_checkbox" %>
+          <%= form.label :has_sku_or_barcode, "This product has a SKU or barcode", class: "ml-2 block text-sm text-gray-900 nata-sans" %>
+        </div>
+
+        <div class="flex gap-5" id="sku_barcode_fields">
+          <div class="w-1/2">
+            <%= form.label :sku, "SKU (Stock Keeping Unit)", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+            <div class="mt-1">
+              <%= form.text_field :sku,
+                                  value: @product ? @product.dig('inventory', 'sku') : '',
+                                  class: "w-full p-2 border rounded text-sm nata-sans" %>
+            </div>
+          </div>
+          <div  class="w-1/2">
+            <%= form.label :barcode, "Barcode (ISBN, UPC, GTIN, etc.)", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+            <div class="mt-1">
+              <%= form.text_field :barcode,
+                                  value: @product ? @product.dig('inventory', 'barcode') : '',
+                                  class: "w-full p-2 border rounded text-sm nata-sans" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Section -->
+      <div class="py-4 px-6 bg-gray-50 rounded-lg flex flex-col gap-5">
+        <h3 class="text-lg font-medium text-gray-900 nata-sans">Shipping</h3>
+
+        <div class="flex items-center">
+          <%= form.check_box :physical_product,
+                             checked: @product ? @product.dig('shipping', 'physical_product') : true,
+                             class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded",
+                             id: "physical_product_checkbox" %>
+          <%= form.label :physical_product, "This is a physical product", class: "ml-2 block text-sm text-gray-900 nata-sans" %>
+        </div>
+
+        <div id="physical_product_fields">
+          <div>
+            <%= form.label :weight, "Weight", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+            <div class="mt-1">
+              <%= form.text_field :weight,
+                                  value: @product ? @product.dig('shipping', 'weight') : '',
+                                  placeholder: "e.g. 1.2kg or 8oz",
+                                  class: "w-full p-2 border rounded text-sm nata-sans" %>
+            </div>
+          </div>
+
+          <div class="flex gap-5 mt-5">
+            <div class="w-1/3">
+              <%= form.label :width, "Width", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+              <div class="mt-1">
+                <%= form.text_field :width,
+                                    value: @product ? @product.dig('shipping', 'sizes', 'width') : '',
+                                    placeholder: "e.g. 40cm",
+                                    class: "w-full p-2 border rounded text-sm nata-sans" %>
+              </div>
+            </div>
+            <div class="w-1/3">
+              <%= form.label :height, "Height", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+              <div class="mt-1">
+                <%= form.text_field :height,
+                                    value: @product ? @product.dig('shipping', 'sizes', 'height') : '',
+                                    placeholder: "e.g. 40cm",
+                                    class: "w-full p-2 border rounded text-sm nata-sans" %>
+              </div>
+            </div>
+            <div class="w-1/3">
+              <%= form.label :depth, "Depth", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+              <div class="mt-1">
+                <%= form.text_field :depth,
+                                    value: @product ? @product.dig('shipping', 'sizes', 'depth') : '',
+                                    placeholder: "e.g. 40cm",
+                                    class: "w-full p-2 border rounded text-sm nata-sans" %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variants Section -->
+      <div class="py-4 px-6 bg-gray-50 rounded-lg flex flex-col gap-5">
+        <h3 class="text-lg font-medium text-gray-900 nata-sans">Variants</h3>
+        <p class="text-sm text-gray-600">For now, variants are handled automatically. Advanced variant options coming soon.</p>
+
+        <!-- Basic variant options -->
+        <div>
+          <%= render 'variants_form', form: form %>
+        </div>
+      </div>
+
+      <!-- SEO Section -->
+      <div class="py-4 px-6 bg-gray-50 rounded-lg flex flex-col gap-5">
+        <h3 class="text-lg font-medium text-gray-900 nata-sans">Search Engine Listing</h3>
+
+        <div>
+          <%= form.label :seo_title, "Page Title", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.text_field :seo_title,
+                                value: @product ? @product.dig('seo', 'title') : '',
+                                maxlength: 70,
+                                class: "w-full p-2 border rounded text-sm nata-sans" %>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">0 of 70 characters used</p>
+        </div>
+
+        <div>
+          <%= form.label :seo_description, "Meta Description", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.text_area :seo_description,
+                               value: @product ? @product.dig('seo', 'description') : '',
+                               rows: 3,
+                               maxlength: 320,
+                               class: "w-full p-2 border rounded text-sm nata-sans" %>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">0 of 320 characters used</p>
+        </div>
+
+        <div>
+          <%= form.label :seo_url, "URL Handle", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.text_field :seo_url,
+                                value: @product ? @product.dig('seo', 'url_handle') : '',
+                                class: "w-full p-2 border rounded text-sm nata-sans" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="w-1/4 space-y-5">
+      <!-- Status -->
+      <div class="py-4 px-6 bg-gray-50 rounded-lg flex flex-col gap-5">
+        <div>
+          <%= form.label :status, class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.select :status,
+                            options_for_select([
+                                                 ['Active', 'active'],
+                                                 ['Draft', 'draft'],
+                                                 ['Archived', 'archived']
+                                               ], @product ? @product['status'] : 'active'),
+                            {},
+                            { class: "w-full p-2 border rounded text-sm nata-sans" } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Organization -->
+      <div class="py-4 px-6 bg-gray-50 rounded-lg flex flex-col gap-5">
+        <h3 class="text-lg font-medium text-gray-900 nata-sans">Organization</h3>
+
+        <div>
+          <%= form.label :product_type, "Product Type", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.text_field :product_type,
+                                value: @product ? @product.dig('organization', 'product_type') : '',
+                                class: "w-full p-2 border rounded text-sm nata-sans" %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :vendor, "Vendor", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.text_field :vendor,
+                                value: @product ? @product.dig('organization', 'vendor') : '',
+                                class: "w-full p-2 border rounded text-sm nata-sans" %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :tags, "Tags", class: "block text-sm font-medium text-gray-700 nata-sans" %>
+          <div class="mt-1">
+            <%= form.text_field :tags,
+                                value: @product ? (@product.dig('organization', 'tags') || []).join(', ') : '',
+                                placeholder: "vintage, cotton, summer",
+                                class: "w-full p-2 border rounded text-sm nata-sans" %>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">Separate tags with commas</p>
+        </div>
+
+      </div>
+
+      <div class="flex justify-end space-x-3 mt-6">
+        <%= form.submit submit_text,
+                        class: "w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 nata-sans" %>
+      </div>
+    </div>
+  </div>
+
+<% end %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Track quantity checkbox functionality
+        const trackQuantityCheckbox = document.getElementById('track_quantity_checkbox');
+        const quantityField = document.getElementById('quantity_field');
+        const sellOutOfStockField = document.getElementById('sell_out_of_stock_field');
+
+        function toggleQuantityField() {
+            if (trackQuantityCheckbox.checked) {
+                quantityField.style.display = 'block';
+                sellOutOfStockField.style.display = 'flex';
+            } else {
+                quantityField.style.display = 'none';
+                sellOutOfStockField.style.display = 'none';
+            }
+        }
+
+        // Set initial state
+        toggleQuantityField();
+
+        // Add event listener
+        trackQuantityCheckbox.addEventListener('change', toggleQuantityField);
+
+        // SKU/Barcode checkbox functionality
+        const skuBarcodeCheckbox = document.getElementById('has_sku_or_barcode_checkbox');
+        const skuBarcodeFields = document.getElementById('sku_barcode_fields');
+
+        function toggleSkuBarcodeFields() {
+            if (skuBarcodeCheckbox.checked) {
+                skuBarcodeFields.style.display = 'flex';
+            } else {
+                skuBarcodeFields.style.display = 'none';
+            }
+        }
+
+        // Set initial state
+        toggleSkuBarcodeFields();
+
+        // Add event listener
+        skuBarcodeCheckbox.addEventListener('change', toggleSkuBarcodeFields);
+
+        // Physical product checkbox functionality
+        const physicalProductCheckbox = document.getElementById('physical_product_checkbox');
+        const physicalProductFields = document.getElementById('physical_product_fields');
+
+        function togglePhysicalProductFields() {
+            if (physicalProductCheckbox.checked) {
+                physicalProductFields.style.display = 'block';
+            } else {
+                physicalProductFields.style.display = 'none';
+            }
+        }
+
+        // Set initial state
+        togglePhysicalProductFields();
+
+        // Add event listener
+        physicalProductCheckbox.addEventListener('change', togglePhysicalProductFields);
+    });
+</script>

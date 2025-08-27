@@ -8,6 +8,10 @@ class Theme < ApplicationRecord
   # Custom validation for image
   validate :acceptable_image
 
+  def website_count(theme)
+    Website.where(theme_id: theme.id).count
+  end
+
   private
 
   def acceptable_image
@@ -23,4 +27,7 @@ class Theme < ApplicationRecord
       errors.add(:image, "must be a JPEG, PNG, GIF, or WebP")
     end
   end
+
+
+
 end

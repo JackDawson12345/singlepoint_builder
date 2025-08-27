@@ -351,7 +351,7 @@ class Manage::SetupController < Manage::BaseController
         "years" => 1,
         "caRegistryAgreement" => true,
         "contact" => contact,
-        "privacyService" => false
+        "privacyService" => false  # Changed from true to false
       }
 
       Rails.logger.info "Domain registration payload prepared"
@@ -369,7 +369,7 @@ class Manage::SetupController < Manage::BaseController
           domain: user_setup.domain_name,
           registered_at: Time.current,
           years: 1,
-          privacy_enabled: true,
+          privacy_enabled: false,  # Updated to reflect the actual setting
           api_response: result
         }
       }

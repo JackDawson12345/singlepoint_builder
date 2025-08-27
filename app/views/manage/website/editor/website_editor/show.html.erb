@@ -7,7 +7,12 @@
   </style>
   <% @page_data["components"].each do |component| %>
     <% foundComponent = Component.find(component["component_id"]) %>
-    <section><%= raw(render_editor_content(foundComponent)) %></section>
+    <section class="relative edit-content-section">
+      <% unless foundComponent.editable_fields.blank? %>
+        <button class="edit-content-button absolute top-3 right-3 z-10 nata-sans bg-blue-500 px-4 py-0.5 rounded-full text-white">Edit Content</button>
+      <% end %>
+      <%= raw(render_editor_content(foundComponent)) %>
+    </section>
   <% end %>
   <script>
       <% @page_data["components"].each do |component| %>

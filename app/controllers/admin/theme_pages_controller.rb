@@ -1,6 +1,11 @@
 class Admin::ThemePagesController < Admin::BaseController
   def index
     @theme = Theme.find(params[:id])
+
+    if @theme.website_count(@theme) >= 1
+      redirect_to admin_theme_path(@theme), alert: 'You cant edit a theme with websites attached'
+    end
+
     @pageName, @themePage = @theme.pages["theme_pages"].find do |name, page|
       page["theme_page_id"] == params[:theme_page_id]
     end
