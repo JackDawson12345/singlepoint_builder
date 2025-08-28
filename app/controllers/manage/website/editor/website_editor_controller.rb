@@ -13,8 +13,32 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     load_page_data(params[:page_slug])
 
     if @page_data.nil?
-      redirect_to manage_website_editor_path, alert: "Page not found"
+      redirect_to manage_website_website_editor_path, alert: "Page not found"
       return
+    end
+  end
+
+  def sidebar_data
+    title = params[:title]
+
+    begin
+      respond_to do |format|
+        format.json do
+          render json: {
+            html: render_to_string(partial: 'editor_sidebar', locals: { title: title }),
+            success: true
+          }
+        end
+      end
+    rescue => e
+      Rails.logger.error "Sidebar data error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+
+      respond_to do |format|
+        format.json do
+          render json: { error: e.message }, status: 500
+        end
+      end
     end
   end
 

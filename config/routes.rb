@@ -86,6 +86,7 @@ Rails.application.routes.draw do
       namespace :editor do
         get "/", to: "website_editor#index", as: "website_editor"
         get "/:page_slug", to: "website_editor#show", as: "website_editor_page"
+        post "/sidebar_data", to: "website_editor#sidebar_data", as: "website_editor_sidebar_data"
       end
 
       get "/", to: "website#index", as: "website"

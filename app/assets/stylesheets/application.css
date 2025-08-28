@@ -91,3 +91,11 @@
 .notification-section > div:nth-last-child(1){
     border: 0px !important;
 }
+
+.editor-sidebar {
+    display: none; /* Hidden by default */
+}
+
+.editor-sidebar.show {
+    display: block; /* or flex, grid, etc. */
+}
