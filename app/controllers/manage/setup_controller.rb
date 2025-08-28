@@ -178,6 +178,8 @@ class Manage::SetupController < Manage::BaseController
             domain_purchase_details: domain_purchase_result[:details]
           )
 
+          notify_all_admins("A new purchase has been made by #{current_user.email} for a #{current_user.user_setup.package_type} website. Support Option #{current_user.user_setup.support_option}", "Purchase Of A New Website")
+
           render json: {
             success: true,
             message: 'Payment successful and domain purchased!',
@@ -230,6 +232,8 @@ class Manage::SetupController < Manage::BaseController
     theme = Theme.find(params[:theme_id])
     @website = Website.create(user_id: current_user.id, theme_id: theme.id, name: 'My Website', description: 'Description Of My Website', pages: theme.pages, domain_name: current_user.user_setup.domain_name)
     @user_setup = current_user.user_setup.update(theme_id: theme.id)
+
+    notify_all_admins("A new website has been set up for #{current_user.email} with the id of #{current_user.website.id}", "New Website Setup Successfully")
     redirect_to manage_website_website_path
   end
 

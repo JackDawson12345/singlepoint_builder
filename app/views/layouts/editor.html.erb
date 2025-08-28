@@ -121,7 +121,22 @@
       </div>
     </div>
   </div>
-  <div class="flex">
+  <div class="flex relative">
+    <div class="w-full absolute bg-white" style="z-index: 9999; max-width: 35%; min-height: calc(100vh - 101px); max-height: calc(100vh - 101px)">
+      <div class="flex p-5 border-b">
+        <div class="w-4/5">
+          <h2 class="nata-sans font-bold sidebar-title">Sidebar Title</h2>
+        </div>
+        <div class="w-1/5 flex justify-end items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="X--Streamline-Phosphor" height="16" width="16">
+            <path d="M15.61025625 14.50095625c0.42696875 0.42696875 0.23161875 1.1560375 -0.35163125 1.31231875 -0.2706875 0.072525 -0.55950625 -0.0048625 -0.75766875 -0.20301875L8 9.10831875 1.49904375 15.61025625c-0.42696875 0.42696875 -1.1560375 0.23161875 -1.31231875 -0.35163125 -0.072525 -0.2706875 0.0048625 -0.5595125 0.20301875 -0.75766875L6.89168125 8 0.38974375 1.49904375C-0.037225 1.072075 0.158125 0.34300625 0.741375 0.186725c0.2706875 -0.072525 0.55950625 0.0048625 0.75766875 0.20301875L8 6.89168125 14.50095625 0.38974375c0.42696875 -0.42696875 1.1560375 -0.23161875 1.31231875 0.35163125 0.072525 0.2706875 -0.0048625 0.5595125 -0.20301875 0.75766875L9.10831875 8Z" stroke-width="0.0625"></path>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <%= render 'editor_sidebar' %>
+      </div>
+    </div>
     <div class="border-r flex flex-col items-center justify-between py-6" style="width: 5%; min-height: calc(100vh - 101px); max-height: calc(100vh - 101px)">
       <div class="flex-col space-y-8">
         <div>

@@ -1,0 +1,70 @@
+<div class="">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="nata-sans page-title">Notifications</h1>
+      <p class="nata-sans font-normal text-base">A list of all Notifications in your application</p>
+    </div>
+  </div>
+
+  <div class="mt-8 flow-root">
+    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+          <table class="min-w-full divide-y divide-gray-300">
+            <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="nata-sans py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Notification Type</th>
+              <th scope="col" class="nata-sans px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Message</th>
+              <th scope="col" class="nata-sans px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Read?</th>
+              <th scope="col" class="nata-sans px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Created</th>
+              <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                <span class="sr-only">Actions</span>
+              </th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+            <% @notifications.each do |notification| %>
+              <tr class="hover:bg-gray-50">
+                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                  <div class="flex items-center">
+                    <div class="">
+                      <div class="text-sm font-medium text-gray-900 nata-sans"><%= notification.notification_type %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  <div class="text-sm font-medium text-gray-900 nata-sans"><%= notification.message.truncate(60) %></div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  <span class="nata-sans inline-flex rounded-full px-2 text-xs font-semibold leading-5
+                  <%= notification.read == true ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                    <%= notification.read == true ? 'Yes' : 'No' %>
+                  </span>
+                </td>
+
+                <td class="nata-sans whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  <%= notification.created_at.strftime("%b %d, %Y") %>
+                </td>
+
+                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 flex gap-2 justify-end">
+                  <%= link_to "View", admin_notification_path(notification), class: "nata-sans text-blue-500 hover:text-indigo-900 mr-3" %>
+
+                  <% unless notification.read == true %>
+                    <%= button_to "Read", admin_notification_read_path(notification),
+                                  method: :post,
+                                  class: "nata-sans text-indigo-600 hover:text-indigo-900" %>
+                  <% end %>
+
+                </td>
+
+              </tr>
+            <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>

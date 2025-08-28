@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_21_103216) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_28_085758) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -54,6 +54,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_21_103216) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.text "message"
+    t.boolean "read"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "notification_type"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
   create_table "themes", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -91,6 +101,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_21_103216) do
     t.integer "role", default: 1, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "first_name"
+    t.string "last_name"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
@@ -115,6 +127,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_21_103216) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "notifications", "users"
   add_foreign_key "user_setups", "themes"
   add_foreign_key "user_setups", "users"
   add_foreign_key "websites", "themes"

@@ -1,3 +1,10 @@
+<!-- Store existing variants data for JavaScript -->
+<% if @product && @product.dig('variants', 'variants_pricing')&.any? %>
+  <script type="application/json" id="existing-variants-data">
+    <%= raw @product.dig('variants', 'variants_pricing').to_json %>
+  </script>
+<% end %>
+
 <!-- app/views/manage/website/products/_variants_form.html.erb -->
 <div id="variants-container">
   <!-- Button to add new option -->
@@ -181,7 +188,15 @@
 </template>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    function initializeVariantsForm() {
+        // Check if already initialized to prevent duplicate event listeners
+        if (document.getElementById('variants-container').dataset.initialized) {
+            return;
+        }
+
+        // Mark as initialized
+        document.getElementById('variants-container').dataset.initialized = 'true';
+
         let optionIndex = document.querySelectorAll('.option-group').length;
 
         // Add Option functionality
@@ -216,7 +231,7 @@
             if (e.target.classList.contains('add-value')) {
                 e.preventDefault();
                 const optionGroup = e.target.closest('.option-group');
-                const optionIndex = optionGroup.getAttribute('data-option-index');
+                const optionIndex = optionGroup.getAttribute('data-option-index.html.erb');
                 const valuesList = optionGroup.querySelector('.values-list');
 
                 const valueTemplate = document.getElementById('value-template');
@@ -249,9 +264,7 @@
 
         // Listen for input changes to regenerate variants
         document.getElementById('options-list').addEventListener('input', function(e) {
-            console.log('Input detected:', e.target);
             if (e.target.matches('input[type="text"]')) {
-                console.log('Regenerating variants...');
                 generateVariants();
             }
         });
@@ -263,17 +276,42 @@
             }
         });
 
-        // Manual trigger for testing
-        window.testGenerateVariants = function() {
-            console.log('Manual test triggered');
-            generateVariants();
-        };
+        // Handle variant image removal
+        document.getElementById('variants-list').addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-variant-image')) {
+                e.preventDefault();
+                const imagePreview = e.target.closest('.variant-image-preview');
+                const fileInput = e.target.closest('.variant-row').querySelector('.variant-image-input');
+
+                imagePreview.style.display = 'none';
+                fileInput.value = '';
+            }
+        });
+
+        // Handle variant image preview
+        document.getElementById('variants-list').addEventListener('change', function(e) {
+            if (e.target.classList.contains('variant-image-input')) {
+                const file = e.target.files[0];
+                const variantRow = e.target.closest('.variant-row');
+                const imagePreview = variantRow.querySelector('.variant-image-preview');
+                const previewImg = variantRow.querySelector('.variant-preview-img');
+
+                if (file && imagePreview && previewImg) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
 
         // Update option numbers after removal
         function updateOptionNumbers() {
             const optionGroups = document.querySelectorAll('.option-group');
             optionGroups.forEach((group, index) => {
-                group.setAttribute('data-option-index', index);
+                group.setAttribute('data-option-index.html.erb', index);
                 group.querySelector('.option-number').textContent = index + 1;
 
                 // Update input names
@@ -286,24 +324,20 @@
                 });
             });
 
-            // Update the global option index
+            // Update the global option index.html.erb
             optionIndex = optionGroups.length;
         }
 
         // Generate all possible variant combinations
         function generateVariants() {
-            console.log('generateVariants() called');
             const optionGroups = document.querySelectorAll('.option-group');
             const variantsList = document.getElementById('variants-list');
             const variantsSection = document.getElementById('generated-variants-section');
-
-            console.log('Found option groups:', optionGroups.length);
 
             // Clear existing variants
             variantsList.innerHTML = '';
 
             if (optionGroups.length === 0) {
-                console.log('No option groups, hiding section');
                 variantsSection.style.display = 'none';
                 return;
             }
@@ -313,7 +347,6 @@
             let hasValidOptions = false;
 
             optionGroups.forEach((group, index) => {
-                console.log('Processing group:', index);
                 const nameInput = group.querySelector('input[name*="[name]"]');
                 const valueInputs = group.querySelectorAll('input[name*="[values]"]');
 
@@ -321,8 +354,6 @@
                 const values = Array.from(valueInputs)
                     .map(input => input.value.trim())
                     .filter(value => value !== '');
-
-                console.log('Option name:', optionName, 'Values:', values);
 
                 if (optionName && values.length > 0) {
                     options.push({
@@ -333,27 +364,31 @@
                 }
             });
 
-            console.log('Collected options:', options);
-            console.log('Has valid options:', hasValidOptions);
-
             if (!hasValidOptions || options.length === 0) {
-                console.log('No valid options, hiding section');
                 variantsSection.style.display = 'none';
                 return;
             }
 
             // Generate all combinations
             const combinations = generateCombinations(options);
-            console.log('Generated combinations:', combinations);
 
             if (combinations.length === 0) {
-                console.log('No combinations, hiding section');
                 variantsSection.style.display = 'none';
                 return;
             }
 
+            // Get existing variants data if editing
+            let existingVariants = {};
+            const existingData = document.getElementById('existing-variants-data');
+            if (existingData) {
+                try {
+                    existingVariants = JSON.parse(existingData.textContent);
+                } catch (e) {
+                    console.log('Error parsing existing variants data:', e);
+                }
+            }
+
             // Show the variants section
-            console.log('Showing variants section');
             variantsSection.style.display = 'block';
 
             // Create variant elements for each combination
@@ -364,8 +399,8 @@
                 const variantName = combination.map(c => c.value).join(' / ');
                 const variantCombination = JSON.stringify(combination);
 
-                console.log('Creating variant:', variantName);
-                console.log('Combination JSON:', variantCombination);
+                // Create variant key for looking up existing data
+                const variantKey = combination.map(c => c.value.toLowerCase().replace(/\s+/g, '_')).join('_');
 
                 // Create the variant HTML
                 const variantDiv = clone.firstElementChild;
@@ -376,11 +411,42 @@
                 // Set the hidden input value properly
                 variantDiv.querySelector('.variant-combination-input').value = variantCombination;
 
+                // Populate existing data if available
+                const existingVariant = existingVariants[variantKey];
+                if (existingVariant) {
+                    // Set price
+                    const priceInput = variantDiv.querySelector('.variant-price-input');
+                    if (priceInput && existingVariant.price) {
+                        priceInput.value = existingVariant.price;
+                    }
+
+                    // Set quantity
+                    const quantityInput = variantDiv.querySelector('.variant-quantity-input');
+                    if (quantityInput && existingVariant.quantity) {
+                        quantityInput.value = existingVariant.quantity;
+                    }
+
+                    // Set SKU
+                    const skuInput = variantDiv.querySelector('.variant-sku-input');
+                    if (skuInput && existingVariant.sku) {
+                        skuInput.value = existingVariant.sku;
+                    }
+
+                    // Handle existing image
+                    if (existingVariant.image && existingVariant.image.trim() !== '') {
+                        const imagePreview = variantDiv.querySelector('.variant-image-preview');
+                        const previewImg = variantDiv.querySelector('.variant-preview-img');
+
+                        if (imagePreview && previewImg) {
+                            previewImg.src = existingVariant.image;
+                            imagePreview.style.display = 'block';
+                        }
+                    }
+                }
+
                 // Append to the list
                 variantsList.appendChild(variantDiv);
             });
-
-            console.log('Variants generation complete');
         }
 
         // Helper function to generate all combinations
@@ -411,5 +477,17 @@
 
         // Generate variants on page load if editing existing product
         generateVariants();
+    }
+
+    // Listen for both DOMContentLoaded and Turbo events
+    document.addEventListener('DOMContentLoaded', initializeVariantsForm);
+    document.addEventListener('turbo:load', initializeVariantsForm);
+
+    // Clean up on page navigation to prevent memory leaks
+    document.addEventListener('turbo:before-cache', function() {
+        const container = document.getElementById('variants-container');
+        if (container) {
+            container.removeAttribute('data-initialized');
+        }
     });
 </script>

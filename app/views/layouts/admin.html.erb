@@ -36,16 +36,38 @@
       <input class="w-full" type="text" id="fname" name="fname" style="background: #303030; border: 1px solid #484848; border-radius: 10px">
     </form>
   </div>
-  <div class="flex gap-5 items-center w-auto">
+  <div class="flex gap-5 items-center w-auto relative">
     <div>
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path d="M21.9508 1.14465H2.04926C1.05008 1.1447 0.240022 1.9547 0.240022 2.95388V21.0462C0.23585 21.7505 0.644647 22.392 1.28486 22.6858C1.52437 22.797 1.78518 22.8549 2.04926 22.8554C2.47397 22.8544 2.88461 22.7029 3.20829 22.428L3.21847 22.42L6.91155 19.2369H21.9508C22.95 19.2369 23.76 18.4269 23.76 17.4277V2.95388C23.76 1.95467 22.95 1.14465 21.9508 1.14465ZM21.9508 17.4277H6.57233C6.35512 17.4278 6.14519 17.5061 5.98093 17.6482L2.04926 21.0462V2.95388H21.9508V17.4277ZM7.47694 8.38156C7.47694 7.88196 7.88195 7.47695 8.38155 7.47695H15.6185C16.3148 7.47698 16.7501 8.23085 16.4019 8.83391C16.2403 9.11378 15.9416 9.28618 15.6185 9.28618H8.38155C7.88195 9.28618 7.47694 8.88117 7.47694 8.38156ZM7.47694 12C7.47694 11.5004 7.88195 11.0954 8.38155 11.0954H15.6185C16.3148 11.0954 16.7501 11.8493 16.4019 12.4523C16.2403 12.7322 15.9417 12.9047 15.6185 12.9046H8.38155C7.88193 12.9047 7.47694 12.4996 7.47694 12Z" fill="white"/>
       </svg>
     </div>
-    <div>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M22.4494 6.23899C22.0225 6.46006 21.4972 6.29341 21.2759 5.86667C20.4446 4.2244 19.1863 2.83636 17.6332 1.8484C17.0658 1.49055 17.0986 0.652706 17.6922 0.340275C17.9677 0.195281 18.2996 0.208265 18.5629 0.374344C20.3729 1.53327 21.8427 3.15215 22.8218 5.06541C23.0428 5.49232 22.8762 6.01761 22.4494 6.23899ZM1.95095 6.33697C2.27621 6.33683 2.57429 6.15547 2.7239 5.86667C3.55521 4.2244 4.81352 2.83636 6.36659 1.8484C6.93394 1.49055 6.90117 0.652706 6.30758 0.340275C6.0321 0.195281 5.70018 0.208265 5.43686 0.374344C3.62685 1.53327 2.15713 3.15215 1.178 5.06541C0.877742 5.645 1.29821 6.33669 1.95095 6.33697ZM22.211 17.6526C22.8865 18.8109 22.0548 20.2661 20.7139 20.2719C20.7118 20.2719 20.7097 20.2719 20.7076 20.2719H16.2658C15.5987 23.5571 11.6255 24.8882 9.114 22.6679C8.4047 22.0408 7.91908 21.1997 7.73068 20.2719H3.28893C1.94804 20.2692 1.11285 18.816 1.78559 17.6561C1.78627 17.6549 1.78697 17.6538 1.78766 17.6526C2.76855 15.9597 3.28893 13.5526 3.28893 10.6916C3.28893 3.98719 10.5467 -0.203091 16.3529 3.14914C19.0476 4.70491 20.7076 7.58009 20.7076 10.6916C20.7076 13.5516 21.228 15.9586 22.211 17.6526ZM14.4608 20.2719H9.5357C10.2079 22.1676 12.6802 22.6247 13.9858 21.0947C14.1931 20.8518 14.3541 20.5729 14.4608 20.2719ZM20.7076 18.53C19.5492 16.541 18.9657 13.9043 18.9657 10.6916C18.9657 5.32807 13.1595 1.97586 8.51452 4.65763C6.35878 5.90225 5.03079 8.20239 5.03079 10.6916C5.03079 13.9054 4.44509 16.5421 3.28893 18.53H20.7076Z" fill="white"/>
-      </svg>
+    <div class="notification-top">
+      <div class="relative notification-icon cursor-pointer">
+        <p class="bg-blue-500 w-5 h-5 rounded-full text-sm flex items-center justify-center text-white nata-sans absolute" style="top: -10px; right: -10px"><%= current_user.unread_notifications_count %></p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M22.4494 6.23899C22.0225 6.46006 21.4972 6.29341 21.2759 5.86667C20.4446 4.2244 19.1863 2.83636 17.6332 1.8484C17.0658 1.49055 17.0986 0.652706 17.6922 0.340275C17.9677 0.195281 18.2996 0.208265 18.5629 0.374344C20.3729 1.53327 21.8427 3.15215 22.8218 5.06541C23.0428 5.49232 22.8762 6.01761 22.4494 6.23899ZM1.95095 6.33697C2.27621 6.33683 2.57429 6.15547 2.7239 5.86667C3.55521 4.2244 4.81352 2.83636 6.36659 1.8484C6.93394 1.49055 6.90117 0.652706 6.30758 0.340275C6.0321 0.195281 5.70018 0.208265 5.43686 0.374344C3.62685 1.53327 2.15713 3.15215 1.178 5.06541C0.877742 5.645 1.29821 6.33669 1.95095 6.33697ZM22.211 17.6526C22.8865 18.8109 22.0548 20.2661 20.7139 20.2719C20.7118 20.2719 20.7097 20.2719 20.7076 20.2719H16.2658C15.5987 23.5571 11.6255 24.8882 9.114 22.6679C8.4047 22.0408 7.91908 21.1997 7.73068 20.2719H3.28893C1.94804 20.2692 1.11285 18.816 1.78559 17.6561C1.78627 17.6549 1.78697 17.6538 1.78766 17.6526C2.76855 15.9597 3.28893 13.5526 3.28893 10.6916C3.28893 3.98719 10.5467 -0.203091 16.3529 3.14914C19.0476 4.70491 20.7076 7.58009 20.7076 10.6916C20.7076 13.5516 21.228 15.9586 22.211 17.6526ZM14.4608 20.2719H9.5357C10.2079 22.1676 12.6802 22.6247 13.9858 21.0947C14.1931 20.8518 14.3541 20.5729 14.4608 20.2719ZM20.7076 18.53C19.5492 16.541 18.9657 13.9043 18.9657 10.6916C18.9657 5.32807 13.1595 1.97586 8.51452 4.65763C6.35878 5.90225 5.03079 8.20239 5.03079 10.6916C5.03079 13.9054 4.44509 16.5421 3.28893 18.53H20.7076Z" fill="white"/>
+        </svg>
+      </div>
+
+      <div class="notification-section z-10 absolute top-13 left--11 px-1 bg-black-gray w-300 hidden">
+        <% notifications = Notification.where(user_id: current_user.id, read: false) %>
+        <% if notifications.count == 0 %>
+          <div class="p-2 py-6 pt-4 flex flex-col gap-4 items-center">
+            <p class="nata-sans text-white text-sm text-center">No new notifications to show. You can view all your notifications with the button below</p>
+            <%= link_to 'View all Notifications', admin_notifications_path, class: 'nata-sans bg-blue-500 px-4 py-0.5 rounded-full text-white' %>
+          </div>
+        <% else %>
+          <% notifications.last(5).each do |notification| %>
+            <div class="border-b px-2 py-2">
+              <%= link_to notification.notification_type.truncate(40), admin_notification_path(notification), class: 'nata-sans text-white text-sm font-semibold hover:text-blue-500'%>
+              <p class="nata-sans text-white text-xs font-base"><%= notification.message.truncate(80) %></p>
+            </div>
+          <% end %>
+        <% end %>
+
+      </div>
+
     </div>
     <div>
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -160,64 +182,79 @@
                 </svg>
               </button>
               <ul class="mt-2 space-y-1 ml-8 hidden" id="portfolio-dropdown">
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">View All Users</a></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Create New User</a></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Reports</a></li>
+                <li><%= link_to 'View All Users', admin_users_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Create New User', admin_new_user_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Reports', admin_user_reports_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
               </ul>
             </li>
 
-            <!-- Services with Dropdown -->
+            <!-- Websites with Dropdown -->
             <li>
-              <button onclick="toggleDropdown('website')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">
+              <button onclick="toggleDropdown('websites')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="currentColor" id="Desktop-Tower-Light--Streamline-Phosphor" height="18" width="18">
+                  <path d="M15.046875 5.0625a0.421875 0.421875 0 0 1 -0.421875 0.421875h-2.25a0.421875 0.421875 0 0 1 0 -0.84375h2.25a0.421875 0.421875 0 0 1 0.421875 0.421875Zm-0.421875 1.828125h-2.25a0.421875 0.421875 0 0 0 0 0.84375h2.25a0.421875 0.421875 0 0 0 0 -0.84375Zm2.671875 -3.515625v11.25a0.984375 0.984375 0 0 1 -0.984375 0.984375h-5.625a0.984375 0.984375 0 0 1 -0.984375 -0.984375v-1.265625H6.609375v1.40625h1.265625a0.421875 0.421875 0 0 1 0 0.84375H4.5a0.421875 0.421875 0 0 1 0 -0.84375h1.265625v-1.40625H2.25a1.546875 1.546875 0 0 1 -1.546875 -1.546875V6.75a1.546875 1.546875 0 0 1 1.546875 -1.546875h7.453125V3.375a0.984375 0.984375 0 0 1 0.984375 -0.984375h5.625a0.984375 0.984375 0 0 1 0.984375 0.984375ZM9.703125 12.515625V6.046875H2.25a0.703125 0.703125 0 0 0 -0.703125 0.703125v5.0625a0.703125 0.703125 0 0 0 0.703125 0.703125Zm6.75 -9.140625a0.140625 0.140625 0 0 0 -0.140625 -0.140625h-5.625a0.140625 0.140625 0 0 0 -0.140625 0.140625v11.25a0.140625 0.140625 0 0 0 0.140625 0.140625h5.625a0.140625 0.140625 0 0 0 0.140625 -0.140625Zm-2.953125 8.578125a0.703125 0.703125 0 1 0 0.703125 0.703125 0.703125 0.703125 0 0 0 -0.703125 -0.703125Z" stroke-width="0.0703"></path>
+                </svg>
+                <span class="font-medium sidebar-navigation pl-4 nata-sans">Websites</span>
+                <svg class="w-3 h-3 ml-auto transform transition-transform duration-200" id="websites-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              <ul class="mt-2 space-y-1 ml-8 hidden" id="websites-dropdown">
+                <li><%= link_to 'View All Websites', admin_website_websites_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Create New Website', admin_website_website_new_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Reports', admin_website_website_reports_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+              </ul>
+            </li>
+            <!-- Services -->
+            <li>
+              <button onclick="toggleDropdown('services')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="currentColor" id="Desktop-Tower-Light--Streamline-Phosphor" height="18" width="18">
                   <path d="M15.046875 5.0625a0.421875 0.421875 0 0 1 -0.421875 0.421875h-2.25a0.421875 0.421875 0 0 1 0 -0.84375h2.25a0.421875 0.421875 0 0 1 0.421875 0.421875Zm-0.421875 1.828125h-2.25a0.421875 0.421875 0 0 0 0 0.84375h2.25a0.421875 0.421875 0 0 0 0 -0.84375Zm2.671875 -3.515625v11.25a0.984375 0.984375 0 0 1 -0.984375 0.984375h-5.625a0.984375 0.984375 0 0 1 -0.984375 -0.984375v-1.265625H6.609375v1.40625h1.265625a0.421875 0.421875 0 0 1 0 0.84375H4.5a0.421875 0.421875 0 0 1 0 -0.84375h1.265625v-1.40625H2.25a1.546875 1.546875 0 0 1 -1.546875 -1.546875V6.75a1.546875 1.546875 0 0 1 1.546875 -1.546875h7.453125V3.375a0.984375 0.984375 0 0 1 0.984375 -0.984375h5.625a0.984375 0.984375 0 0 1 0.984375 0.984375ZM9.703125 12.515625V6.046875H2.25a0.703125 0.703125 0 0 0 -0.703125 0.703125v5.0625a0.703125 0.703125 0 0 0 0.703125 0.703125Zm6.75 -9.140625a0.140625 0.140625 0 0 0 -0.140625 -0.140625h-5.625a0.140625 0.140625 0 0 0 -0.140625 0.140625v11.25a0.140625 0.140625 0 0 0 0.140625 0.140625h5.625a0.140625 0.140625 0 0 0 0.140625 -0.140625Zm-2.953125 8.578125a0.703125 0.703125 0 1 0 0.703125 0.703125 0.703125 0.703125 0 0 0 -0.703125 -0.703125Z" stroke-width="0.0703"></path>
                 </svg>
                 <span class="font-medium sidebar-navigation pl-4 nata-sans">Services</span>
-                <svg class="w-3 h-3 ml-auto transform transition-transform duration-200" id="website-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 ml-auto transform transition-transform duration-200" id="services-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <ul class="mt-2 space-y-1 ml-8 hidden" id="website-dropdown">
-                <li><%= link_to 'Website & SEO', manage_website_website_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">SEO</a></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Site Speed</a></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Uptime & Security</a></li>
+              <ul class="mt-2 space-y-1 ml-8 hidden" id="services-dropdown">
+                <li><%= link_to 'View All Services', admin_website_all_website_services_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Create New Service', admin_website_new_website_service_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Reports', admin_website_website_services_reports_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
               </ul>
             </li>
+
             <!-- Blogs with Dropdown -->
             <li>
-              <button onclick="toggleDropdown('customers-leads')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">
+              <button onclick="toggleDropdown('blogs')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="currentColor" id="Users-Three-Light--Streamline-Phosphor" height="18" width="18">
                   <path d="M17.64061171875 9.949971093750001c-0.1981546875 0.14861249999999998 -0.47925703124999997 0.10845703125 -0.62786953125 -0.08969062500000001 -0.7589742187499999 -1.020290625 -1.95739453125 -1.6195007812500002 -3.2290171875 -1.61450859375 -0.345234375 0 -0.56100234375 -0.37373203125 -0.38838515625 -0.67271484375 0.08010703125 -0.1387546875 0.22816406250000001 -0.22423359375 0.38838515625 -0.22423359375 1.4960250000000002 -0.00033046875000000003 2.4306890625 -1.6200281250000002 1.6823953125 -2.9154515625 -0.74829375 -1.29543046875 -2.618325 -1.29502265625 -3.36604921875 0.0007312499999999999 -0.087778125 0.15212109375 -0.1545328125 0.31542890625000003 -0.19844296874999998 0.48547968750000003 -0.08630859375 0.33430781249999997 -0.50214375 0.44981015625000004 -0.7485046875 0.2079140625 -0.11433515625000001 -0.1122609375 -0.16009453125 -0.27699609375 -0.1200375 -0.43214765624999996 0.54447890625 -2.117615625 3.1771617187500003 -2.85171328125 4.73883046875 -1.32136875 1.23453984375 1.20976875 1.11138046875 3.23248359375 -0.2608171875 4.28354296875 0.8843625 0.33001171875 1.6548539062499998 0.9079453125 2.219203125 1.66458515625 0.14861249999999998 0.19814765625 0.10845703125 0.47925 -0.08969062500000001 0.6278625Zm-4.0669171875000005 4.79868046875c0.12411562500000001 0.21444609375 0.05081484375 0.48890390624999996 -0.16369453125 0.6129140625 -0.0679921875 0.039853124999999996 -0.14542734375 0.060757031249999996 -0.224240625 0.0605390625 -0.1603265625 0.00010546875 -0.30851015625 -0.08538749999999999 -0.3886734375 -0.22423359375 -1.70647734375 -2.89125703125 -5.88918515625 -2.89125703125 -7.5956624999999995 0 -0.16002421875 0.30590859375 -0.59119453125 0.32386640624999996 -0.776109375 0.032329687499999996 -0.09309375 -0.14677734374999998 -0.0929953125 -0.334125 0.00024609375 -0.48080390624999997 0.61085390625 -1.0495406250000001 1.56728671875 -1.85431640625 2.7058007812500002 -2.2767539062499997 -2.21992734375 -1.4413640625000002 -2.0470640625 -4.745348437500001 0.31115390625 -5.9471859375000005 2.35821796875 -1.20183046875 5.1331218750000005 0.5998640625 4.99483125 3.24305859375 -0.057515624999999994 1.09932890625 -0.6379382812500001 2.10465 -1.56122578125 2.70412734375 1.1353429687499998 0.42387890625 2.0886468750000002 1.2282046875000001 2.69757421875 2.2760085937500003ZM9 12.132548437499999c1.95633984375 0 3.17904609375 -2.1177984375000003 2.2008796875 -3.812034375 -0.97816640625 -1.6942359375 -3.4235859375000004 -1.6942359375 -4.401759375 0 -0.2230453125 0.3863390625 -0.34047421875 0.82457578125 -0.34047421875 1.27068046875 0 1.40355 1.1378039062499998 2.5413539062500003 2.5413539062500003 2.5413539062500003Zm-4.33525078125 -4.33525078125c0 -0.24768281250000002 -0.20079843749999998 -0.4484671875 -0.44847421875000004 -0.44847421875000004 -1.4960250000000002 -0.000478125 -2.43052734375 -1.62026015625 -1.6821070312500002 -2.9156203124999998 0.7484203125 -1.2953531249999999 2.6184515625 -1.2947625 3.36604921875 0.00106875 0.08760234375 0.15184687500000002 0.15425859375 0.31484531250000003 0.1981546875 0.484565625 0.08630859375 0.33430078125 0.50214375 0.44981015625000004 0.7485046875 0.2079140625 0.11433515625000001 -0.11226796875 0.16009453125 -0.277003125 0.1200375 -0.4321546875C6.422435156250001 2.57698125 3.78975234375 1.8428906250000001 2.22808359375 3.3732281250000002 0.99354375 4.583003906249999 1.116703125 6.605718749999999 2.48890078125 7.65677109375c-0.8844539062500001 0.33022265625 -1.65495234375 0.9084164062500001 -2.219203125 1.6653375 -0.20714062500000002 0.2761875 -0.0376171875 0.6730453125 0.30513515625 0.7143398437499999 0.159075 0.019167187500000002 0.31629375000000004 -0.04798828125 0.412425 -0.17616796875000001 0.7589812499999999 -1.020290625 1.95739453125 -1.6195007812500002 3.2290171875 -1.61450859375 0.24767578125 -0.0000140625 0.44847421875000004 -0.20079843749999998 0.44847421875000004 -0.44847421875000004Z" stroke-width="0.0703"></path>
                 </svg>
                 <span class="font-medium sidebar-navigation pl-4 nata-sans">Blogs</span>
-                <svg class="w-3 h-3 ml-auto transform transition-transform duration-200" id="customers-leads-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 ml-auto transform transition-transform duration-200" id="blogs-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <ul class="mt-2 space-y-1 ml-8 hidden" id="customers-leads-dropdown">
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Contacts</a></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Forms & Submissions</a></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Business Email</a></li>
+              <ul class="mt-2 space-y-1 ml-8 hidden" id="blogs-dropdown">
+                <li><%= link_to 'View All Blogs', admin_website_all_website_blogs_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Create New Blog', admin_website_new_website_blog_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Reports', admin_website_website_blogs_reports_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
               </ul>
             </li>
             <!-- Products with Dropdown -->
             <li class="border-b">
-              <button onclick="toggleDropdown('marketing')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">
+              <button onclick="toggleDropdown('products')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="currentColor" id="Megaphone-Light--Streamline-Phosphor" height="18" width="18">
                   <path d="M17.82 8.66837109375c-0.0022921875 -2.11293984375 -1.7145984375 -3.82524609375 -3.8275382812500003 -3.8275453125h-3.31581796875c-0.214678125 -0.01248046875 -4.50152578125 -0.29704921875 -8.58285 -3.72019921875 -0.68688984375 -0.5764781250000001 -1.74025546875 -0.19319765625000002 -1.8960539062500001 0.6899062499999999 -0.01172109375 0.06644531249999999 -0.0176484375 0.1337765625 -0.01771171875 0.20124140624999998V15.3249609375c-0.0030656249999999998 0.453121875 0.2596921875 0.8659828125 0.671484375 1.05507421875 0.15458906249999999 0.07188046875 0.32293828125 0.10934999999999999 0.49341796875 0.10983515625000001 0.27428203125 0.00016171875 0.53969765625 -0.0971578125 0.7488632812499999 -0.274584375 3.3282984375 -2.7891140625 6.78723046875 -3.4947140625 8.07112265625 -3.6669515625v2.8290515625c-0.00011250000000000001 0.3894609375 0.19440703125 0.753215625 0.5183859375000001 0.96936328125l0.9152789062500001 0.60991171875c0.66766640625 0.44463515625 1.5744375 0.09715078125 1.773984375 -0.67980234375l1.00930078125 -3.8034140625000004c1.9506375 -0.20219062499999998 3.4341117187499997 -1.84399453125 3.43813359375 -3.8050734375ZM1.4522695312499998 15.4514390625c-0.09789609375000001 0.08263125 -0.24853359375 0.02830078125 -0.27114609375 -0.09779765625 -0.00169453125 -0.0094640625 -0.0025664062499999997 -0.01906171875 -0.0026085937500000002 -0.02868046875V2.01177421875c-0.0018421875 -0.06482109375 0.03609140625 -0.1242 0.09568828125 -0.14977265625 0.022134375 -0.010490625 0.0462375 -0.0161578125 0.07072734375 -0.01664296875 0.03863671875 0.0001265625 0.07590937499999999 0.0143296875 0.10484296875 0.039944531250000005 3.66112265625 3.07201640625 7.40546015625 3.76014375 8.712646875 3.9107460937500003v5.7413109375c-1.3046906249999999 0.15393515624999998 -5.04819140625 0.8428921875 -8.71015078125 3.91407890625Zm10.953421875 0.5824546875c-0.0278578125 0.1116984375 -0.15799921875 0.16204218750000002 -0.25377890625 0.098184375l-0.9152859375 -0.60991171875c-0.0464203125 -0.03097265625 -0.07422890625 -0.08315156250000001 -0.074053125 -0.13895859375v-2.8872984375h2.18003203125Zm1.5867703125 -4.5364710937499995h-2.82905859375V5.83931953125h2.82905859375c2.177803125 0 3.53893359375 2.35754296875 2.450025 4.24357734375 -0.50535703125 0.87531328125 -1.43930390625 1.41452578125 -2.450025 1.41452578125Z" stroke-width="0.0703"></path>
                 </svg>
                 <span class="font-medium sidebar-navigation pl-4 nata-sans">Products</span>
-                <svg class="w-3 h-3 ml-auto transform transition-transform duration-200" id="marketing-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 ml-auto transform transition-transform duration-200" id="products-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <ul class="mt-2 space-y-1 ml-8 hidden" id="marketing-dropdown">
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Marketing Home</a></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Google Ads</a></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Email Marketing</a></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Social Media Marketing</a></li>
-                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Referral Program</a></li>
+              <ul class="mt-2 space-y-1 ml-8 hidden" id="products-dropdown">
+                <li><%= link_to 'View All Products', admin_website_all_website_products_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Create New Product', admin_website_new_website_product_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Reports', admin_website_website_products_reports_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
               </ul>
             </li>
 
@@ -282,6 +319,26 @@
   </div>
 </main>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationIcon = document.querySelector('.notification-icon');
+        const notificationSection = document.querySelector('.notification-section');
+
+        if (notificationIcon && notificationSection) {
+            notificationIcon.addEventListener('click', function() {
+                notificationSection.classList.toggle('hidden');
+            });
+
+            // Optional: Close notification when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!notificationIcon.contains(event.target) && !notificationSection.contains(event.target)) {
+                    notificationSection.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
+
+<script>
     function toggleDropdown(menuId) {
         const dropdown = document.getElementById(menuId + '-dropdown');
         const arrow = document.getElementById(menuId + '-arrow');
@@ -306,6 +363,7 @@
         dropdown.classList.toggle('hidden');
         arrow.classList.toggle('rotate-180');
     }
+
 </script>
 </body>
 </html>

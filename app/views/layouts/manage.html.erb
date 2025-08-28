@@ -59,16 +59,38 @@
       <input class="w-full" type="text" id="fname" name="fname" style="background: #303030; border: 1px solid #484848; border-radius: 10px">
     </form>
   </div>
-  <div class="flex gap-5 items-center w-auto">
+  <div class="flex gap-5 items-center w-auto relative">
     <div>
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path d="M21.9508 1.14465H2.04926C1.05008 1.1447 0.240022 1.9547 0.240022 2.95388V21.0462C0.23585 21.7505 0.644647 22.392 1.28486 22.6858C1.52437 22.797 1.78518 22.8549 2.04926 22.8554C2.47397 22.8544 2.88461 22.7029 3.20829 22.428L3.21847 22.42L6.91155 19.2369H21.9508C22.95 19.2369 23.76 18.4269 23.76 17.4277V2.95388C23.76 1.95467 22.95 1.14465 21.9508 1.14465ZM21.9508 17.4277H6.57233C6.35512 17.4278 6.14519 17.5061 5.98093 17.6482L2.04926 21.0462V2.95388H21.9508V17.4277ZM7.47694 8.38156C7.47694 7.88196 7.88195 7.47695 8.38155 7.47695H15.6185C16.3148 7.47698 16.7501 8.23085 16.4019 8.83391C16.2403 9.11378 15.9416 9.28618 15.6185 9.28618H8.38155C7.88195 9.28618 7.47694 8.88117 7.47694 8.38156ZM7.47694 12C7.47694 11.5004 7.88195 11.0954 8.38155 11.0954H15.6185C16.3148 11.0954 16.7501 11.8493 16.4019 12.4523C16.2403 12.7322 15.9417 12.9047 15.6185 12.9046H8.38155C7.88193 12.9047 7.47694 12.4996 7.47694 12Z" fill="white"/>
       </svg>
     </div>
-    <div>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M22.4494 6.23899C22.0225 6.46006 21.4972 6.29341 21.2759 5.86667C20.4446 4.2244 19.1863 2.83636 17.6332 1.8484C17.0658 1.49055 17.0986 0.652706 17.6922 0.340275C17.9677 0.195281 18.2996 0.208265 18.5629 0.374344C20.3729 1.53327 21.8427 3.15215 22.8218 5.06541C23.0428 5.49232 22.8762 6.01761 22.4494 6.23899ZM1.95095 6.33697C2.27621 6.33683 2.57429 6.15547 2.7239 5.86667C3.55521 4.2244 4.81352 2.83636 6.36659 1.8484C6.93394 1.49055 6.90117 0.652706 6.30758 0.340275C6.0321 0.195281 5.70018 0.208265 5.43686 0.374344C3.62685 1.53327 2.15713 3.15215 1.178 5.06541C0.877742 5.645 1.29821 6.33669 1.95095 6.33697ZM22.211 17.6526C22.8865 18.8109 22.0548 20.2661 20.7139 20.2719C20.7118 20.2719 20.7097 20.2719 20.7076 20.2719H16.2658C15.5987 23.5571 11.6255 24.8882 9.114 22.6679C8.4047 22.0408 7.91908 21.1997 7.73068 20.2719H3.28893C1.94804 20.2692 1.11285 18.816 1.78559 17.6561C1.78627 17.6549 1.78697 17.6538 1.78766 17.6526C2.76855 15.9597 3.28893 13.5526 3.28893 10.6916C3.28893 3.98719 10.5467 -0.203091 16.3529 3.14914C19.0476 4.70491 20.7076 7.58009 20.7076 10.6916C20.7076 13.5516 21.228 15.9586 22.211 17.6526ZM14.4608 20.2719H9.5357C10.2079 22.1676 12.6802 22.6247 13.9858 21.0947C14.1931 20.8518 14.3541 20.5729 14.4608 20.2719ZM20.7076 18.53C19.5492 16.541 18.9657 13.9043 18.9657 10.6916C18.9657 5.32807 13.1595 1.97586 8.51452 4.65763C6.35878 5.90225 5.03079 8.20239 5.03079 10.6916C5.03079 13.9054 4.44509 16.5421 3.28893 18.53H20.7076Z" fill="white"/>
-      </svg>
+    <div class="notification-top">
+      <div class="relative notification-icon cursor-pointer">
+        <p class="bg-blue-500 w-5 h-5 rounded-full text-sm flex items-center justify-center text-white nata-sans absolute" style="top: -10px; right: -10px"><%= current_user.unread_notifications_count %></p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M22.4494 6.23899C22.0225 6.46006 21.4972 6.29341 21.2759 5.86667C20.4446 4.2244 19.1863 2.83636 17.6332 1.8484C17.0658 1.49055 17.0986 0.652706 17.6922 0.340275C17.9677 0.195281 18.2996 0.208265 18.5629 0.374344C20.3729 1.53327 21.8427 3.15215 22.8218 5.06541C23.0428 5.49232 22.8762 6.01761 22.4494 6.23899ZM1.95095 6.33697C2.27621 6.33683 2.57429 6.15547 2.7239 5.86667C3.55521 4.2244 4.81352 2.83636 6.36659 1.8484C6.93394 1.49055 6.90117 0.652706 6.30758 0.340275C6.0321 0.195281 5.70018 0.208265 5.43686 0.374344C3.62685 1.53327 2.15713 3.15215 1.178 5.06541C0.877742 5.645 1.29821 6.33669 1.95095 6.33697ZM22.211 17.6526C22.8865 18.8109 22.0548 20.2661 20.7139 20.2719C20.7118 20.2719 20.7097 20.2719 20.7076 20.2719H16.2658C15.5987 23.5571 11.6255 24.8882 9.114 22.6679C8.4047 22.0408 7.91908 21.1997 7.73068 20.2719H3.28893C1.94804 20.2692 1.11285 18.816 1.78559 17.6561C1.78627 17.6549 1.78697 17.6538 1.78766 17.6526C2.76855 15.9597 3.28893 13.5526 3.28893 10.6916C3.28893 3.98719 10.5467 -0.203091 16.3529 3.14914C19.0476 4.70491 20.7076 7.58009 20.7076 10.6916C20.7076 13.5516 21.228 15.9586 22.211 17.6526ZM14.4608 20.2719H9.5357C10.2079 22.1676 12.6802 22.6247 13.9858 21.0947C14.1931 20.8518 14.3541 20.5729 14.4608 20.2719ZM20.7076 18.53C19.5492 16.541 18.9657 13.9043 18.9657 10.6916C18.9657 5.32807 13.1595 1.97586 8.51452 4.65763C6.35878 5.90225 5.03079 8.20239 5.03079 10.6916C5.03079 13.9054 4.44509 16.5421 3.28893 18.53H20.7076Z" fill="white"/>
+        </svg>
+      </div>
+
+      <div class="notification-section z-10 absolute top-13 left-1.5 px-1 bg-black-gray w-300 hidden">
+        <% notifications = Notification.where(user_id: current_user.id, read: false) %>
+        <% if notifications.count == 0 %>
+          <div class="p-2 py-6 pt-4 flex flex-col gap-4 items-center">
+            <p class="nata-sans text-white text-sm text-center">No new notifications to show. You can view all your notifications with the button below</p>
+            <%= link_to 'View all Notifications', admin_notifications_path, class: 'nata-sans bg-blue-500 px-4 py-0.5 rounded-full text-white' %>
+          </div>
+        <% else %>
+          <% notifications.last(5).each do |notification| %>
+            <div class="border-b px-2 py-2">
+              <%= link_to notification.notification_type.truncate(40), admin_notification_path(notification), class: 'nata-sans text-white text-sm font-semibold hover:text-blue-500'%>
+              <p class="nata-sans text-white text-xs font-base"><%= notification.message.truncate(80) %></p>
+            </div>
+          <% end %>
+        <% end %>
+
+      </div>
+
     </div>
     <div>
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -399,6 +421,27 @@
 
   </div>
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationIcon = document.querySelector('.notification-icon');
+        const notificationSection = document.querySelector('.notification-section');
+
+        if (notificationIcon && notificationSection) {
+            notificationIcon.addEventListener('click', function() {
+                notificationSection.classList.toggle('hidden');
+            });
+
+            // Optional: Close notification when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!notificationIcon.contains(event.target) && !notificationSection.contains(event.target)) {
+                    notificationSection.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
+
 <script>
     function toggleDropdown(menuId) {
         const dropdown = document.getElementById(menuId + '-dropdown');

@@ -1,0 +1,67 @@
+<div class="">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="nata-sans page-title">Notification Details</h1>
+      <p class="nata-sans font-normal text-base">View notification information</p>
+    </div>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <%= link_to "Back to Notifications", admin_notifications_path,
+                  class: "nata-sans inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+    </div>
+  </div>
+
+  <div class="mt-8">
+    <div class="overflow-hidden bg-white shadow sm:rounded-lg">
+      <div class="px-4 py-5 sm:px-6">
+        <h3 class="nata-sans text-base font-semibold leading-6 text-gray-900">Notification Information</h3>
+        <p class="nata-sans mt-1 max-w-2xl text-sm text-gray-500">Details and message content.</p>
+      </div>
+      <div class="border-t border-gray-200">
+        <dl>
+          <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="nata-sans text-sm font-medium text-gray-500">Notification Type</dt>
+            <dd class="nata-sans mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @notification.notification_type %></dd>
+          </div>
+          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="nata-sans text-sm font-medium text-gray-500">Message</dt>
+            <dd class="nata-sans mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0"><%= @notification.message %></dd>
+          </div>
+          <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="nata-sans text-sm font-medium text-gray-500">Status</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+              <span class="nata-sans inline-flex rounded-full px-2 text-xs font-semibold leading-5
+              <%= @notification.read == true ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                <%= @notification.read == true ? 'Read' : 'Unread' %>
+              </span>
+            </dd>
+          </div>
+          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="nata-sans text-sm font-medium text-gray-500">Created</dt>
+            <dd class="nata-sans mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+              <%= @notification.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+            </dd>
+          </div>
+          <% if @notification.updated_at != @notification.created_at %>
+            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="nata-sans text-sm font-medium text-gray-500">Last Updated</dt>
+              <dd class="nata-sans mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                <%= @notification.updated_at.strftime("%B %d, %Y at %I:%M %p") %>
+              </dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 flex items-center justify-end gap-x-4">
+    <% unless @notification.read == true %>
+      <%= button_to "Mark as Read", admin_notification_read_path(@notification),
+                    method: :post,
+                    class: "nata-sans rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+    <% end %>
+
+    <%= link_to "Back to Notifications", admin_notifications_path,
+                class: "nata-sans rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+  </div>
+</div>

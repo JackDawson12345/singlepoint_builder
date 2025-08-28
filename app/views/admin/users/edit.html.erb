@@ -1,0 +1,43 @@
+<!-- app/views/admin/users/edit.html.erb -->
+<div class="min-h-screen">
+  <div class="">
+    <% content_for :title, "New User" %>
+
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="nata-sans page-title">Edit User</h1>
+          <p class="nata-sans font-normal text-base">Build and configure a new reusable component for your application.</p>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="flex" aria-label="Breadcrumb">
+          <ol class="flex items-center space-x-2 text-sm text-gray-500">
+            <li>
+              <%= link_to "Back to User", admin_user_path(@user), class: "nata-sans hover:text-gray-700 transition-colors" %>
+            </li>
+            <li class="flex items-center">
+              <svg class="flex-shrink-0 h-4 w-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-gray-900 font-medium nata-sans">Edit</span>
+            </li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="bg-white overflow-hidden">
+      <div class="">
+        <%= form_with model: @user, url: admin_user_path(@user), method: :patch, local: true do |form| %>
+          <%= render 'form', form: form %>
+        <% end %>
+        <%= link_to 'Change Password', admin_edit_password_path(@user), class: 'btn btn-warning btn-sm' %>
+      </div>
+    </div>
+
+
+  </div>
+</div>

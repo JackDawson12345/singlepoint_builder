@@ -1,7 +1,7 @@
 require "test_helper"
 
 class Admin::ComponentsControllerTest < ActionDispatch::IntegrationTest
-  test "should get index" do
+  test "should get index.html.erb" do
     get admin_components_index_url
     assert_response :success
   end
