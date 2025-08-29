@@ -1,0 +1,60 @@
+<div class="p-4">
+  <div class="p-4 border-b">
+    <h2 class="nata-sans text-base font-semibold">Header</h2>
+    <% components.each do |component| %>
+      <% found_component = Component.find(component['component_id']) %>
+      <% if found_component.name == 'Navbar' %>
+        <p>Section: <%= found_component.name %></p>
+        <div>
+          <% found_component.editable_fields.each do |type, text| %>
+            <div class="pl-4 flex gap-2 items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Text-T--Streamline-Phosphor" height="16" width="16">
+                <path d="M15.84 0.944V4.08c0 0.603525 -0.65333125 0.980725 -1.176 0.6789625 -0.24256875 -0.14004375 -0.392 -0.39886875 -0.392 -0.6789625V1.728h-5.488v12.544h2.352c0.603525 0.000025 0.98073125 0.653375 0.67894375 1.17603125 -0.14005 0.24255 -0.3988625 0.39196875 -0.67894375 0.39196875H4.864c-0.603525 0 -0.980725 -0.65333125 -0.6789625 -1.176 0.1400375 -0.2425625 0.39888125 -0.3919875 0.6789625 -0.392h2.352V1.728H1.728V4.08c0 0.603525 -0.65333125 0.980725 -1.176 0.6789625C0.30943125 4.61891875 0.16 4.36009375 0.16 4.08V0.944c0 -0.43300625 0.35099375 -0.78401875 0.784 -0.784h14.112c0.432975 0.00001875 0.784 0.351025 0.784 0.784Z" stroke-width="0.0625"></path>
+              </svg>
+              <p class="uppercase"><%= type %></p>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="p-4 border-b">
+    <h2 class="nata-sans text-base font-semibold">Page</h2>
+    <% components.each do |component| %>
+      <% found_component = Component.find(component['component_id']) %>
+      <% unless found_component.name == 'Navbar' or found_component.name == 'Footer' %>
+        <p>Section: <%= found_component.name %></p>
+        <div>
+          <% found_component.editable_fields.each do |type, text| %>
+            <div class="pl-4 flex gap-2 items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Text-T--Streamline-Phosphor" height="16" width="16">
+                <path d="M15.84 0.944V4.08c0 0.603525 -0.65333125 0.980725 -1.176 0.6789625 -0.24256875 -0.14004375 -0.392 -0.39886875 -0.392 -0.6789625V1.728h-5.488v12.544h2.352c0.603525 0.000025 0.98073125 0.653375 0.67894375 1.17603125 -0.14005 0.24255 -0.3988625 0.39196875 -0.67894375 0.39196875H4.864c-0.603525 0 -0.980725 -0.65333125 -0.6789625 -1.176 0.1400375 -0.2425625 0.39888125 -0.3919875 0.6789625 -0.392h2.352V1.728H1.728V4.08c0 0.603525 -0.65333125 0.980725 -1.176 0.6789625C0.30943125 4.61891875 0.16 4.36009375 0.16 4.08V0.944c0 -0.43300625 0.35099375 -0.78401875 0.784 -0.784h14.112c0.432975 0.00001875 0.784 0.351025 0.784 0.784Z" stroke-width="0.0625"></path>
+              </svg>
+              <p class="uppercase"><%= type %></p>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="p-4">
+    <h2 class="nata-sans text-base font-semibold">Footer</h2>
+    <% components.each do |component| %>
+      <% found_component = Component.find(component['component_id']) %>
+      <% if found_component.name == 'Footer' %>
+        <p>Section: <%= found_component.name %></p>
+        <div>
+          <% found_component.editable_fields.each do |type, text| %>
+            <div class="pl-4 flex gap-2 items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Text-T--Streamline-Phosphor" height="16" width="16">
+                <path d="M15.84 0.944V4.08c0 0.603525 -0.65333125 0.980725 -1.176 0.6789625 -0.24256875 -0.14004375 -0.392 -0.39886875 -0.392 -0.6789625V1.728h-5.488v12.544h2.352c0.603525 0.000025 0.98073125 0.653375 0.67894375 1.17603125 -0.14005 0.24255 -0.3988625 0.39196875 -0.67894375 0.39196875H4.864c-0.603525 0 -0.980725 -0.65333125 -0.6789625 -1.176 0.1400375 -0.2425625 0.39888125 -0.3919875 0.6789625 -0.392h2.352V1.728H1.728V4.08c0 0.603525 -0.65333125 0.980725 -1.176 0.6789625C0.30943125 4.61891875 0.16 4.36009375 0.16 4.08V0.944c0 -0.43300625 0.35099375 -0.78401875 0.784 -0.784h14.112c0.432975 0.00001875 0.784 0.351025 0.784 0.784Z" stroke-width="0.0625"></path>
+              </svg>
+              <p class="uppercase"><%= type %></p>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+</div>

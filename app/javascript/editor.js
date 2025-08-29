@@ -5,7 +5,8 @@ window.showPagesSidebar = showPagesSidebar;
 window.showColourSidebar = showColourSidebar;
 window.showNavigatorSidebar = showNavigatorSidebar;
 window.initializeComponentSidebar = initializeComponentSidebar;
-window.showEditorFieldsSidebar = showEditorFieldsSidebar
+window.showEditorFieldsSidebar = showEditorFieldsSidebar;
+window.addSection = addSection;
 
 
 function hideSidebar(){
@@ -17,14 +18,14 @@ function hideSidebar(){
     }
 }
 
-function showSectionsSidebar(title) {
+function showSectionsSidebar(title, theme_page_id) {
     const sidebar = document.querySelector('.editor-sidebar');
     if (sidebar) {
         sidebar.classList.toggle('show');
 
         // If sidebar is being shown, fetch data via AJAX
         if (sidebar.classList.contains('show')) {
-            fetchSidebarData(title);
+            fetchSectionsSidebarData(title, theme_page_id)
         }
 
         if (title) {
@@ -74,10 +75,16 @@ function showColourSidebar(title) {
     }
 }
 
-function showNavigatorSidebar(title) {
+function showNavigatorSidebar(title, theme_page_id) {
     const sidebar = document.querySelector('.editor-sidebar');
     if (sidebar) {
         sidebar.classList.toggle('show');
+
+        // If sidebar is being shown, fetch data via AJAX
+        if (sidebar.classList.contains('show')) {
+            fetchNavigatorSidebarData(title, theme_page_id)
+        }
+
         if (title) {
             const titleElement = sidebar.querySelector('.sidebar-title');
             if (titleElement) {
@@ -86,6 +93,7 @@ function showNavigatorSidebar(title) {
         }
     }
 }
+
 
 function fetchSidebarData(title) {
     // Get CSRF token for Rails
@@ -129,6 +137,59 @@ function updateSidebarContent(data) {
         }
     }
 }
+
+function fetchNavigatorSidebarData(title, theme_page_id) {
+    // Get CSRF token for Rails
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch('/manage/website/editor/sidebar_data', {  // Updated to match your namespace
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': token,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            title: title,
+            theme_page_id: theme_page_id
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Update sidebar content with the received data
+            updateSidebarContent(data);
+        })
+        .catch(error => {
+            console.error('Error fetching sidebar data:', error);
+        });
+}
+
+function fetchSectionsSidebarData(title, theme_page_id) {
+    // Get CSRF token for Rails
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch('/manage/website/editor/sidebar_data', {  // Updated to match your namespace
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': token,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            title: title,
+            theme_page_id: theme_page_id
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Update sidebar content with the received data
+            updateSidebarContent(data);
+        })
+        .catch(error => {
+            console.error('Error fetching sidebar data:', error);
+        });
+}
+
 
 function initializeComponentSidebar() {
     const menuItems = document.querySelectorAll('.menu-item');
@@ -242,4 +303,40 @@ function updateEditorFieldsContent(data) {
             }, 50);
         }
     }
+}
+
+function addSection(component_id, theme_page_id, user_id){
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch('/manage/website/editor/add_section', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': token,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            component_id: component_id,
+            theme_page_id: theme_page_id,
+            user_id: user_id
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.success) {
+
+                // Update the main content area
+                document.querySelector('.w-19\\/20').innerHTML = data.html;
+                // Hide the sidebar
+                hideSidebar();
+                console.log(data.message);
+            } else {
+                console.error(data.message);
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error adding section:', error);
+        });
 }

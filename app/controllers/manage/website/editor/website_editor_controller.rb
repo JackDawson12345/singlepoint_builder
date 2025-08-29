@@ -40,13 +40,22 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       'website_editor/editor_section_sidebar'
     ]
 
+    possible_navigator_paths = [
+      'editor_navigator_sidebar',
+      'manage/website/editor/website_editor/editor_navigator_sidebar',
+      'website_editor/editor_navigator_sidebar'
+    ]
+
+
     if title == 'Sections'
       menu = component_types
       options = Component.all.group_by(&:component_type)
+      theme_page_id = params[:theme_page_id]
+      user_id = params[:user_id]
 
       possible_section_paths.each do |path|
         begin
-          test_render = render_to_string(partial: path, locals: { menu: menu, options: options })
+          test_render = render_to_string(partial: path, locals: { menu: menu, options: options, theme_page_id: theme_page_id, user_id: user_id })
 
           respond_to do |format|
             format.json do
@@ -89,6 +98,34 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       possible_paths.each do |path|
         begin
           test_render = render_to_string(partial: path, locals: { menu: menu, options: content })
+
+          respond_to do |format|
+            format.json do
+              render json: {
+                html: test_render,
+                success: true,
+                path_used: path
+              }
+            end
+          end
+
+          return
+        rescue => e
+        end
+      end
+    elsif title == 'Navigator'
+
+      websitePageID = params[:theme_page_id]
+      website_pages = current_user.website.pages
+      matching_page = website_pages["theme_pages"].find do |page_name, page_data|
+        page_data["theme_page_id"] == websitePageID
+      end
+
+      components = matching_page[1]['components']
+
+      possible_navigator_paths.each do |path|
+        begin
+          test_render = render_to_string(partial: path, locals: { components: components })
 
           respond_to do |format|
             format.json do
@@ -200,6 +237,78 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       format.html { redirect_back(fallback_location: manage_website_editor_website_editor_path, notice: 'Customisations saved!') }
       format.js # This will render sidebar_editor_fields_save.js.erb
     end
+  end
+
+  def add_section
+    component = Component.find(params[:component_id])
+    theme_page_id = params[:theme_page_id]
+    user = User.find(params[:user_id])
+
+    begin
+      pages_data = user.website.pages
+      updated = false
+
+      pages_data["theme_pages"].each do |page_name, page_data|
+        if page_data["theme_page_id"] == theme_page_id
+          components = page_data["components"]
+          next_position = components.empty? ? 1 : components.map { |c| c["position"] }.max + 1
+
+          new_component = {"component_id" => component.id, "position" => next_position}
+          components << new_component
+          updated = true
+          break
+        end
+      end
+
+      if updated
+        user.website.update!(pages: pages_data)
+        success = true
+        message = "Component added successfully"
+      else
+        success = false
+        message = "Theme page not found"
+      end
+
+    rescue => e
+      success = false
+      message = "Error: #{e.message}"
+    end
+
+    possible_paths = [
+      'page_content',
+      'manage/website/editor/website_editor/page_content',
+      'website_editor/page_content'
+    ]
+
+    possible_paths.each do |path|
+      begin
+
+        pages_data = user.website.pages
+        theme_page = params['theme_page_id']
+        pageData = ''
+        pages_data["theme_pages"].each do |page_name, page_data|
+          if page_data["theme_page_id"] == theme_page
+            pageData << page_data
+          end
+        end
+
+        test_render = render_to_string(partial: path, locals: { page_data: pageData }, layout: false)
+
+        respond_to do |format|
+          format.json do
+            render json: {
+              html: test_render,
+              success: true,
+              path_used: path
+            }
+          end
+        end
+
+        return
+      rescue => e
+      end
+    end
+
   end
 
   private

@@ -90,6 +90,7 @@ Rails.application.routes.draw do
 
         post '/sidebar_editor_fields_data', to: "website_editor#sidebar_editor_fields_data", as: "website_editor_sidebar_editor_fields_data"
         post '/sidebar_editor_fields_save', to: "website_editor#sidebar_editor_fields_save", as: "website_editor_sidebar_editor_fields_save"
+        post '/add_section', to: "website_editor#add_section", as: "website_editor_add_section"
       end
 
       get "/", to: "website#index", as: "website"

@@ -1,10 +1,21 @@
 <% if @page_data["components"].any? %>
+  <%
+    # Track which CSS and JS we've already included
+    included_css = Set.new
+    included_js = Set.new
+  %>
+
   <style>
     <% @page_data["components"].each do |component| %>
     <% foundComponent = Component.find(component["component_id"]) %>
-    <%= raw(foundComponent.content['css']) %>
+    <% component_css = foundComponent.content['css'] %>
+    <% if component_css.present? && !included_css.include?(foundComponent.id) %>
+    <%= raw(component_css) %>
+    <% included_css.add(foundComponent.id) %>
+    <% end %>
     <% end %>
   </style>
+
   <% @page_data["components"].each do |component| %>
     <% foundComponent = Component.find(component["component_id"]) %>
     <section class="relative edit-content-section">
@@ -14,10 +25,15 @@
       <%= raw(render_editor_content(foundComponent, current_user.id, @page_data['theme_page_id'])) %>
     </section>
   <% end %>
+
   <script>
       <% @page_data["components"].each do |component| %>
       <% foundComponent = Component.find(component["component_id"]) %>
-      <%= raw(foundComponent.content['js']) %>
+      <% component_js = foundComponent.content['js'] %>
+      <% if component_js.present? && !included_js.include?(foundComponent.id) %>
+      <%= raw(component_js) %>
+      <% included_js.add(foundComponent.id) %>
+      <% end %>
       <% end %>
   </script>
 <% else %>
