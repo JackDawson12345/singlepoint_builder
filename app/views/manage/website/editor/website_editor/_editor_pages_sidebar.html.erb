@@ -10,8 +10,12 @@
     </div>
   </div>
   <div class="w-3/5 p-5">
-    <div class="options-sidebar">
-
+    <div class="options-sidebar space-y-2">
+      <% options.map do |page_name, page_data| %>
+        <div class="p-2 border rounded">
+          <%= link_to page_name, '/manage/website/editor/' + page_data['slug'], class: 'nata-sans text-sm uppercase' %>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>

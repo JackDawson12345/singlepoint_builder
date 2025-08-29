@@ -1,0 +1,32 @@
+<!-- In your partial, remove the <script> tag completely -->
+<div class="flex">
+  <div class="w-2/5 bg-gray-50 p-5" style="min-height: calc(100vh - 146px); max-height: calc(100vh - 146px); overflow: auto">
+    <div class="menu-sidebar">
+      <% menu.each do |item| %>
+        <div class="menu-item cursor-pointer hover:bg-gray-200 transition-colors duration-200 p-2 rounded" data-category="<%= item %>">
+          <h2 class="nata-sans text-sm font-semibold py-2 border-b"><%= item %></h2>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="w-3/5 p-5">
+    <div class="options-sidebar">
+      <% options.each do |component_type, components| %>
+        <div class="component-group hidden" data-type="<%= component_type %>">
+          <h3 class="text-lg font-semibold mb-3 text-gray-800"><%= component_type %></h3>
+          <ul class="space-y-2">
+            <% components.each do |component| %>
+              <li class="component-item p-3 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200">
+                <div class="font-medium text-gray-700"><%= component.name %></div>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div id="default-message" class="text-center text-gray-500 mt-8">
+        <p class="text-lg">Select a component category from the menu to view available components.</p>
+      </div>
+    </div>
+  </div>
+</div>

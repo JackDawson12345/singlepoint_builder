@@ -1,0 +1,25 @@
+<% if @page_data["components"].any? %>
+  <style>
+    <% @page_data["components"].each do |component| %>
+    <% foundComponent = Component.find(component["component_id"]) %>
+    <%= raw(foundComponent.content['css']) %>
+    <% end %>
+  </style>
+  <% @page_data["components"].each do |component| %>
+    <% foundComponent = Component.find(component["component_id"]) %>
+    <section class="relative edit-content-section">
+      <% unless foundComponent.editable_fields.blank? %>
+        <button onclick="showEditorFieldsSidebar('<%= foundComponent.id %>', '<%= foundComponent.component_type %>', '<%= @page_data['theme_page_id'] %>', '<%= current_user.id %>')" class="edit-content-button absolute top-3 right-3 z-10 nata-sans bg-blue-500 px-4 py-0.5 rounded-full text-white">Edit Content</button>
+      <% end %>
+      <%= raw(render_editor_content(foundComponent, current_user.id, @page_data['theme_page_id'])) %>
+    </section>
+  <% end %>
+  <script>
+      <% @page_data["components"].each do |component| %>
+      <% foundComponent = Component.find(component["component_id"]) %>
+      <%= raw(foundComponent.content['js']) %>
+      <% end %>
+  </script>
+<% else %>
+  <p>No components on this page.</p>
+<% end %>

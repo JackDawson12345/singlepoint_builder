@@ -87,6 +87,9 @@ Rails.application.routes.draw do
         get "/", to: "website_editor#index", as: "website_editor"
         get "/:page_slug", to: "website_editor#show", as: "website_editor_page"
         post "/sidebar_data", to: "website_editor#sidebar_data", as: "website_editor_sidebar_data"
+
+        post '/sidebar_editor_fields_data', to: "website_editor#sidebar_editor_fields_data", as: "website_editor_sidebar_editor_fields_data"
+        post '/sidebar_editor_fields_save', to: "website_editor#sidebar_editor_fields_save", as: "website_editor_sidebar_editor_fields_save"
       end
 
       get "/", to: "website#index", as: "website"

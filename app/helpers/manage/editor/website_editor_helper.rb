@@ -1,13 +1,15 @@
 module Manage::Editor::WebsiteEditorHelper
 
-  def render_editor_content(component)
+  def render_editor_content(component, user_id = nil, theme_page_id = nil)
     componentHTML = component.content['html']
-
     updated_content = componentHTML
 
     unless component.editable_fields == ""
-      component.editable_fields.to_a.each do |field|
-        updated_content = updated_content.gsub('{{'+field[0].to_s+'}}', field[1].to_s)
+      # Get customisations if user_id and theme_page_id are provided
+      field_values = get_component_field_values(component, user_id, theme_page_id)
+
+      field_values.each do |field_name, field_value|
+        updated_content = updated_content.gsub('{{'+field_name.to_s+'}}', field_value.to_s)
       end
     end
 
@@ -18,8 +20,29 @@ module Manage::Editor::WebsiteEditorHelper
       end
     end
 
-
     updated_content
+  end
+
+  private
+
+  def get_component_field_values(component, user_id, theme_page_id)
+    # Start with default values
+    field_values = component.editable_fields.to_h
+
+    # Override with customisations if they exist
+    if user_id && theme_page_id
+      user = User.find(user_id)
+      customisations = user.website&.customisations&.dig("customisations") || []
+
+      customisations.each do |customisation|
+        if customisation["component_id"] == component.id.to_s &&
+           customisation["theme_page_id"] == theme_page_id.to_s
+          field_values[customisation["field_name"]] = customisation["field_value"]
+        end
+      end
+    end
+
+    field_values
   end
 
   def render_navbar_items(component)

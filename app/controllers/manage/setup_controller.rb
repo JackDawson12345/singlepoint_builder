@@ -230,7 +230,30 @@ class Manage::SetupController < Manage::BaseController
 
   def set_website_theme
     theme = Theme.find(params[:theme_id])
-    @website = Website.create(user_id: current_user.id, theme_id: theme.id, name: 'My Website', description: 'Description Of My Website', pages: theme.pages, domain_name: current_user.user_setup.domain_name)
+
+    # Create updated pages with new theme_page_ids
+    updated_pages = theme.pages.deep_dup
+    base_timestamp = Time.now.to_i
+    counter = 0
+
+    if updated_pages["theme_pages"]
+      updated_pages["theme_pages"].each do |page_key, page_data|
+        if page_data["theme_page_id"]
+          counter += 1
+          page_data["theme_page_id"] = (base_timestamp + counter).to_s
+        end
+      end
+    end
+
+    @website = Website.create(
+      user_id: current_user.id,
+      theme_id: theme.id,
+      name: 'My Website',
+      description: 'Description Of My Website',
+      pages: updated_pages,
+      domain_name: current_user.user_setup.domain_name
+    )
+
     @user_setup = current_user.user_setup.update(theme_id: theme.id)
 
     notify_all_admins("A new website has been set up for #{current_user.email} with the id of #{current_user.website.id}", "New Website Setup Successfully")

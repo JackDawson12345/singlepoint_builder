@@ -1,0 +1,42 @@
+<%
+  component = Component.find(component_id)
+  editable_fields = component.editable_fields
+  field_types = component.field_types
+
+  # Get user's customisations for this component and theme_page
+  user = User.find(user_id)
+  customisations = user.website&.customisations&.dig("customisations") || []
+
+  # Create a hash of field_name => field_value for quick lookup
+  custom_values = {}
+  customisations.each do |customisation|
+    if customisation["component_id"] == component.id.to_s &&
+       customisation["theme_page_id"] == theme_page_id.to_s
+      custom_values[customisation["field_name"]] = customisation["field_value"]
+    end
+  end
+%>
+
+<%= form_with url: manage_website_editor_website_editor_sidebar_editor_fields_save_path,
+              remote: true,
+              method: :post,
+              class: 'p-4 space-y-3' do |form| %>
+
+  <%= form.hidden_field :component_id, value: component.id %>
+  <%= form.hidden_field :theme_page_id, value: theme_page_id %>
+  <%= form.hidden_field :user_id, value: user_id %>
+
+  <% component.field_types.each do |name, type| %>
+    <div>
+      <%= form.label name, name.to_s.humanize, class: 'nata-sans text-sm font-semibold' %>
+      <%= form.text_field name,
+                          value: custom_values[name] || component.editable_fields[name],
+                          placeholder: "Enter your #{name}",
+                          class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.submit "Save Changes", class: "btn btn-primary" %>
+  </div>
+<% end %>

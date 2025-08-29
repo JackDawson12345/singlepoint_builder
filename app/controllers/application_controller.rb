@@ -18,4 +18,28 @@ class ApplicationController < ActionController::Base
 
     Notification.insert_all(notification_data)
   end
+
+  def component_types
+    [
+      'Header',
+      'Footer',
+      'Breadcrumbs',
+      'Tabs',
+      'Hero Section',
+      'Content Section',
+      'Card',
+      'Article/Blog Post',
+      'Image Gallery',
+      'Carousel/Slider',
+      'Accordion',
+      'Search Bar',
+      'Progress Bar',
+      'Rating/Stars',
+      'Comments Section',
+      'Social Share Buttons',
+      'Testimonial',
+      'Banner',
+      'Call-to-Action'
+    ]
+  end
 end
