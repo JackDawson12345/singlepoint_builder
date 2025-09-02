@@ -1,30 +1,74 @@
-<% if @page_data["components"].any? %>
+
+<% if @page_data && @page_data["components"] && @page_data["components"].any? %>
   <%
     # Track which CSS and JS we've already included
     included_css = Set.new
     included_js = Set.new
   %>
 
-  <style>
-    <% @page_data["components"].each do |component| %>
-    <% foundComponent = Component.find(component["component_id"]) %>
-    <% component_css = foundComponent.content['css'] %>
-    <% if component_css.present? && !included_css.include?(foundComponent.id) %>
-    <%= raw(component_css) %>
-    <% included_css.add(foundComponent.id) %>
-    <% end %>
-    <% end %>
-  </style>
+  <!-- Add data attributes for drag and drop -->
+  <div data-theme-page-id="<%= @page_data['theme_page_id'] %>" data-user-id="<%= current_user.id %>">
 
-  <% @page_data["components"].each do |component| %>
-    <% foundComponent = Component.find(component["component_id"]) %>
-    <section class="relative edit-content-section">
-      <% unless foundComponent.editable_fields.blank? %>
-        <button onclick="showEditorFieldsSidebar('<%= foundComponent.id %>', '<%= foundComponent.component_type %>', '<%= @page_data['theme_page_id'] %>', '<%= current_user.id %>')" class="edit-content-button absolute top-3 right-3 z-10 nata-sans bg-blue-500 px-4 py-0.5 rounded-full text-white">Edit Content</button>
+    <style>
+      <% @page_data["components"].each do |component| %>
+      <% foundComponent = Component.find(component["component_id"]) %>
+      <% component_css = foundComponent.content['css'] %>
+      <% if component_css.present? && !included_css.include?(foundComponent.id) %>
+      <%= raw(component_css) %>
+      <% included_css.add(foundComponent.id) %>
       <% end %>
-      <%= raw(render_editor_content(foundComponent, current_user.id, @page_data['theme_page_id'])) %>
-    </section>
-  <% end %>
+      <% end %>
+
+      /* Drag and drop styles */
+      .edit-content-section.dragging {
+          opacity: 0.5;
+      }
+
+      .edit-content-section:hover .edit-content-section-actions {
+          opacity: 1;
+      }
+
+      .edit-content-section-actions {
+          opacity: 0;
+          transition: opacity 0.2s ease;
+      }
+    </style>
+
+    <% @page_data["components"].sort_by { |c| c["position"] }.each do |component| %>
+      <% foundComponent = Component.find(component["component_id"]) %>
+      <section class="relative edit-content-section"
+               data-component-id="<%= foundComponent.id %>"
+               data-component-page-id="<%= component['component_page_id'] %>"
+               data-position="<%= component['position'] %>">
+        <div class="edit-content-section-actions flex gap-2 items-center justify-between" style=" width: <% unless foundComponent.editable_fields.blank? %> 125px <% else %> 100px <% end %>; left: <% unless foundComponent.editable_fields.blank? %> calc(50% - 63.5px) <% else %> calc(50% - 50px) <% end %>">
+          <div>
+            <svg onclick="showSectionsSidebar('Sections', '<%= @page_data['theme_page_id'] %>', 'Above', '<%= component['component_page_id'] %>')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#ffffff" id="Plus--Streamline-Phosphor" height="16" width="16">
+              <path d="M15.84 8c0 0.3608125 -0.29251875 0.65331875 -0.65333125 0.65333125H8.65333125v6.5333375c0 0.50293125 -0.54444375 0.81726875 -0.98 0.5658 -0.2021375 -0.11670625 -0.3266625 -0.3323875 -0.3266625 -0.5658V8.65333125H0.81333125c-0.50293125 0 -0.81726875 -0.54444375 -0.5658 -0.98 0.1167125 -0.20215 0.33238125 -0.326675 0.5658 -0.3266625h6.5333375V0.81333125c0 -0.50293125 0.54444375 -0.81726875 0.98 -0.5658 0.2021375 0.11670625 0.3266625 0.3323875 0.3266625 0.5658v6.5333375h6.5333375c0.3608125 0.0000125 0.65333125 0.29251875 0.65333125 0.65333125Z" stroke-width="0.0625"></path>
+            </svg>
+          </div>
+          <% unless foundComponent.editable_fields.blank? %>
+            <div>
+              <svg onclick="showEditorFieldsSidebar('<%= foundComponent.id %>', '<%= foundComponent.component_type %>', '<%= @page_data['theme_page_id'] %>', '<%= current_user.id %>', '<%= component['component_page_id'] %>')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#FFFFFF" id="Pencil--Streamline-Phosphor" height="16" width="16">
+                <path d="m15.47211875 4.03105625 -3.50278125 -3.5035625c-0.489875 -0.48999375 -1.28424375 -0.48999375 -1.774125 0L0.52808125 10.1954125c-0.23630625 0.234425 -0.36874375 0.5538125 -0.36768125 0.88666875v3.5035625c0 0.6927375 0.5616125 1.25431875 1.25435 1.25435h3.5035625c0.33285625 0.0010625 0.65224375 -0.13138125 0.88666875 -0.36768125L15.47211875 5.80518125c0.4899875 -0.48988125 0.4899875 -1.28425 0 -1.774125ZM1.67424375 10.8225875 8.3136875 4.18314375l1.30844375 1.30844375L2.9826875 12.13025Zm-0.25949375 1.51384375 2.2492125 2.2492125H1.41475Zm3.76305625 1.98971875 -1.30844375 -1.30845 6.6394375 -6.6394375 1.30845 1.30844375Zm7.5261125 -7.5261125 -3.5035625 -3.5035625 1.881525 -1.88153125 3.5035625 3.50278125Z" stroke-width="0.0625"></path>
+              </svg>
+            </div>
+          <% end %>
+          <div class="draggable-handle" style="cursor: grab;">
+            <svg class="draggable-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#fff" id="Dots-Six--Streamline-Phosphor" height="16" width="16">
+              <path d="M2.512 4.472c0 0.9052875 -0.98 1.4710875 -1.764 1.01844375 -0.784 -0.4526375 -0.784 -1.58425 0 -2.0368875 0.178775 -0.10321875 0.38156875 -0.15755625 0.588 -0.15755625 0.6494875 0 1.176 0.5265125 1.176 1.176ZM8 3.296c-0.9052875 0 -1.4710875 0.98 -1.01844375 1.764 0.4526375 0.784 1.58425 0.784 2.0368875 0 0.10321875 -0.178775 0.15755625 -0.38156875 0.15755625 -0.588 0 -0.6494875 -0.5265125 -1.176 -1.176 -1.176Zm6.664 2.352c0.9052875 0 1.4710875 -0.98 1.01844375 -1.764 -0.4526375 -0.784 -1.58425 -0.784 -2.0368875 0 -0.10321875 0.178775 -0.15755625 0.38156875 -0.15755625 0.588 0 0.6494875 0.5265125 1.176 1.176 1.176ZM1.336 10.352c-0.9052875 -0.0000375 -1.47108125 0.97993125 -1.018475 1.76395625 0.4526125 0.78401875 1.58421875 0.78406875 2.03689375 0.0000875 0.10323125 -0.17878125 0.15758125 -0.38159375 0.15758125 -0.58804375 0 -0.6494875 -0.5265125 -1.176 -1.176 -1.176Zm6.664 0c-0.9052875 0.0000375 -1.4711 0.98006875 -1.01841875 1.76404375 0.452675 0.78398125 1.58428125 0.78393125 2.03689375 -0.0000875 0.10319375 -0.1787625 0.157525 -0.38154375 0.157525 -0.58795625 0 -0.6494875 -0.5265125 -1.176 -1.176 -1.176Zm6.664 0c-0.9052875 -0.0000375 -1.47108125 0.97993125 -1.018475 1.76395625 0.4526125 0.78401875 1.58421875 0.78406875 2.03689375 0.0000875 0.10323125 -0.17878125 0.15758125 -0.38159375 0.15758125 -0.58804375 0 -0.6494875 -0.5265125 -1.176 -1.176 -1.176Z" stroke-width="0.0625"></path>
+            </svg>
+          </div>
+          <div>
+            <svg onclick="removeSection('<%= foundComponent.id %>', '<%= @page_data['theme_page_id'] %>',  '<%= current_user.id %>', '<%= component['component_page_id'] %>')" style="transform: rotate(45deg)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#ffffff" id="Plus--Streamline-Phosphor" height="18" width="18">
+              <path d="M15.84 8c0 0.3608125 -0.29251875 0.65331875 -0.65333125 0.65333125H8.65333125v6.5333375c0 0.50293125 -0.54444375 0.81726875 -0.98 0.5658 -0.2021375 -0.11670625 -0.3266625 -0.3323875 -0.3266625 -0.5658V8.65333125H0.81333125c-0.50293125 0 -0.81726875 -0.54444375 -0.5658 -0.98 0.1167125 -0.20215 0.33238125 -0.326675 0.5658 -0.3266625h6.5333375V0.81333125c0 -0.50293125 0.54444375 -0.81726875 0.98 -0.5658 0.2021375 0.11670625 0.3266625 0.3323875 0.3266625 0.5658v6.5333375h6.5333375c0.3608125 0.0000125 0.65333125 0.29251875 0.65333125 0.65333125Z" stroke-width="0.0625"></path>
+            </svg>
+          </div>
+        </div>
+        <%= raw(render_editor_content(foundComponent, current_user.id, @page_data['theme_page_id'], component['component_page_id'])) %>
+      </section>
+    <% end %>
+
+  </div>
 
   <script>
       <% @page_data["components"].each do |component| %>

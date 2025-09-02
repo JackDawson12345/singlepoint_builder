@@ -38,14 +38,7 @@
           <div>
             <%= form.label :component_type, "Type", class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
             <%= form.select :component_type,
-                            options_for_select([
-                                                 ['Navbar', 'Navbar'],
-                                                 ['Hero Section', 'Hero Section'],
-                                                 ['Content Section', 'Content Section'],
-                                                 ['CTA Section', 'CTA Section'],
-                                                 ['Form Element', 'form_element'],
-                                                 ['Footer', 'Footer']
-                                               ], @component.component_type),
+                            options_for_select(Component.component_types.map { |type| [type, type] }, @component.component_type),
                             { prompt: 'Select type' },
                             { class: "nata-sans block w-full h-10 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:component_type].any?}" } %>
             <% if @component.errors[:component_type].any? %>
@@ -63,6 +56,46 @@
                                              ], @component.global),
                           { prompt: 'Select' },
                           { class: "nata-sans block w-full h-10 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @component.errors[:global].any?}" } %>
+        </div>
+
+        <!-- Component Image Upload Section -->
+        <div>
+          <%= form.label :component_image, "Component Image", class: "nata-sans block text-sm font-medium text-gray-700 mb-2" %>
+          <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+            <div class="space-y-1 text-center">
+              <% if @component.component_image.present? %>
+                <div class="mb-4">
+                  <%= image_tag @component.component_image, class: "mx-auto h-32 w-auto object-cover rounded-lg shadow-sm" %>
+                  <p class="nata-sans mt-2 text-sm text-gray-500">Current image</p>
+                </div>
+              <% else %>
+                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              <% end %>
+
+              <div class="flex text-sm text-gray-600">
+                <%= form.file_field :component_image,
+                                    class: "sr-only",
+                                    accept: "image/*",
+                                    onchange: "previewImage(this)" %>
+                <label for="<%= form.field_id(:component_image) %>" class="nata-sans relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                  <span><%= @component.component_image.present? ? 'Change image' : 'Upload an image' %></span>
+                </label>
+                <p class="nata-sans pl-1">or drag and drop</p>
+              </div>
+              <p class="nata-sans text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+            </div>
+          </div>
+          <% if @component.component_image.present? %>
+            <div class="mt-2">
+              <%= form.check_box :remove_component_image, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+              <%= form.label :remove_component_image, "Remove current image", class: "nata-sans ml-2 text-sm text-gray-700" %>
+            </div>
+          <% end %>
+          <% if @component.errors[:component_image].any? %>
+            <p class="nata-sans mt-1 text-sm text-red-600"><%= @component.errors[:component_image].first %></p>
+          <% end %>
         </div>
 
         <div>
@@ -212,6 +245,54 @@
         }
     }
 
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            const file = input.files[0];
+
+            // Validate file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                input.value = '';
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file');
+                input.value = '';
+                return;
+            }
+
+            reader.onload = function(e) {
+                // Find the upload area
+                const uploadArea = input.closest('.border-dashed');
+                const currentImage = uploadArea.querySelector('img');
+
+                if (currentImage) {
+                    currentImage.src = e.target.result;
+                } else {
+                    // Replace the SVG with image preview
+                    const svg = uploadArea.querySelector('svg');
+                    if (svg) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'mx-auto h-32 w-auto object-cover rounded-lg shadow-sm mb-4';
+                        svg.parentNode.replaceChild(img, svg);
+
+                        // Update text
+                        const uploadText = uploadArea.querySelector('label span');
+                        if (uploadText) {
+                            uploadText.textContent = 'Change image';
+                        }
+                    }
+                }
+            };
+
+            reader.readAsDataURL(file);
+        }
+    }
+
     // Restore active tab on page load
     document.addEventListener('DOMContentLoaded', function() {
         try {
@@ -221,6 +302,55 @@
             }
         } catch (e) {
             // Ignore storage errors, default to HTML tab
+        }
+    });
+
+    // Drag and drop functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.querySelector('.border-dashed');
+        const fileInput = document.querySelector('input[type="file"]');
+
+        if (uploadArea && fileInput) {
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            // Handle dropped files
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function highlight(e) {
+                uploadArea.classList.add('border-blue-400', 'bg-blue-50');
+            }
+
+            function unhighlight(e) {
+                uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+            }
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    previewImage(fileInput);
+                }
+            }
         }
     });
 </script>

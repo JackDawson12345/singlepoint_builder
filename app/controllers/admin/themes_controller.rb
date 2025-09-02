@@ -76,7 +76,7 @@ class Admin::ThemesController < Admin::BaseController
 
       # Add to existing theme_pages with page name as key
       existing_theme_pages[page_data["page_name"].downcase] = {
-        "theme_page_id" => Time.now.to_i.to_s,
+        "theme_page_id" => SecureRandom.uuid,
         "components" => [],
         "slug" => page_data["page_slug"],
         "package_type" => page_data["package_type"],

@@ -16,9 +16,34 @@
           <h3 class="text-lg font-semibold mb-3 text-gray-800"><%= component_type %></h3>
           <ul class="space-y-2">
             <% components.each do |component| %>
-              <li onclick="addSection('<%= component.id %>', '<%= theme_page_id %>', '<%= current_user.id %>')" class="component-item p-3 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200">
-                <div class="font-medium text-gray-700"><%= component.name %></div>
-              </li>
+              <% if current_component_id == 'nil' %>
+                <li onclick="addSection('<%= component.id %>', '<%= theme_page_id %>', '<%= current_user.id %>')" class="component-item">
+                  <% if component.component_image.attached? %>
+                    <%= image_tag component.component_image,
+                                  class: " object-contain",
+                                  alt: "#{component.name} component image" %>
+                  <% else %>
+                    <div class="p-3 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200">
+                      <div class="font-medium text-gray-700"><%= component.name %></div>
+                    </div>
+                  <% end %>
+                </li>
+              <% else %>
+                <li onclick="addSectionAbove('<%= component.id %>', '<%= theme_page_id %>', '<%= current_user.id %>', '<%= current_component_id %>')" class="component-item">
+                  <% if component.component_image.attached? %>
+                    <%= image_tag component.component_image,
+                                  class: " object-contain",
+                                  alt: "#{component.name} component image" %>
+                  <% else %>
+                    <div class="p-3 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200">
+                      <div class="font-medium text-gray-700"><%= component.name %></div>
+                    </div>
+                  <% end %>
+
+
+                </li>
+              <% end %>
+
             <% end %>
           </ul>
         </div>

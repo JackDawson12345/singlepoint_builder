@@ -11,7 +11,7 @@
   custom_values = {}
   customisations.each do |customisation|
     if customisation["component_id"] == component.id.to_s &&
-       customisation["theme_page_id"] == theme_page_id.to_s
+       customisation["theme_page_id"] == theme_page_id.to_s && customisation['component_page_id'] == component_page_id
       custom_values[customisation["field_name"]] = customisation["field_value"]
     end
   end
@@ -25,14 +25,16 @@
   <%= form.hidden_field :component_id, value: component.id %>
   <%= form.hidden_field :theme_page_id, value: theme_page_id %>
   <%= form.hidden_field :user_id, value: user_id %>
+  <%= form.hidden_field :component_page_id, value: component_page_id %>
 
   <% component.field_types.each do |name, type| %>
-    <div>
+
+    <div class="sidebar-field">
       <%= form.label name, name.to_s.humanize, class: 'nata-sans text-sm font-semibold' %>
       <%= form.text_field name,
                           value: custom_values[name] || component.editable_fields[name],
                           placeholder: "Enter your #{name}",
-                          class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+                          class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
     </div>
   <% end %>
 

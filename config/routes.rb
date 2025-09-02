@@ -39,6 +39,7 @@ Rails.application.routes.draw do
 
     # Components
     get "/components", to: 'components#index', as: 'components'
+    get "/components/:id/preview", to: 'components#preview', as: 'component_preview'
     get "/components/new", to: 'components#new', as: 'components_new'
     get "/components/:id", to: 'components#show', as: 'components_show'
     get "/components/:id/edit", to: 'components#edit', as: 'components_edit'
@@ -91,9 +92,16 @@ Rails.application.routes.draw do
         post '/sidebar_editor_fields_data', to: "website_editor#sidebar_editor_fields_data", as: "website_editor_sidebar_editor_fields_data"
         post '/sidebar_editor_fields_save', to: "website_editor#sidebar_editor_fields_save", as: "website_editor_sidebar_editor_fields_save"
         post '/add_section', to: "website_editor#add_section", as: "website_editor_add_section"
+        post '/add_section_above', to: "website_editor#add_section_above", as: "website_editor_add_section_above"
+        post '/remove_section', to: "website_editor#remove_section", as: "website_editor_remove_section"
+        post '/reorder_components', to: "website_editor#reorder_components", as: "website_editor_reorder_components"
+
       end
 
       get "/", to: "website#index", as: "website"
+
+      get "preview/", to: "preview#index", as: "website_preview"
+      get "preview/:page_slug", to: "preview#show", as: "website_preview_page"
 
       resources :products do
         member do

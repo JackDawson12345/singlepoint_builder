@@ -52,10 +52,12 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       options = Component.all.group_by(&:component_type)
       theme_page_id = params[:theme_page_id]
       user_id = params[:user_id]
+      area = params[:area]
+      current_component_id = params[:current_component_id]
 
       possible_section_paths.each do |path|
         begin
-          test_render = render_to_string(partial: path, locals: { menu: menu, options: options, theme_page_id: theme_page_id, user_id: user_id })
+          test_render = render_to_string(partial: path, locals: { menu: menu, options: options, theme_page_id: theme_page_id, user_id: user_id, area: area, current_component_id: current_component_id })
 
           respond_to do |format|
             format.json do
@@ -152,6 +154,7 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     component_type = params[:website_editor][:component_type]
     theme_page_id = params[:website_editor][:theme_page_id]
     user_id = params[:website_editor][:user_id]
+    component_page_id = params[:website_editor][:component_page_id]
 
     possible_paths = [
       'editor_fields_sidebar',
@@ -161,7 +164,7 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
 
     possible_paths.each do |path|
       begin
-        test_render = render_to_string(partial: path, locals: { component_id: component_id, component_type: component_type, theme_page_id: theme_page_id, user_id: user_id })
+        test_render = render_to_string(partial: path, locals: { component_id: component_id, component_type: component_type, theme_page_id: theme_page_id, user_id: user_id, component_page_id: component_page_id })
 
         respond_to do |format|
           format.json do
@@ -184,6 +187,7 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     component = Component.find(params[:component_id])
     theme_page_id = params[:theme_page_id]
     user = User.find(params[:user_id])
+    component_page_id = params[:component_page_id]
 
     field_values = {}
     component.field_types.each do |name, type|
@@ -209,23 +213,46 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
 
       # Remove old entries for this component/theme_page combination only
       filtered_customisations = current_customisations.reject do |c|
-        c["component_id"] == component.id.to_s && c["theme_page_id"] == theme_page_id.to_s
+        c["component_id"] == component.id.to_s && c["theme_page_id"] == theme_page_id.to_s && c["component_page_id"] == component_page_id
       end
     end
 
-    # Create new customisation entries for each theme_page_id
-    new_customisations = []
-    theme_page_ids.each do |page_id|
-      field_values.each do |field_name, field_value|
-        new_customisations << {
-          "component_id" => component.id.to_s,
-          "theme_page_id" => page_id.to_s,
-          "field_name" => field_name.to_s,
-          "field_value" => field_value.to_s,
-          "field_styling" => ""
-        }
+    if component.global == true
+      new_customisations = []
+      theme_page_ids.each do |page_id|
+
+        page = website.pages["theme_pages"].values.find { |page| page["theme_page_id"] == page_id }
+        component_data = page['components'].find { |comp| comp['component_id'] == component.id }
+
+        field_values.each do |field_name, field_value|
+          new_customisations << {
+            "component_id" => component.id.to_s,
+            "component_page_id" => component_data['component_page_id'],
+            "theme_page_id" => page_id.to_s,
+            "field_name" => field_name.to_s,
+            "field_value" => field_value.to_s,
+            "field_styling" => ""
+          }
+        end
+      end
+    else
+      # Create new customisation entries for each theme_page_id
+      new_customisations = []
+      theme_page_ids.each do |page_id|
+        field_values.each do |field_name, field_value|
+          new_customisations << {
+            "component_id" => component.id.to_s,
+            "component_page_id" => component_page_id,
+            "theme_page_id" => page_id.to_s,
+            "field_name" => field_name.to_s,
+            "field_value" => field_value.to_s,
+            "field_styling" => ""
+          }
+        end
       end
     end
+
+
 
     # Add new customisations
     all_customisations = filtered_customisations + new_customisations
@@ -251,10 +278,35 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       pages_data["theme_pages"].each do |page_name, page_data|
         if page_data["theme_page_id"] == theme_page_id
           components = page_data["components"]
-          next_position = components.empty? ? 1 : components.map { |c| c["position"] }.max + 1
 
-          new_component = {"component_id" => component.id, "position" => next_position}
-          components << new_component
+          if components.any?
+            final_component_id = components.last['component_id']
+            final_component = Component.find(final_component_id)
+
+            if final_component.component_type == 'Footer'
+              # Insert before the footer (which is the last component)
+              next_position = components.map { |c| c["position"] }.max
+              # Update footer position to make room
+              components.last["position"] = next_position + 1
+            else
+              # Add after all existing components
+              next_position = components.map { |c| c["position"] }.max + 1
+            end
+          else
+            # No components exist, start with position 1
+            next_position = 1
+          end
+
+          new_component = {"component_id" => component.id, component_page_id: SecureRandom.uuid, "position" => next_position}
+
+          if components.any? && Component.find(components.last['component_id']).component_type == 'Footer'
+            # Insert before the footer
+            components.insert(-2, new_component)
+          else
+            # Add to the end
+            components << new_component
+          end
+
           updated = true
           break
         end
@@ -262,53 +314,248 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
 
       if updated
         user.website.update!(pages: pages_data)
-        success = true
-        message = "Component added successfully"
+
+        # Load the updated page data
+        @website = user.website
+        pages = @website.pages["theme_pages"]
+        @page_data = pages.find do |key, page|
+          page["theme_page_id"] == theme_page_id
+        end&.last
+
+        @page_data ||= {"components" => []}
+
+        # Render the partial and return JSON
+        rendered_html = render_to_string(partial: 'page_content', layout: false)
+
+        render json: {
+          success: true,
+          message: "Component added successfully",
+          html: rendered_html
+        }
       else
-        success = false
-        message = "Theme page not found"
+        render json: {
+          success: false,
+          message: "Theme page not found"
+        }
       end
 
     rescue => e
-      success = false
-      message = "Error: #{e.message}"
+      render json: {
+        success: false,
+        message: "Error: #{e.message}"
+      }
     end
+  end
 
-    possible_paths = [
-      'page_content',
-      'manage/website/editor/website_editor/page_content',
-      'website_editor/page_content'
-    ]
+  def add_section_above
+    component = Component.find(params[:component_id])
+    theme_page_id = params[:theme_page_id]
+    user = User.find(params[:user_id])
+    current_component_id = params['current_component_id']
 
-    possible_paths.each do |path|
-      begin
+    page = user.website.pages["theme_pages"].values.find { |page| page["theme_page_id"] == theme_page_id }
+    current_component_data = page['components'].find { |comp| comp['component_page_id'] == current_component_id }
 
-        pages_data = user.website.pages
-        theme_page = params['theme_page_id']
-        pageData = ''
-        pages_data["theme_pages"].each do |page_name, page_data|
-          if page_data["theme_page_id"] == theme_page
-            pageData << page_data
+    begin
+      pages_data = user.website.pages
+      updated = false
+
+      pages_data["theme_pages"].each do |page_name, page_data|
+        if page_data["theme_page_id"] == theme_page_id
+          components = page_data["components"]
+          insertion_position = current_component_data['position']
+
+          # Update positions of all components at or after the insertion point
+          components.each do |comp|
+            if comp['position'] >= insertion_position
+              comp['position'] += 1
+            end
           end
-        end
 
-        test_render = render_to_string(partial: path, locals: { page_data: pageData }, layout: false)
+          # Create new component with the insertion position
+          new_component = {
+            "component_id" => component.id,
+            "component_page_id" => SecureRandom.uuid,
+            "position" => insertion_position
+          }
 
-        respond_to do |format|
-          format.json do
-            render json: {
-              html: test_render,
-              success: true,
-              path_used: path
-            }
+          # Insert the new component
+          if components.any? && Component.find(components.last['component_id']).component_type == 'Footer'
+            # Find the position to insert before footer
+            footer_index = components.length - 1
+            components.insert(footer_index, new_component)
+          else
+            # Add to components array (position is already set correctly)
+            components << new_component
           end
-        end
 
-        return
-      rescue => e
+          # Sort components by position to ensure correct order
+          components.sort_by! { |comp| comp['position'] }
+
+          updated = true
+          break
+        end
       end
+
+      if updated
+        user.website.update!(pages: pages_data)
+
+        # Load the updated page data
+        @website = user.website
+        pages = @website.pages["theme_pages"]
+        @page_data = pages.find do |key, page|
+          page["theme_page_id"] == theme_page_id
+        end&.last
+
+        @page_data ||= {"components" => []}
+
+        # Render the partial and return JSON
+        rendered_html = render_to_string(partial: 'page_content', layout: false)
+
+        render json: {
+          success: true,
+          message: "Component added successfully",
+          html: rendered_html
+        }
+      else
+        render json: {
+          success: false,
+          message: "Theme page not found"
+        }
+      end
+
+    rescue => e
+      render json: {
+        success: false,
+        message: "Error: #{e.message}"
+      }
     end
 
+  end
+
+  def remove_section
+    component = Component.find(params[:component_id])
+    theme_page_id = params[:theme_page_id]
+    user = User.find(params[:user_id])
+    current_component_id = params['current_component_id']
+
+    page = user.website.pages["theme_pages"].values.find { |page| page["theme_page_id"] == theme_page_id }
+    current_component_data = page['components'].find { |comp| comp['component_page_id'] == current_component_id }
+
+    begin
+      pages_data = user.website.pages
+      updated = false
+
+      pages_data["theme_pages"].each do |page_name, page_data|
+        if page_data["theme_page_id"] == theme_page_id
+          components = page_data["components"]
+
+          # Find the component to remove and get its position
+          component_to_remove = components.find { |comp| comp['component_page_id'] == current_component_id }
+          removal_position = component_to_remove['position']
+
+          # Remove the component
+          components.reject! { |comp| comp['component_page_id'] == current_component_id }
+
+          # Update positions of all components after the removed component
+          components.each do |comp|
+            if comp['position'] > removal_position
+              comp['position'] -= 1
+            end
+          end
+
+          # Sort components by position to ensure correct order
+          components.sort_by! { |comp| comp['position'] }
+
+          updated = true
+          break
+        end
+      end
+
+      if updated
+        user.website.update!(pages: pages_data)
+
+        # Load the updated page data
+        @website = user.website
+        pages = @website.pages["theme_pages"]
+        @page_data = pages.find do |key, page|
+          page["theme_page_id"] == theme_page_id
+        end&.last
+
+        @page_data ||= {"components" => []}
+
+        # Render the partial and return JSON
+        rendered_html = render_to_string(partial: 'page_content', layout: false)
+
+        render json: {
+          success: true,
+          message: "Component removed successfully",
+          html: rendered_html
+        }
+      else
+        render json: {
+          success: false,
+          message: "Theme page not found"
+        }
+      end
+
+    rescue => e
+      render json: {
+        success: false,
+        message: "Error: #{e.message}"
+      }
+    end
+  end
+
+  def reorder_components
+    theme_page_id = params[:theme_page_id]
+    user = User.find(params[:user_id])
+    positions = params[:positions] # Array of {component_page_id, component_id, position}
+
+    begin
+      pages_data = user.website.pages
+      updated = false
+
+      pages_data["theme_pages"].each do |page_name, page_data|
+        if page_data["theme_page_id"] == theme_page_id
+          components = page_data["components"]
+
+          # Update positions based on the new order
+          positions.each do |pos_data|
+            component = components.find { |c| c["component_page_id"] == pos_data["component_page_id"] }
+            if component
+              component["position"] = pos_data["position"]
+            end
+          end
+
+          # Sort components by position to ensure correct order
+          components.sort_by! { |comp| comp["position"] }
+
+          updated = true
+          break
+        end
+      end
+
+      if updated
+        user.website.update!(pages: pages_data)
+
+        render json: {
+          success: true,
+          message: "Component positions updated successfully"
+        }
+      else
+        render json: {
+          success: false,
+          message: "Theme page not found"
+        }
+      end
+
+    rescue => e
+      render json: {
+        success: false,
+        message: "Error: #{e.message}"
+      }
+    end
   end
 
   private
@@ -327,6 +574,11 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
         normalized_slug == slug || page_slug == "/#{slug}"
       end
     end&.last
+
+    pages = current_user.website.pages
+    theme_page_id = @page_data['theme_page_id']
+
+    @page_name = pages['theme_pages'].find { |name, data| data['theme_page_id'] == theme_page_id }&.first
   end
 
   def ensure_manage!

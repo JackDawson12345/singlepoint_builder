@@ -17,6 +17,12 @@
 
         <!-- Action Buttons -->
         <div class="flex items-center space-x-3">
+          <%= link_to admin_component_preview_path(@component), class: "nata-sans inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            Preview
+          <% end %>
           <%= link_to admin_components_edit_path(@component), class: "nata-sans inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-600 border border-transparent rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200" do %>
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -195,6 +201,29 @@
             </div>
           </div>
         </div>
+
+        <!-- Component Image Section -->
+        <% if @component.component_image.attached? %>
+          <div class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-medium text-gray-900 nata-sans">Component Image</h3>
+            </div>
+            <div class="p-6">
+              <div class="flex justify-center">
+                <%= image_tag @component.component_image,
+                              class: "max-w-full h-auto max-h-96 object-contain rounded-lg shadow-sm border border-gray-200",
+                              alt: "#{@component.name} component image" %>
+              </div>
+              <div class="mt-4 text-center">
+                <p class="nata-sans text-sm text-gray-500">
+                  <%= @component.component_image.filename %>
+                  (<%= number_to_human_size(@component.component_image.blob.byte_size) %>)
+                </p>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
       </div>
     </div>
 

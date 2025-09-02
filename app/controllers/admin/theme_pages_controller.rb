@@ -14,6 +14,7 @@ class Admin::ThemePagesController < Admin::BaseController
   end
 
   def add_component
+
     @theme = Theme.find(params[:id])
     @pageName, @themePage = @theme.pages["theme_pages"].find do |name, page|
       page["theme_page_id"] == params[:theme_page_id]
@@ -23,7 +24,7 @@ class Admin::ThemePagesController < Admin::BaseController
     max_position = @themePage['components'].map { |comp| comp[:position] || comp['position'] || 0 }.max || 0
     new_position = max_position + 1
 
-    @themePage['components'] << {component_id: params[:component_id].to_i, position: new_position}
+    @themePage['components'] << {component_id: params[:component_id].to_i, component_page_id: SecureRandom.uuid, position: new_position}
     @theme.save
 
     respond_to do |format|

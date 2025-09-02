@@ -1,12 +1,47 @@
 module Manage::Editor::WebsiteEditorHelper
 
-  def render_editor_content(component, user_id = nil, theme_page_id = nil)
+  def render_editor_content(component, user_id = nil, theme_page_id = nil, component_page_id)
     componentHTML = component.content['html']
     updated_content = componentHTML
 
     unless component.editable_fields == ""
       # Get customisations if user_id and theme_page_id are provided
-      field_values = get_component_field_values(component, user_id, theme_page_id)
+      field_values = get_component_field_values(component, user_id, theme_page_id, component_page_id)
+
+      field_values.each do |field_name, field_value|
+        updated_content = updated_content.gsub('{{'+field_name.to_s+'}}', field_value.to_s)
+      end
+    end
+
+    if componentHTML.include?('_class}}')
+      class_variables = componentHTML.scan(/\{\{(\w+_class)\}\}/).flatten
+      class_values = get_component_class_values(component, user_id, theme_page_id, component_page_id, class_variables)
+
+      class_values.each do |class_value|
+        component_value = class_value.split("_")[2..-1].join("_")
+        updated_content = updated_content.gsub('{{'+component_value.to_s+'_class}}', class_value.to_s)
+      end
+
+    end
+
+    if updated_content.include?('{{nav_items}}')
+      unless component.template_patterns == ""
+        nav_items_html = render_navbar_items(component)
+        updated_content = updated_content.gsub!('{{nav_items}}', nav_items_html)
+      end
+    end
+
+    updated_content
+  end
+
+
+  def render_preview_content(component, user_id = nil, theme_page_id = nil, component_page_id)
+    componentHTML = component.content['html']
+    updated_content = componentHTML
+
+    unless component.editable_fields == ""
+      # Get customisations if user_id and theme_page_id are provided
+      field_values = get_component_field_values(component, user_id, theme_page_id, component_page_id)
 
       field_values.each do |field_name, field_value|
         updated_content = updated_content.gsub('{{'+field_name.to_s+'}}', field_value.to_s)
@@ -22,10 +57,9 @@ module Manage::Editor::WebsiteEditorHelper
 
     updated_content
   end
-
   private
 
-  def get_component_field_values(component, user_id, theme_page_id)
+  def get_component_field_values(component, user_id, theme_page_id, component_page_id)
     # Start with default values
     field_values = component.editable_fields.to_h
 
@@ -36,13 +70,34 @@ module Manage::Editor::WebsiteEditorHelper
 
       customisations.each do |customisation|
         if customisation["component_id"] == component.id.to_s &&
-           customisation["theme_page_id"] == theme_page_id.to_s
+           customisation["theme_page_id"] == theme_page_id.to_s && customisation['component_page_id'] == component_page_id
           field_values[customisation["field_name"]] = customisation["field_value"]
         end
       end
     end
 
     field_values
+  end
+
+  def get_component_class_values(component, user_id, theme_page_id, component_page_id, class_variables)
+
+    # Start with default values
+    field_values = class_variables
+    new_classes = []
+
+    # Override with customisations if they exist
+    if user_id && theme_page_id
+      user = User.find(user_id)
+
+      field_values.each do |class_value|
+
+        value = class_value.gsub("_class", "")
+        new_classes << theme_page_id + '_' + component_page_id + '_' + value
+
+      end
+    end
+
+    new_classes
   end
 
   def render_navbar_items(component)
@@ -67,11 +122,18 @@ module Manage::Editor::WebsiteEditorHelper
       # Replace nav_item with page_type
       item_html.gsub!('{{nav_item}}', pageName)
 
-      # Replace nav_item_link based on user role
-      if pageSlug == '/'
-        link = '/manage/website/editor/'
-      else
-        link = '/manage/website/editor/' + pageSlug
+      if controller_name == "preview"
+        if pageSlug == '/'
+          link = '/manage/website/preview/'
+        else
+          link = '/manage/website/preview/' + pageSlug
+        end
+      elsif controller_name == "website_editor"
+        if pageSlug == '/'
+          link = '/manage/website/editor/'
+        else
+          link = '/manage/website/editor/' + pageSlug
+        end
       end
 
       item_html.gsub!('{{nav_item_link}}', link)

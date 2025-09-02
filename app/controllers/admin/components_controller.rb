@@ -8,6 +8,11 @@ class Admin::ComponentsController < Admin::BaseController
   def show
   end
 
+  def preview
+    @component = Component.find(params[:id])
+    render layout: false
+  end
+
   def new
     @component = Component.new
   end
@@ -32,7 +37,12 @@ class Admin::ComponentsController < Admin::BaseController
   def update
     Rails.logger.debug "Updating component with params: #{component_params.inspect}"
 
-    if @component.update(component_params)
+    # Handle image removal if requested
+    if params[:component][:remove_component_image] == '1'
+      @component.component_image.purge if @component.component_image.attached?
+    end
+
+    if @component.update(component_params.except(:remove_component_image))
       Rails.logger.debug "Component updated successfully: #{@component.attributes.inspect}"
       redirect_to admin_components_show_path(@component), notice: 'Component was successfully updated.'
     else
@@ -60,6 +70,8 @@ class Admin::ComponentsController < Admin::BaseController
       :editable_fields,
       :field_types,
       :template_patterns,
+      :component_image,
+      :remove_component_image,
       content: [:html, :css, :js]
     )
 

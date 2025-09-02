@@ -231,16 +231,23 @@ class Manage::SetupController < Manage::BaseController
   def set_website_theme
     theme = Theme.find(params[:theme_id])
 
-    # Create updated pages with new theme_page_ids
+    # Create updated pages with new theme_page_ids and component_page_ids
     updated_pages = theme.pages.deep_dup
-    base_timestamp = Time.now.to_i
-    counter = 0
 
     if updated_pages["theme_pages"]
       updated_pages["theme_pages"].each do |page_key, page_data|
+        # Update theme_page_id
         if page_data["theme_page_id"]
-          counter += 1
-          page_data["theme_page_id"] = (base_timestamp + counter).to_s
+          page_data["theme_page_id"] = SecureRandom.uuid
+        end
+
+        # Update component_page_ids
+        if page_data["components"]&.is_a?(Array)
+          page_data["components"].each do |component|
+            if component["component_page_id"]
+              component["component_page_id"] = SecureRandom.uuid
+            end
+          end
         end
       end
     end
