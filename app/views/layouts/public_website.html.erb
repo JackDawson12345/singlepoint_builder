@@ -12,9 +12,7 @@
   <%= javascript_importmap_tags %>
 
   <!-- Custom styles based on website theme -->
-  <% if current_website&.theme_id %>
-    <%= render 'shared/theme_styles', theme_id: current_website.theme_id %>
-  <% end %>
+
 </head>
 
 <body>
