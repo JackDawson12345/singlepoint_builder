@@ -1,0 +1,25 @@
+<!-- app/views/layouts/public_website.html.erb -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= current_website&.name || 'Website' %></title>
+  <meta name="description" content="<%= current_website&.description %>">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+
+  <!-- Custom styles based on website theme -->
+  <% if current_website&.theme_id %>
+    <%= render 'shared/theme_styles', theme_id: current_website.theme_id %>
+  <% end %>
+</head>
+
+<body>
+<main>
+  <%= yield %>
+</main>
+</body>
+</html>

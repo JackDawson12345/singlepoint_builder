@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  root "frontend#home"
   get "frontend/about"
   get "frontend/themes"
   get "frontend/contact"
@@ -148,4 +147,14 @@ Rails.application.routes.draw do
     get "/settings", to: "settings#index", as: "settings"
     get "/settings/website-settings", to: "settings#website_settings", as: "website_settings"
   end
+
+  # Constraint for custom domains
+  constraints(CustomDomainConstraint.new) do
+    get '/', to: 'public_websites#show'
+    get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
+    get '*path', to: 'public_websites#show'
+  end
+
+  root "frontend#home"
+
 end

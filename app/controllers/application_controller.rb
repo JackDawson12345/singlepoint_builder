@@ -2,6 +2,54 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
+  # Add multi-tenant domain detection before all actions
+  before_action :find_current_website
+
+  private
+
+  # Multi-tenant domain detection
+  def find_current_website
+    # Extract domain from request, removing port if present
+    domain = request.host.downcase.split(':').first
+
+    # Remove www prefix for consistency
+    domain_without_www = domain.sub(/^www\./, '')
+
+    # Try to find website by domain (with or without www)
+    @current_website = Website.find_by(domain_name: [domain, domain_without_www])
+
+    # Store the detected domain type for later use
+    @is_custom_domain = !is_main_domain?(domain)
+
+    # Log the domain detection for debugging
+    Rails.logger.info "Domain detected: #{domain}, Custom domain: #{@is_custom_domain}, Website found: #{@current_website.present?}"
+  end
+
+  def is_main_domain?(domain = nil)
+    domain ||= request.host.downcase.split(':').first
+    main_domains = [
+      'localhost',                    # Development
+      '127.0.0.1',                   # Development
+      ENV['MAIN_DOMAIN'],            # Production main domain from env
+      "#{ENV['HEROKU_APP_NAME']}.herokuapp.com"  # Heroku app domain
+    ].compact.map(&:downcase)
+
+    main_domains.include?(domain) || main_domains.include?(domain.sub(/^www\./, ''))
+  end
+
+  def current_website
+    @current_website
+  end
+
+  def is_custom_domain?
+    @is_custom_domain
+  end
+
+  # Make these methods available in views
+  helper_method :current_website, :is_custom_domain?, :is_main_domain?
+
+  public
+
   def notify_all_admins(message, notification_type = 'announcement')
     admin_users = User.where(role: 0) # or User.admin if using enum
 
