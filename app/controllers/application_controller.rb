@@ -21,20 +21,39 @@ class ApplicationController < ActionController::Base
     # Store the detected domain type for later use
     @is_custom_domain = !is_main_domain?(domain)
 
-    # Log the domain detection for debugging
-    Rails.logger.info "Domain detected: #{domain}, Custom domain: #{@is_custom_domain}, Website found: #{@current_website.present?}"
+    # Enhanced logging for debugging
+    Rails.logger.info "=== DOMAIN DEBUG ==="
+    Rails.logger.info "Raw host: #{request.host}"
+    Rails.logger.info "Domain detected: #{domain}"
+    Rails.logger.info "Domain without www: #{domain_without_www}"
+    Rails.logger.info "Is custom domain: #{@is_custom_domain}"
+    Rails.logger.info "Website found: #{@current_website.present?}"
+    Rails.logger.info "Website name: #{@current_website&.name}"
+    Rails.logger.info "ENV HEROKU_APP_NAME: #{ENV['HEROKU_APP_NAME']}"
+    Rails.logger.info "ENV MAIN_DOMAIN: #{ENV['MAIN_DOMAIN']}"
+    Rails.logger.info "=================="
   end
 
   def is_main_domain?(domain = nil)
     domain ||= request.host.downcase.split(':').first
+    domain_without_www = domain.sub(/^www\./, '')
+
     main_domains = [
       'localhost',                    # Development
       '127.0.0.1',                   # Development
       ENV['MAIN_DOMAIN'],            # Production main domain from env
-      "#{ENV['HEROKU_APP_NAME']}.herokuapp.com"  # Heroku app domain
+      "#{ENV['HEROKU_APP_NAME']}.herokuapp.com",  # Heroku app domain
+      'single-point-commerce-c9fbd3b6fe59.herokuapp.com'  # Hardcoded fallback
     ].compact.map(&:downcase)
 
-    main_domains.include?(domain) || main_domains.include?(domain.sub(/^www\./, ''))
+    # Remove empty strings
+    main_domains = main_domains.reject(&:empty?)
+
+    Rails.logger.info "Main domains list: #{main_domains}"
+    Rails.logger.info "Checking domain: #{domain} and #{domain_without_www}"
+    Rails.logger.info "Domain match result: #{main_domains.include?(domain) || main_domains.include?(domain_without_www)}"
+
+    main_domains.include?(domain) || main_domains.include?(domain_without_www)
   end
 
   def current_website
@@ -43,6 +62,11 @@ class ApplicationController < ActionController::Base
 
   def is_custom_domain?
     @is_custom_domain
+  end
+
+  # Handle unmatched domains
+  def domain_not_found
+    render file: 'public/404.html', status: :not_found, layout: false
   end
 
   # Make these methods available in views
