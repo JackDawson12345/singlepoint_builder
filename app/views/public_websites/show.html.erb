@@ -1,2 +1,5 @@
-<p>test</p>
-<% byebug %>
+<% if @page_data %>
+  <p><%= @page_data.to_s %></p>
+  <% else %>
+  <p>no date</p>
+<% end %>
