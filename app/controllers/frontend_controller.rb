@@ -51,7 +51,7 @@ class FrontendController < ApplicationController
     Rails.logger.info "Page data found: #{@page_data.present?}"
 
     # For now, render a simple success message to confirm it's working
-    render plain: "SUCCESS! Website: #{current_website.name} | Page: #{@page_slug} | Domain: #{current_website.domain_name} | Pages: #{current_website.pages.to_s}"
+    render plain: "SUCCESS! Website: #{current_website.name} | Page: #{@page_slug} | Domain: #{current_website.domain_name}"
   end
 
   def find_page_data(slug)
