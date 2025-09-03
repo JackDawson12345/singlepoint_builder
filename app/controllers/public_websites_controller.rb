@@ -46,7 +46,7 @@ class PublicWebsitesController < ApplicationController
     Rails.logger.info "Page data found: #{@page_data.present?}"
 
     # For now, let's render a simple response to test
-    render plain: "SUCCESS! Website: #{current_website.name} | Page: #{@page_slug} | Domain: #{current_website.domain_name}"
+    render show: "SUCCESS! Website: #{current_website.name} | Page: #{@page_slug} | Domain: #{current_website.domain_name}"
   end
 
   # Handle all other routes that don't match specific pages
