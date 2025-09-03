@@ -5,7 +5,7 @@
     <!-- Render components if they exist -->
     <% if @page_data['components'] %>
       <% @page_data['components'].each do |component| %>
-        <p><%= component[:component_id] %></p>
+        <p><%= component %></p>
       <% end %>
     <% end %>
 
