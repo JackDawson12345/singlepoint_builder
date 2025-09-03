@@ -1,23 +1,2 @@
-<!-- app/views/public_websites/show.html.erb -->
-<% if @page_data %>
-  <div class="website-container">
-    <h1><%= @page_data['title'] || current_website.name %></h1>
-
-    <!-- Render components if they exist -->
-    <% if @page_data['components'] %>
-      <% @page_data['components'].each do |component| %>
-        <%= render 'shared/component', component: component %>
-      <% end %>
-    <% end %>
-
-    <!-- Fallback content -->
-    <% if @page_data['content'] %>
-      <%= raw @page_data['content'] %>
-    <% end %>
-  </div>
-<% else %>
-  <div class="error-container">
-    <h1>Page Not Found</h1>
-    <p>The requested page could not be found.</p>
-  </div>
-<% end %>
+<p>test</p>
+<% byebug %>
