@@ -19,7 +19,7 @@
   <% @page_data["components"].each do |component| %>
     <% foundComponent = Component.find(component["component_id"]) %>
     <section class="relative edit-content-section">
-      <%= current_website.user_id %>
+      <%= raw(render_show_content(foundComponent, current_website.user_id, @page_data['theme_page_id'], component['component_page_id'])) %>
     </section>
   <% end %>
 
