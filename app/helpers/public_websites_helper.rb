@@ -15,7 +15,7 @@ module PublicWebsitesHelper
 
     if updated_content.include?('{{nav_items}}')
       unless component.template_patterns == ""
-        nav_items_html = render_navbar_items(component)
+        nav_items_html = render_navbar_items(component, user_id)
         updated_content = updated_content.gsub!('{{nav_items}}', nav_items_html)
       end
     end
@@ -84,7 +84,7 @@ module PublicWebsitesHelper
     new_classes
   end
 
-  def render_navbar_items(component)
+  def render_navbar_items(component, user_id)
     raw_template = component.template_patterns
 
     # Extract the HTML template from the malformed JSON manually
@@ -97,7 +97,9 @@ module PublicWebsitesHelper
       nav_template = raw_template
     end
 
-    current_user.website.pages["theme_pages"].map do |page_name, page_data|
+    user = User.find(user_id)
+
+    user.website.pages["theme_pages"].map do |page_name, page_data|
       pageName = page_name.to_s
       pageSlug = page_data['slug'].to_s
 
@@ -106,18 +108,10 @@ module PublicWebsitesHelper
       # Replace nav_item with page_type
       item_html.gsub!('{{nav_item}}', pageName)
 
-      if controller_name == "preview"
-        if pageSlug == '/'
-          link = '/manage/website/preview/'
-        else
-          link = '/manage/website/preview/' + pageSlug
-        end
-      elsif controller_name == "website_editor"
-        if pageSlug == '/'
-          link = '/manage/website/editor/'
-        else
-          link = '/manage/website/editor/' + pageSlug
-        end
+      if pageSlug == '/'
+        link = '/'
+      else
+        link = '/' + pageSlug
       end
 
       item_html.gsub!('{{nav_item_link}}', link)
