@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   # IMPORTANT: Custom domain routes must come FIRST before the root route
   # Constraint for custom domains - MOVED TO TOP
   constraints(CustomDomainConstraint.new) do
-    root 'public_websites#show'
+    get '/', to: 'public_websites#show', as: 'custom_domain_root'
     get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
     get '*path', to: 'public_websites#show'
   end
