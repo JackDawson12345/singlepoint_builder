@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
-  get "frontend/about"
-  get "frontend/themes"
-  get "frontend/contact"
+  get '/about', to: 'frontend#about', as: 'about'
+  get '/contact', to: 'frontend#contact', as: 'contact'
+  get '/themes', to: 'frontend#themes', as: 'themes'
 
   get "up" => "rails/health#show", as: :rails_health_check
 
