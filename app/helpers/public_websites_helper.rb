@@ -6,7 +6,7 @@ module PublicWebsitesHelper
 
     unless component.editable_fields == ""
       # Get customisations if user_id and theme_page_id are provided
-      field_values = get_component_field_values(component, user_id, theme_page_id, component_page_id)
+      field_values = get_show_component_field_values(component, user_id, theme_page_id, component_page_id)
 
       field_values.each do |field_name, field_value|
         updated_content = updated_content.gsub('{{'+field_name.to_s+'}}', field_value.to_s)
@@ -15,27 +15,9 @@ module PublicWebsitesHelper
 
     if updated_content.include?('{{nav_items}}')
       unless component.template_patterns == ""
-        nav_items_html = render_navbar_items(component, user_id)
+        nav_items_html = render_show_navbar_items(component, user_id)
         updated_content = updated_content.gsub!('{{nav_items}}', nav_items_html)
       end
-    end
-
-    if updated_content.include?('{{service_items}}')
-      unless component.template_patterns == ""
-        service_items_html = render_service_items(component)
-        updated_content = updated_content.gsub!('{{service_items}}', service_items_html)
-      end
-    end
-
-    if component.component_type == 'Service Inner'
-      service = current_user.website.services.find { |s| s["id"] == theme_page_id }
-      updated_content = updated_content.gsub!('{{service_title}}', service['name'])
-      updated_content = updated_content.gsub!('{{service_content}}', simple_format(service['content']))
-      updated_content = updated_content.gsub!('{{service_image}}', service['featured_image'])
-    elsif component.component_type == 'Blog Inner'
-
-    elsif component.component_type == 'Product Inner'
-
     end
 
     updated_content
@@ -43,7 +25,7 @@ module PublicWebsitesHelper
 
   private
 
-  def get_component_field_values(component, user_id, theme_page_id, component_page_id)
+  def get_show_component_field_values(component, user_id, theme_page_id, component_page_id)
     # Start with default values
     field_values = component.editable_fields.to_h
 
@@ -63,28 +45,7 @@ module PublicWebsitesHelper
     field_values
   end
 
-  def get_component_class_values(component, user_id, theme_page_id, component_page_id, class_variables)
-
-    # Start with default values
-    field_values = class_variables
-    new_classes = []
-
-    # Override with customisations if they exist
-    if user_id && theme_page_id
-      user = User.find(user_id)
-
-      field_values.each do |class_value|
-
-        value = class_value.gsub("_class", "")
-        new_classes << theme_page_id + '_' + component_page_id + '_' + value
-
-      end
-    end
-
-    new_classes
-  end
-
-  def render_navbar_items(component, user_id)
+  def render_show_navbar_items(component, user_id)
     raw_template = component.template_patterns
 
     # Extract the HTML template from the malformed JSON manually
