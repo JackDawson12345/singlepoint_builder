@@ -1,5 +1,18 @@
+<!-- app/views/public_websites/show.html.erb -->
 <% if @page_data %>
-  <p><%= @page_data.to_s %></p>
-  <% else %>
-  <p>no date</p>
+  <div class="website-container">
+
+    <!-- Render components if they exist -->
+    <% if @page_data['components'] %>
+      <% @page_data['components'].each do |component| %>
+        <p><%= component[:component_id] %></p>
+      <% end %>
+    <% end %>
+
+  </div>
+<% else %>
+  <div class="error-container">
+    <h1>Page Not Found</h1>
+    <p>The requested page could not be found.</p>
+  </div>
 <% end %>
