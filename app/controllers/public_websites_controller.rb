@@ -64,35 +64,20 @@ class PublicWebsitesController < ApplicationController
   def find_page_data(slug)
     return nil unless current_website&.pages
 
-    # Based on your existing page structure from the setup controller
-    pages = current_website.pages['theme_pages'] || {}
+    @website = current_website # Adjust this to however you're finding the website
+    @page_slug = slug
 
-    Rails.logger.info "Available pages: #{pages.keys.inspect}"
-
-    # Try to find the exact page
-    page = pages[slug] || pages[slug.to_s]
-
-    # If not found, try common variations
-    unless page
-      # Try with underscores instead of hyphens
-      alt_slug = slug.tr('-', '_')
-      page = pages[alt_slug]
-      Rails.logger.info "Tried alternative slug '#{alt_slug}': #{page.present?}" if alt_slug != slug
-    end
-
-    # If still not found, try case-insensitive search
-    unless page
-      pages.each do |key, value|
-        if key.to_s.downcase == slug.downcase
-          page = value
-          Rails.logger.info "Found case-insensitive match for '#{slug}' with key '#{key}'"
-          break
-        end
+    pages = @website.pages["theme_pages"]
+    @page_data = pages.find do |key, page|
+      page_slug = page["slug"]
+      if slug == "/"
+        page_slug == "/"
+      else
+        normalized_slug = page_slug.start_with?("/") ? page_slug[1..-1] : page_slug
+        normalized_slug == slug || page_slug == "/#{slug}"
       end
-    end
+    end&.last
 
-    Rails.logger.info "Final page result for '#{slug}': #{page.present? ? 'found' : 'not found'}"
-    page
   end
 
   def find_default_page
