@@ -7,6 +7,14 @@ Rails.application.routes.draw do
 
   devise_for :users
 
+  # IMPORTANT: Custom domain routes must come FIRST before the root route
+  # Constraint for custom domains - MOVED TO TOP
+  constraints(CustomDomainConstraint.new) do
+    root 'public_websites#show'
+    get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
+    get '*path', to: 'public_websites#show'
+  end
+
   namespace :admin do
     namespace :website do
       get "/", to: "website#index", as: "websites"
@@ -49,7 +57,7 @@ Rails.application.routes.draw do
 
     # Theme pages routes
     get "/themes/:id/pages/new", to: 'themes#add_page', as: 'add_page'
-    post "/themes/:id/pages", to: 'themes#create_pages', as: 'create_pages'  # Add this line
+    post "/themes/:id/pages", to: 'themes#create_pages', as: 'create_pages'
 
     get "/themes/:id/page/:theme_page_id", to: 'theme_pages#index', as: 'theme_page'
     get "/themes/:id/page/:theme_page_id/inner-page", to: 'theme_pages#inner_page', as: 'theme_page_inner_page'
@@ -69,14 +77,13 @@ Rails.application.routes.draw do
     # Users routes
     get "/users", to: "users#index", as: 'users'
     get "/users/new", to: "users#new", as: "new_user"
-    post "/users", to: "users#create"                    # ADD THIS LINE
+    post "/users", to: "users#create"
     get "/users/reports", to: 'users#reports', as: 'user_reports'
     get "/users/:id", to: "users#show", as: "user"
     get "/users/:id/edit", to: "users#edit", as: "edit_user"
-    patch "/users/:id", to: "users#update"              # ADD THIS LINE
-    put "/users/:id", to: "users#update"                # ADD THIS LINE
-    delete "/users/:id", to: "users#destroy"            # ADD THIS LINE
-    # Add these to your users routes in admin namespace:
+    patch "/users/:id", to: "users#update"
+    put "/users/:id", to: "users#update"
+    delete "/users/:id", to: "users#destroy"
     get "/users/:id/edit_password", to: "users#edit_password", as: "edit_password"
     patch "/users/:id/update_password", to: "users#update_password", as: "update_password"
 
@@ -92,7 +99,7 @@ Rails.application.routes.draw do
         get "/", to: "website_editor#index", as: "website_editor"
         get "/:page_slug", to: "website_editor#show", as: "website_editor_page"
         get "/:page_slug/:inner_page_slug", to: "website_editor#inner_page", as: "website_editor_inner_page"
-        
+
         post "/sidebar_data", to: "website_editor#sidebar_data", as: "website_editor_sidebar_data"
 
         post '/sidebar_editor_fields_data', to: "website_editor#sidebar_editor_fields_data", as: "website_editor_sidebar_editor_fields_data"
@@ -101,7 +108,6 @@ Rails.application.routes.draw do
         post '/add_section_above', to: "website_editor#add_section_above", as: "website_editor_add_section_above"
         post '/remove_section', to: "website_editor#remove_section", as: "website_editor_remove_section"
         post '/reorder_components', to: "website_editor#reorder_components", as: "website_editor_reorder_components"
-
       end
 
       get "/", to: "website#index", as: "website"
@@ -120,7 +126,6 @@ Rails.application.routes.draw do
       end
       resources :blogs do
       end
-
     end
 
     get "/", to: "dashboard#index", as: "dashboard"
@@ -130,7 +135,6 @@ Rails.application.routes.draw do
     post "/setup/search-domain", to: "setup#search_domain", as: "setup_search_domain"
     post "/setup/select-domain", to: "setup#select_domain", as: "setup_select_domain"
 
-    # Fixed this line:
     post "/setup/package", to: "setup#package", as: "setup_package"
     post "/setup/support", to: "setup#support", as: "setup_support"
 
@@ -138,7 +142,7 @@ Rails.application.routes.draw do
     post "/setup/create-payment-intent", to: "setup#create_payment_intent", as: "setup_create_payment_intent"
     post "/setup/confirm-payment", to: "setup#confirm_payment", as: "setup_confirm_payment"
 
-    # Domain purchase retry route (NEW)
+    # Domain purchase retry route
     post "/setup/retry-domain-purchase", to: "setup#retry_domain_purchase", as: "setup_retry_domain_purchase"
 
     match "/set-website-theme/:theme_id", to: "setup#set_website_theme", as: "set_website_theme", via: [:get, :post]
@@ -148,13 +152,6 @@ Rails.application.routes.draw do
     get "/settings/website-settings", to: "settings#website_settings", as: "website_settings"
   end
 
-  # Constraint for custom domains
-  constraints(CustomDomainConstraint.new) do
-    get '/', to: 'public_websites#show'
-    get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
-    get '*path', to: 'public_websites#show'
-  end
-
+  # Main domain root route - MOVED TO BOTTOM so it only catches main domain requests
   root "frontend#home"
-
 end
