@@ -1,12 +1,11 @@
 <!-- app/views/public_websites/show.html.erb -->
 <% if @page_data %>
   <div class="website-container">
-    <% byebug %>
 
     <!-- Render components if they exist -->
     <% if @page_data['components'] %>
       <% @page_data['components'].each do |component| %>
-        <p><%= component %></p>
+        <p><%= component['component_id'] %></p>
       <% end %>
     <% end %>
 
