@@ -1,5 +1,6 @@
 class FrontendController < ApplicationController
-  allow_browser versions: :all
+  # Skip browser compatibility check entirely for this controller
+  skip_before_action :verify_authenticity_token, if: -> { is_custom_domain? }, raise: false
 
   def home
     Rails.logger.info "=== FRONTEND CONTROLLER DEBUG ==="
