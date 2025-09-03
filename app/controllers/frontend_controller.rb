@@ -44,32 +44,58 @@ class FrontendController < ApplicationController
       @page_data = find_page_data('home') || find_default_page
     end
 
+    # If page still not found, render 404
+    unless @page_data
+      render file: 'public/404.html', status: :not_found, layout: false
+      return
+    end
+
     @page_title = @page_data&.dig('title') || current_website.name
     @page_description = @page_data&.dig('description') || current_website.description
 
     Rails.logger.info "Serving page '#{@page_slug}' for website '#{current_website.name}' (#{current_website.domain_name})"
     Rails.logger.info "Page data found: #{@page_data.present?}"
+    Rails.logger.info "Page data: #{@page_data.inspect}" if @page_data
 
-    # For now, render a simple success message to confirm it's working
-    render plain: "SUCCESS! Website: #{current_website.name} | Page: #{@page_slug} | Domain: #{current_website.domain_name}"
+    # Render the same view as PublicWebsitesController with the public_website layout
+    render 'public_websites/show', layout: 'public_website'
   end
 
   def find_page_data(slug)
     return nil unless current_website&.pages
 
-    pages = current_website.pages['theme_pages'] || {}
-    pages[slug] || pages[slug.to_s]
+    @website = current_website
+    @page_slug = slug
+
+    pages = @website.pages["theme_pages"]
+    @page_data = pages.find do |key, page|
+      page_slug = page["slug"]
+      if slug == "/"
+        page_slug == "/"
+      else
+        normalized_slug = page_slug.start_with?("/") ? page_slug[1..-1] : page_slug
+        normalized_slug == slug || page_slug == "/#{slug}"
+      end
+    end&.last
   end
 
   def find_default_page
     return nil unless current_website&.pages
 
     pages = current_website.pages['theme_pages'] || {}
-    ['home', 'index', 'main'].each do |default_slug|
-      page = pages[default_slug]
-      return page if page
+
+    # Try common home page names
+    ['home', 'index', 'main', 'landing'].each do |default_slug|
+      page = pages[default_slug] || pages[default_slug.to_s]
+      if page
+        Rails.logger.info "Using default page: #{default_slug}"
+        return page
+      end
     end
 
-    pages.values.first
+    # Return the first page if no home page found
+    first_page = pages.values.first
+    Rails.logger.info "Using first available page as default: #{first_page.present? ? 'found' : 'none available'}"
+    first_page
   end
 end
