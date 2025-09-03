@@ -23,7 +23,7 @@
     <% @page_data["components"].sort_by { |c| c["position"] }.each do |component| %>
       <% foundComponent = Component.find(component["component_id"]) %>
       <section class="relative edit-content-section">
-        <%= raw(foundComponent.html) %>
+        <%= raw(foundComponent.content['html']) %>
       </section>
     <% end %>
 
