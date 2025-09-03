@@ -1,6 +1,5 @@
 class ApplicationController < ActionController::Base
-  # Only allow modern browsers for main domain, but allow all browsers for custom domains
-  allow_browser versions: :modern, only: -> { is_main_domain? }
+
 
   # Add multi-tenant domain detection before all actions
   before_action :find_current_website
