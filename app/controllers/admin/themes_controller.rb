@@ -78,6 +78,8 @@ class Admin::ThemesController < Admin::BaseController
       existing_theme_pages[page_data["page_name"].downcase] = {
         "theme_page_id" => SecureRandom.uuid,
         "components" => [],
+        "inner_pages_components" => [],
+        "inner_pages" => {},
         "slug" => page_data["page_slug"],
         "package_type" => page_data["package_type"],
         "position" => (next_position + index).to_s

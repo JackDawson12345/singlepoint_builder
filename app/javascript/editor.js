@@ -361,7 +361,8 @@ function initializeRealtimeUpdates(themePageId, componentPageId) {
         }
 
         // Find corresponding elements in the component that should be updated
-        const targetSelector = `.${themePageId}_${componentPageId}_${fieldName}`;
+        const targetClass = `${themePageId}_${componentPageId}_${fieldName}`;
+        const targetSelector = `[class~="${targetClass}"]`;
         const targetElements = document.querySelectorAll(targetSelector);
 
         console.log(`Field: ${fieldName}, Target selector: ${targetSelector}, Found ${targetElements.length} targets`);

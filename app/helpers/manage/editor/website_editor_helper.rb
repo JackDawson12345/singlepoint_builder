@@ -31,6 +31,26 @@ module Manage::Editor::WebsiteEditorHelper
       end
     end
 
+    if updated_content.include?('{{service_items}}')
+      unless component.template_patterns == ""
+        service_items_html = render_service_items(component)
+        updated_content = updated_content.gsub!('{{service_items}}', service_items_html)
+      end
+    end
+
+    if component.component_type == 'Service Inner'
+      service = current_user.website.services.find { |s| s["id"] == theme_page_id }
+      updated_content = updated_content.gsub!('{{service_title}}', service['name'])
+      updated_content = updated_content.gsub!('{{service_content}}', simple_format(service['content']))
+      updated_content = updated_content.gsub!('{{service_image}}', service['featured_image'])
+    elsif component.component_type == 'Blog Inner'
+
+    elsif component.component_type == 'Product Inner'
+
+    end
+
+
+
     updated_content
   end
 
@@ -53,6 +73,24 @@ module Manage::Editor::WebsiteEditorHelper
         nav_items_html = render_navbar_items(component)
         updated_content = updated_content.gsub!('{{nav_items}}', nav_items_html)
       end
+    end
+
+    if updated_content.include?('{{service_items}}')
+      unless component.template_patterns == ""
+        service_items_html = render_service_items(component)
+        updated_content = updated_content.gsub!('{{service_items}}', service_items_html)
+      end
+    end
+
+    if component.component_type == 'Service Inner'
+      service = current_user.website.services.find { |s| s["id"] == theme_page_id }
+      updated_content = updated_content.gsub!('{{service_title}}', service['name'])
+      updated_content = updated_content.gsub!('{{service_content}}', simple_format(service['content']))
+      updated_content = updated_content.gsub!('{{service_image}}', service['featured_image'])
+    elsif component.component_type == 'Blog Inner'
+
+    elsif component.component_type == 'Product Inner'
+
     end
 
     updated_content
@@ -139,6 +177,64 @@ module Manage::Editor::WebsiteEditorHelper
       item_html.gsub!('{{nav_item_link}}', link)
       item_html
     end.join("\n")
+  end
+
+  def render_service_items(component)
+    raw_template = component.template_patterns
+
+    # Since raw_template is a Hash, access the service_items key directly
+    if raw_template.is_a?(Hash) && raw_template["service_items"]
+      service_template = raw_template["service_items"]
+    elsif raw_template.is_a?(String)
+      # Fallback for string format (your original regex approach)
+      if match = raw_template.match(/"service_items":\s*"(.+)"\s*}/)
+        service_template = match[1].gsub('\\"', '"')
+      else
+        service_template = raw_template
+      end
+    else
+      service_template = raw_template.to_s
+    end
+
+    unless current_user.website.services.blank?
+      current_user.website.services.map do |service|
+
+        # Use service attributes instead of undefined page variables
+        service_name = service['name'].to_s  # or whatever attribute holds the service name
+        service_slug = service['slug'].to_s  # or whatever attribute holds the service slug
+
+        item_html = service_template.dup
+
+        # Replace service template placeholders with actual service data
+        item_html.gsub!('{{service_title}}', service_name)
+        item_html.gsub!('{{service_excerpt}}', service['excerpt'].to_s) # or service.description
+        item_html.gsub!('{{service_image}}', service['featured_image'].to_s) # or whatever holds the image
+
+        service_page = current_user.website.pages["theme_pages"]["services"]
+        # Build the service link
+        if controller_name == "preview"
+          if service_page['slug'].present?
+            link = '/manage/website/preview/' + service_page['slug'] + '/' + service_slug
+          else
+            link = '/manage/website/preview/' + service_slug
+          end
+        elsif controller_name == "website_editor"
+          if service_page['slug'].present?
+            link = '/manage/website/editor/' + service_page['slug'] + '/' + service_slug
+          else
+            link = '/manage/website/editor/' + service_slug
+          end
+        end
+
+        item_html.gsub!('{{service_link}}', link)
+        item_html
+      end.join("\n")
+    else
+      item_html = '<p style="text-align: center;">No Service Found</p>'
+      item_html
+    end
+
+
   end
 
 end

@@ -1,0 +1,385 @@
+<%# app/views/manage/website/blogs/_form.html.erb %>
+<%= form_with(url: form_url,
+              method: form_method,
+              local: true,
+              multipart: true,
+              html: { class: 'blog-form' }) do |form| %>
+
+  <% if @website.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><%= pluralize(@website.errors.count, "error") %> prohibited this blog from being saved:</h4>
+      <ul>
+        <% @website.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="flex gap-5 mt-8">
+    <div class="w-3/4">
+      <div class="mb-6">
+        <%= form.label "blog[name]", "Name", class: 'text-base font-semibold nata-sans' %>
+        <%= form.text_field "blog[name]",
+                            value: @blog["name"],
+                            class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                            placeholder: 'Enter blog name',
+                            required: true,
+                            data: { 'blog-name': true } %>
+        <small class="form-text"><% if @blog["slug"].present? %>Slug: /<%= @blog["slug"] %> <% end %> </small>
+      </div>
+      <div class="mb-6">
+        <%= form.label "blog[slug]", "Slug", class: 'text-base font-semibold nata-sans' %>
+        <%= form.text_field "blog[slug]",
+                            value: @blog["slug"],
+                            class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                            placeholder: 'auto-generated-from-name',
+                            data: { 'blog-slug': true } %>
+        <small class="form-text">URL-friendly version of the name. Leave blank to auto-generate.</small>
+      </div>
+      <div class="mb-6">
+        <%= form.label "blog[content]", 'Full Description', class: 'text-base font-semibold nata-sans' %>
+        <%= form.text_area "blog[content]",
+                           value: @blog["content"],
+                           class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                           rows: 18,
+                           placeholder: 'Detailed description of your blog, what it includes, benefits, etc...' %>
+        <small class="form-text">Detailed information about this blog</small>
+      </div>
+    </div>
+    <div class="w-1/4">
+
+      <div class="mb-6">
+        <% if @blog["featured_image"].present? %>
+          <div class="current-image">
+            <p><strong>Current image:</strong></p>
+            <%= image_tag @blog["featured_image"],
+                          alt: @blog["name"],
+                          class: 'w-full mb-3' %>
+            <button type="button" data-image-trigger="change" class="nata-sans p-2 w-full border rounded-sm text-sm bg-gray-100 hover:bg-gray-200">Change Featured Image</button>
+          </div>
+          <%= form.file_field "blog[featured_image]",
+                              data: { 'image-input': true },
+                              class: 'hidden',
+                              accept: 'image/*' %>
+        <% else %>
+          <button type="button" data-image-trigger="set" class="nata-sans p-3 w-full border rounded-sm text-sm bg-blue-50 hover:bg-blue-100">Set Featured Image</button>
+          <%= form.file_field "blog[featured_image]",
+                              data: { 'image-input': true },
+                              class: 'hidden',
+                              accept: 'image/*' %>
+        <% end %>
+        <small class="form-text">Upload an image to represent this blog</small>
+      </div>
+
+      <div class="mb-6">
+        <%= form.label "blog[excerpt]", "Excerpt", class: 'text-base font-semibold nata-sans' %>
+        <%= form.text_area "blog[excerpt]",
+                           value: @blog["excerpt"],
+                           class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                           rows: 3,
+                           placeholder: 'Brief description of this blog...' %>
+        <small class="form-text">Short summary that will appear in blog listings</small>
+      </div>
+
+      <div class="mb-6">
+        <%= form.label "blog[parent_page]", "Parent Page", class: 'text-base font-semibold nata-sans' %>
+        <%
+            # Handle current value - check if it's the new format (hash) or old format (string)
+            current_parent_page_slug = @blog["parent_page"].is_a?(Hash) ? @blog["parent_page"]["slug"] : @blog["parent_page"]
+        %>
+        <%= form.select "blog[parent_page]",
+                        options_for_select([['None', '']] +
+                                           current_user.website.pages["theme_pages"].map { |name, page| [name.titleize, page["slug"]] },
+                                           current_parent_page_slug),
+                        {},
+                        { class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                          data: { 'parent-page-select': true } } %>
+        <small class="form-text">Optional: Associate this blog with a specific page</small>
+      </div>
+
+      <div class="mb-6">
+        <%= form.label "blog[categories]", "Categories", class: 'text-base font-semibold nata-sans' %>
+        <%= form.text_field "blog[categories]",
+                            value: (@blog["categories"].is_a?(Array) ? @blog["categories"].join(', ') : @blog["categories"]),
+                            class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                            placeholder: 'e.g., Web Development, Consulting, Design',
+                            data: { 'categories-input': true } %>
+        <small class="form-text">Separate multiple categories with commas</small>
+        <div data-category-preview class="mt-2"></div>
+      </div>
+
+      <div class="form-actions">
+        <%= form.submit submit_text, class: 'btn btn-primary' %>
+        <%= link_to 'Cancel', cancel_path, class: 'btn btn-secondary' %>
+      </div>
+    </div>
+  </div>
+
+<% end %>
+
+<!-- Select2 CSS -->
+<%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" %>
+
+<style>
+    .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .form-text {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .current-image-preview {
+        max-width: 200px;
+        height: auto;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+
+    .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+
+    .alert h4 {
+        margin-bottom: 0.5rem;
+    }
+
+    .alert ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    /* Custom Select2 styling to match your design */
+    .select2-container .select2-selection--single {
+        height: 46px !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 4px !important;
+        padding: 12px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-rendered {
+        color: #374151 !important;
+        line-height: 24px !important;
+        padding-left: 0 !important;
+        font-size: 0.875rem !important;
+        font-family: inherit !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered{
+        line-height: 20px !important;
+        font-size: .875rem !important;
+        font-family: "Nata Sans", sans-serif !important;
+    }
+    .select2-results__option[aria-selected]{
+        font-size: .875rem !important;
+        font-family: "Nata Sans", sans-serif !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow{
+        top: 11px
+    }
+
+    .select2-container--default .select2-selection--single .select2-arrow {
+        height: 46px !important;
+        right: 12px !important;
+    }
+
+    .select2-dropdown {
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.375rem !important;
+        font-size: 0.875rem !important;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #3b82f6 !important;
+    }
+
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.375rem !important;
+        padding: 0.5rem !important;
+        font-size: 0.875rem !important;
+    }
+</style>
+
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" %>
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" %>
+
+<script data-turbo-eval="false">
+    (function() {
+        'use strict';
+
+        let isInitialized = false;
+
+        function initBlogForm() {
+            // Prevent double initialization
+            if (isInitialized) return;
+
+            // Check if we're on the right page
+            const blogForm = document.querySelector('.blog-form');
+            if (!blogForm) return;
+
+            console.log('Initializing blog form...');
+            isInitialized = true;
+
+            // Auto-generate slug from name
+            const nameField = document.querySelector('[data-blog-name]');
+            const slugField = document.querySelector('[data-blog-slug]');
+
+            if (nameField && slugField) {
+                nameField.addEventListener('input', function() {
+                    if (slugField.value === '' || !slugField.dataset.userModified) {
+                        const slug = this.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, '-')
+                          .replace(/^-+|-+$/g, '');
+                        slugField.value = slug;
+                    }
+                });
+
+                slugField.addEventListener('input', function() {
+                    this.dataset.userModified = 'true';
+                });
+            }
+
+            // Initialize Select2 if jQuery is available
+            if (typeof $ !== 'undefined' && $.fn.select2) {
+                const selectElement = $('[data-parent-page-select]');
+                if (selectElement.length) {
+                    selectElement.select2({
+                        placeholder: 'Choose a parent page...',
+                        allowClear: true,
+                        width: '100%',
+                        theme: 'default'
+                    });
+                }
+            }
+
+            // Image upload functionality
+            const imageTriggers = document.querySelectorAll('[data-image-trigger]');
+            const imageInput = document.querySelector('[data-image-input]');
+
+            imageTriggers.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (imageInput) imageInput.click();
+                });
+            });
+
+            // Show preview when file is selected
+            if (imageInput) {
+                imageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const triggerButton = document.querySelector('[data-image-trigger]');
+
+                            // Create preview container
+                            let previewContainer = document.querySelector('[data-image-preview]');
+                            if (!previewContainer) {
+                                previewContainer = document.createElement('div');
+                                previewContainer.setAttribute('data-image-preview', '');
+                                previewContainer.className = 'mt-3';
+                                triggerButton.parentNode.insertBefore(previewContainer, triggerButton.nextSibling);
+                            }
+
+                            previewContainer.innerHTML = `
+                            <div>
+                                <img src="${e.target.result}" alt="Preview" class="w-full mb-3" />
+                                <button type="button" data-change-preview class="nata-sans p-2 w-full border rounded-sm text-sm bg-gray-100 hover:bg-gray-200">Change Featured Image</button>
+                            </div>
+                        `;
+
+                            // Hide the original button
+                            triggerButton.style.display = 'none';
+
+                            // Add click handler for the new change button
+                            const changeBtn = previewContainer.querySelector('[data-change-preview]');
+                            if (changeBtn) {
+                                changeBtn.addEventListener('click', function() {
+                                    imageInput.click();
+                                });
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Category preview functionality
+            const categoriesField = document.querySelector('[data-categories-input]');
+            const categoryPreview = document.querySelector('[data-category-preview]');
+
+            if (categoriesField && categoryPreview) {
+                function updateCategoryPreview() {
+                    const categories = categoriesField.value
+                      .split(',')
+                      .map(cat => cat.trim())
+                      .filter(cat => cat.length > 0);
+
+                    if (categories.length > 0) {
+                        const badges = categories.map(cat =>
+                          `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1">${cat}</span>`
+                        ).join('');
+                        categoryPreview.innerHTML = badges;
+                    } else {
+                        categoryPreview.innerHTML = '';
+                    }
+                }
+
+                categoriesField.addEventListener('input', updateCategoryPreview);
+                updateCategoryPreview(); // Initialize
+            }
+
+            console.log('Blog form initialized successfully');
+        }
+
+        function resetForm() {
+            isInitialized = false;
+            // Destroy Select2 if it exists
+            if (typeof $ !== 'undefined' && $.fn.select2) {
+                $('[data-parent-page-select]').select2('destroy');
+            }
+            console.log('Form reset for new page load');
+        }
+
+        // Initialize on different events
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initBlogForm);
+        } else {
+            initBlogForm();
+        }
+
+        // Turbo events
+        document.addEventListener('turbo:load', function() {
+            console.log('Turbo load event fired');
+            setTimeout(initBlogForm, 100); // Small delay to ensure DOM is ready
+        });
+
+        document.addEventListener('turbo:before-cache', resetForm);
+        document.addEventListener('turbo:before-render', resetForm);
+    })();
+</script>

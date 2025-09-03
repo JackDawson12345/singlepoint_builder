@@ -53,9 +53,14 @@ Rails.application.routes.draw do
     post "/themes/:id/pages", to: 'themes#create_pages', as: 'create_pages'  # Add this line
 
     get "/themes/:id/page/:theme_page_id", to: 'theme_pages#index', as: 'theme_page'
+    get "/themes/:id/page/:theme_page_id/inner-page", to: 'theme_pages#inner_page', as: 'theme_page_inner_page'
     patch "themes/:id/theme-page/:theme_page_id/add", to: 'theme_pages#add_component', as: 'theme_pages_add_component'
     delete "/themes/:id/theme-pages/:theme_page_id/remove", to: 'theme_pages#remove_component', as: 'theme_pages_remove_component'
     patch "/themes/:id/theme-pages/:theme_page_id/reorder_components", to: 'theme_pages#reorder_components', as: 'theme_pages_reorder_components'
+
+    patch "themes/:id/theme-page/:theme_page_id/inner-page/add", to: 'theme_pages#inner_add_component', as: 'theme_inner_pages_add_component'
+    delete "/themes/:id/theme-pages/:theme_page_id/inner-page/remove", to: 'theme_pages#inner_remove_component', as: 'theme_inner_pages_remove_component'
+    patch "/themes/:id/theme-pages/:theme_page_id/inner-page/reorder_components", to: 'theme_pages#inner_reorder_components', as: 'theme_inner_pages_reorder_components'
 
     # Notifications routes
     get "/notifications", to: 'notifications#index', as: 'notifications'
@@ -87,6 +92,8 @@ Rails.application.routes.draw do
       namespace :editor do
         get "/", to: "website_editor#index", as: "website_editor"
         get "/:page_slug", to: "website_editor#show", as: "website_editor_page"
+        get "/:page_slug/:inner_page_slug", to: "website_editor#inner_page", as: "website_editor_inner_page"
+        
         post "/sidebar_data", to: "website_editor#sidebar_data", as: "website_editor_sidebar_data"
 
         post '/sidebar_editor_fields_data', to: "website_editor#sidebar_editor_fields_data", as: "website_editor_sidebar_editor_fields_data"
@@ -102,11 +109,17 @@ Rails.application.routes.draw do
 
       get "preview/", to: "preview#index", as: "website_preview"
       get "preview/:page_slug", to: "preview#show", as: "website_preview_page"
+      get "preview/:page_slug/:inner_page_slug", to: "preview#inner_page", as: "preview_inner_page"
 
       resources :products do
         member do
           delete :remove_image
         end
+      end
+
+      resources :services do
+      end
+      resources :blogs do
       end
 
     end

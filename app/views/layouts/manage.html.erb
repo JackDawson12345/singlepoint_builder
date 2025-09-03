@@ -104,7 +104,7 @@
         <h1 class="text-white text-1xl uppercase"><%= current_user.get_name_from_email.first(2) %></h1>
       </div>
       <div class="flex items-center">
-        <p class="text-white capitalize"> <%= current_user.get_name_from_email %></p>
+        <p class="text-white capitalize"> <%= current_user.get_name_from_email.truncate(13) %></p>
       </div>
     </div>
   </div>

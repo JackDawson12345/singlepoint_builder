@@ -1,0 +1,43 @@
+<!-- Component Partial (_component.html.erb) -->
+<%
+  # Check if this component is already added to the theme page
+  is_added = @themePage['inner_pages_components'].any? { |comp| comp['component_id'].to_s == component.id.to_s || comp[:component_id].to_s == component.id.to_s }
+%>
+
+<div class="group p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all duration-200" id="component-<%= component.id %>">
+  <div class="flex items-center justify-between">
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-3">
+        <h4 class="text-sm font-medium text-gray-900 truncate"><%= component.name %></h4>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          <%= component.component_type %>
+        </span>
+      </div>
+    </div>
+
+    <div class="ml-4 flex-shrink-0">
+      <% if is_added %>
+        <span class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-800 text-sm font-medium rounded-md border border-green-200">
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Added
+        </span>
+      <% else %>
+        <%= button_to "Add Component",
+                      admin_theme_inner_pages_add_component_path(
+                        id: @theme.id,
+                        theme_page_id: @themePage['theme_page_id'],
+                        component_id: component.id
+                      ),
+                      method: :patch,
+                      remote: true,
+                      class: "inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200",
+                      data: {
+                        disable_with: "Adding...",
+                        turbo_method: :patch
+                      } %>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,385 @@
+<%# app/views/manage/website/services/_form.html.erb %>
+<%= form_with(url: form_url,
+              method: form_method,
+              local: true,
+              multipart: true,
+              html: { class: 'service-form' }) do |form| %>
+
+  <% if @website.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><%= pluralize(@website.errors.count, "error") %> prohibited this service from being saved:</h4>
+      <ul>
+        <% @website.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="flex gap-5 mt-8">
+    <div class="w-3/4">
+      <div class="mb-6">
+        <%= form.label "service[name]", "Name", class: 'text-base font-semibold nata-sans' %>
+        <%= form.text_field "service[name]",
+                            value: @service["name"],
+                            class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                            placeholder: 'Enter service name',
+                            required: true,
+                            data: { 'service-name': true } %>
+        <small class="form-text"><% if @service["slug"].present? %>Slug: /<%= @service["slug"] %> <% end %> </small>
+      </div>
+      <div class="mb-6">
+        <%= form.label "service[slug]", "Slug", class: 'text-base font-semibold nata-sans' %>
+        <%= form.text_field "service[slug]",
+                            value: @service["slug"],
+                            class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                            placeholder: 'auto-generated-from-name',
+                            data: { 'service-slug': true } %>
+        <small class="form-text">URL-friendly version of the name. Leave blank to auto-generate.</small>
+      </div>
+      <div class="mb-6">
+        <%= form.label "service[content]", 'Full Description', class: 'text-base font-semibold nata-sans' %>
+        <%= form.text_area "service[content]",
+                           value: @service["content"],
+                           class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                           rows: 18,
+                           placeholder: 'Detailed description of your service, what it includes, benefits, etc...' %>
+        <small class="form-text">Detailed information about this service</small>
+      </div>
+    </div>
+    <div class="w-1/4">
+
+      <div class="mb-6">
+        <% if @service["featured_image"].present? %>
+          <div class="current-image">
+            <p><strong>Current image:</strong></p>
+            <%= image_tag @service["featured_image"],
+                          alt: @service["name"],
+                          class: 'w-full mb-3' %>
+            <button type="button" data-image-trigger="change" class="nata-sans p-2 w-full border rounded-sm text-sm bg-gray-100 hover:bg-gray-200">Change Featured Image</button>
+          </div>
+          <%= form.file_field "service[featured_image]",
+                              data: { 'image-input': true },
+                              class: 'hidden',
+                              accept: 'image/*' %>
+        <% else %>
+          <button type="button" data-image-trigger="set" class="nata-sans p-3 w-full border rounded-sm text-sm bg-blue-50 hover:bg-blue-100">Set Featured Image</button>
+          <%= form.file_field "service[featured_image]",
+                              data: { 'image-input': true },
+                              class: 'hidden',
+                              accept: 'image/*' %>
+        <% end %>
+        <small class="form-text">Upload an image to represent this service</small>
+      </div>
+
+      <div class="mb-6">
+        <%= form.label "service[excerpt]", "Excerpt", class: 'text-base font-semibold nata-sans' %>
+        <%= form.text_area "service[excerpt]",
+                           value: @service["excerpt"],
+                           class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                           rows: 3,
+                           placeholder: 'Brief description of this service...' %>
+        <small class="form-text">Short summary that will appear in service listings</small>
+      </div>
+
+      <div class="mb-6">
+        <%= form.label "service[parent_page]", "Parent Page", class: 'text-base font-semibold nata-sans' %>
+        <%
+            # Handle current value - check if it's the new format (hash) or old format (string)
+            current_parent_page_slug = @service["parent_page"].is_a?(Hash) ? @service["parent_page"]["slug"] : @service["parent_page"]
+        %>
+        <%= form.select "service[parent_page]",
+                        options_for_select([['None', '']] +
+                                           current_user.website.pages["theme_pages"].map { |name, page| [name.titleize, page["slug"]] },
+                                           current_parent_page_slug),
+                        {},
+                        { class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                          data: { 'parent-page-select': true } } %>
+        <small class="form-text">Optional: Associate this service with a specific page</small>
+      </div>
+
+      <div class="mb-6">
+        <%= form.label "service[categories]", "Categories", class: 'text-base font-semibold nata-sans' %>
+        <%= form.text_field "service[categories]",
+                            value: (@service["categories"].is_a?(Array) ? @service["categories"].join(', ') : @service["categories"]),
+                            class: 'w-full p-3 border rounded text-sm nata-sans mt-2',
+                            placeholder: 'e.g., Web Development, Consulting, Design',
+                            data: { 'categories-input': true } %>
+        <small class="form-text">Separate multiple categories with commas</small>
+        <div data-category-preview class="mt-2"></div>
+      </div>
+
+      <div class="form-actions">
+        <%= form.submit submit_text, class: 'btn btn-primary' %>
+        <%= link_to 'Cancel', cancel_path, class: 'btn btn-secondary' %>
+      </div>
+    </div>
+  </div>
+
+<% end %>
+
+<!-- Select2 CSS -->
+<%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" %>
+
+<style>
+    .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .form-text {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .current-image-preview {
+        max-width: 200px;
+        height: auto;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+
+    .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+
+    .alert h4 {
+        margin-bottom: 0.5rem;
+    }
+
+    .alert ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    /* Custom Select2 styling to match your design */
+    .select2-container .select2-selection--single {
+        height: 46px !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 4px !important;
+        padding: 12px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-rendered {
+        color: #374151 !important;
+        line-height: 24px !important;
+        padding-left: 0 !important;
+        font-size: 0.875rem !important;
+        font-family: inherit !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered{
+        line-height: 20px !important;
+        font-size: .875rem !important;
+        font-family: "Nata Sans", sans-serif !important;
+    }
+    .select2-results__option[aria-selected]{
+        font-size: .875rem !important;
+        font-family: "Nata Sans", sans-serif !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow{
+        top: 11px
+    }
+
+    .select2-container--default .select2-selection--single .select2-arrow {
+        height: 46px !important;
+        right: 12px !important;
+    }
+
+    .select2-dropdown {
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.375rem !important;
+        font-size: 0.875rem !important;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #3b82f6 !important;
+    }
+
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.375rem !important;
+        padding: 0.5rem !important;
+        font-size: 0.875rem !important;
+    }
+</style>
+
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" %>
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" %>
+
+<script data-turbo-eval="false">
+    (function() {
+        'use strict';
+
+        let isInitialized = false;
+
+        function initServiceForm() {
+            // Prevent double initialization
+            if (isInitialized) return;
+
+            // Check if we're on the right page
+            const serviceForm = document.querySelector('.service-form');
+            if (!serviceForm) return;
+
+            console.log('Initializing service form...');
+            isInitialized = true;
+
+            // Auto-generate slug from name
+            const nameField = document.querySelector('[data-service-name]');
+            const slugField = document.querySelector('[data-service-slug]');
+
+            if (nameField && slugField) {
+                nameField.addEventListener('input', function() {
+                    if (slugField.value === '' || !slugField.dataset.userModified) {
+                        const slug = this.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, '-')
+                          .replace(/^-+|-+$/g, '');
+                        slugField.value = slug;
+                    }
+                });
+
+                slugField.addEventListener('input', function() {
+                    this.dataset.userModified = 'true';
+                });
+            }
+
+            // Initialize Select2 if jQuery is available
+            if (typeof $ !== 'undefined' && $.fn.select2) {
+                const selectElement = $('[data-parent-page-select]');
+                if (selectElement.length) {
+                    selectElement.select2({
+                        placeholder: 'Choose a parent page...',
+                        allowClear: true,
+                        width: '100%',
+                        theme: 'default'
+                    });
+                }
+            }
+
+            // Image upload functionality
+            const imageTriggers = document.querySelectorAll('[data-image-trigger]');
+            const imageInput = document.querySelector('[data-image-input]');
+
+            imageTriggers.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (imageInput) imageInput.click();
+                });
+            });
+
+            // Show preview when file is selected
+            if (imageInput) {
+                imageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const triggerButton = document.querySelector('[data-image-trigger]');
+
+                            // Create preview container
+                            let previewContainer = document.querySelector('[data-image-preview]');
+                            if (!previewContainer) {
+                                previewContainer = document.createElement('div');
+                                previewContainer.setAttribute('data-image-preview', '');
+                                previewContainer.className = 'mt-3';
+                                triggerButton.parentNode.insertBefore(previewContainer, triggerButton.nextSibling);
+                            }
+
+                            previewContainer.innerHTML = `
+                            <div>
+                                <img src="${e.target.result}" alt="Preview" class="w-full mb-3" />
+                                <button type="button" data-change-preview class="nata-sans p-2 w-full border rounded-sm text-sm bg-gray-100 hover:bg-gray-200">Change Featured Image</button>
+                            </div>
+                        `;
+
+                            // Hide the original button
+                            triggerButton.style.display = 'none';
+
+                            // Add click handler for the new change button
+                            const changeBtn = previewContainer.querySelector('[data-change-preview]');
+                            if (changeBtn) {
+                                changeBtn.addEventListener('click', function() {
+                                    imageInput.click();
+                                });
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Category preview functionality
+            const categoriesField = document.querySelector('[data-categories-input]');
+            const categoryPreview = document.querySelector('[data-category-preview]');
+
+            if (categoriesField && categoryPreview) {
+                function updateCategoryPreview() {
+                    const categories = categoriesField.value
+                      .split(',')
+                      .map(cat => cat.trim())
+                      .filter(cat => cat.length > 0);
+
+                    if (categories.length > 0) {
+                        const badges = categories.map(cat =>
+                          `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1">${cat}</span>`
+                        ).join('');
+                        categoryPreview.innerHTML = badges;
+                    } else {
+                        categoryPreview.innerHTML = '';
+                    }
+                }
+
+                categoriesField.addEventListener('input', updateCategoryPreview);
+                updateCategoryPreview(); // Initialize
+            }
+
+            console.log('Service form initialized successfully');
+        }
+
+        function resetForm() {
+            isInitialized = false;
+            // Destroy Select2 if it exists
+            if (typeof $ !== 'undefined' && $.fn.select2) {
+                $('[data-parent-page-select]').select2('destroy');
+            }
+            console.log('Form reset for new page load');
+        }
+
+        // Initialize on different events
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initServiceForm);
+        } else {
+            initServiceForm();
+        }
+
+        // Turbo events
+        document.addEventListener('turbo:load', function() {
+            console.log('Turbo load event fired');
+            setTimeout(initServiceForm, 100); // Small delay to ensure DOM is ready
+        });
+
+        document.addEventListener('turbo:before-cache', resetForm);
+        document.addEventListener('turbo:before-render', resetForm);
+    })();
+</script>

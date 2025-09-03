@@ -39,7 +39,13 @@ class ApplicationController < ActionController::Base
       'Social Share Buttons',
       'Testimonial',
       'Banner',
-      'Call-to-Action'
+      'Call-to-Action',
+      'Products',
+      'Services',
+      'Blogs',
+      'Service Inner',
+      'Blog Inner',
+      'Product Inner'
     ]
   end
 end

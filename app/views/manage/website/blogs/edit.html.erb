@@ -1,0 +1,36 @@
+<%# app/views/manage/website/blogs/edit.html.erb %>
+<div class="page-header">
+  <%= link_to '← Back to Blog', manage_website_blog_path(@blog["id"]), class: 'back-link' %>
+  <h1>Edit Blog: <%= @blog["name"] %></h1>
+</div>
+
+<%= render 'form',
+           form_url: manage_website_blog_path(@blog["id"]),
+           form_method: :patch,
+           submit_text: 'Update Blog',
+           cancel_path: manage_website_blog_path(@blog["id"]) %>
+
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .page-header h1 {
+        margin: 0.5rem 0 0 0;
+        color: #333;
+    }
+
+    .back-link {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>

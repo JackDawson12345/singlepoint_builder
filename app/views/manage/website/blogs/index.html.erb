@@ -1,0 +1,113 @@
+<%# app/views/manage/website/blogs/index.html.erb %>
+
+<div>
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="nata-sans page-title">Blogs</h1>
+      <p class="nata-sans font-normal text-base">A list of all blogs on your website including their name, image, categories and content.</p>
+    </div>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <%= link_to "New Blog", new_manage_website_blog_path, class: "nata-sans inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto" %>
+    </div>
+  </div>
+
+  <div class="mt-8 flow-root">
+    <% if @blogs.any? %>
+      <div class="grid grid-cols-3 gap-5">
+        <% @blogs.each do |blog| %>
+          <div class="border rounded-lg overflow-hidden shadow-md">
+            <% if blog["featured_image"].present? %>
+              <div class="relative">
+                <%= image_tag blog["featured_image"], alt: blog["name"], class: 'w-full object-cover h-50' %>
+                <% if blog["categories"].present? %>
+                  <div class="absolute left-0 bottom-0 flex flex-wrap gap-1 p-2">
+                    <% categories = blog["categories"].is_a?(Array) ? blog["categories"] : [blog["categories"]] %>
+                    <% categories.take(3).each do |category| %>
+                      <span class="px-2 py-1 bg-blue-500 text-white nata-sans text-xs font-bold rounded"><%= category %></span>
+                    <% end %>
+                    <% if categories.length > 3 %>
+                      <span class="px-2 py-1 bg-gray-500 text-white nata-sans text-xs font-bold rounded">+<%= categories.length - 3 %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+
+            <div class="p-4">
+              <h3 class="nata-sans text-base font-semibold"><%= blog["name"] %></h3>
+
+              <% if blog["parent_page"].present? %>
+                <%
+                  if blog["parent_page"].is_a?(Hash)
+                    page_name = blog["parent_page"]["name"]
+                  else
+                    page_name = current_user.website.pages["theme_pages"].find { |name, page| page["slug"] == blog["parent_page"] }&.first
+                  end
+                %>
+                <p class="text-xs text-gray-400 nata-sans mb-2">
+                  Page: <%= page_name ? page_name.titleize : blog["parent_page"] %>
+                </p>
+              <% end %>
+
+              <% unless blog["featured_image"].present? %>
+                <% if blog["categories"].present? %>
+                  <div class="categories-container mb-2">
+                    <% categories = blog["categories"].is_a?(Array) ? blog["categories"] : [blog["categories"]] %>
+                    <% categories.each do |category| %>
+                      <span class="category-badge"><%= category %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              <% end %>
+
+              <% if blog["excerpt"].present? %>
+                <p class="text-gray-500 my-2 nata-sans"><%= truncate(blog["excerpt"], length: 100) %></p>
+              <% end %>
+
+              <div class="flex gap-2 mt-4">
+                <%= link_to 'View', manage_website_blog_path(blog["id"]), class: 'nata-sans hover:text-blue-500' %>
+                <%= link_to 'Edit', edit_manage_website_blog_path(blog["id"]), class: 'nata-sans hover:text-blue-500' %>
+                <%= link_to 'Delete',
+                            manage_website_blog_path(blog["id"]),
+                            method: :delete,
+                            class: 'nata-sans hover:text-blue-500',
+                            confirm: 'Are you sure you want to delete this blog?' %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state">
+        <h3>No blogs yet</h3>
+        <p>Get started by creating your first blog.</p>
+        <%= link_to 'Create First Blog', new_manage_website_blog_path, class: 'btn btn-primary' %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .categories-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .category-badge {
+        background-color: #3b82f6;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+</style>

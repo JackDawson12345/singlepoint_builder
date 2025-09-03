@@ -1,0 +1,244 @@
+<%# app/views/manage/website/blogs/show.html.erb %>
+
+<div class="flex justify-between items-center mb-8">
+  <%= link_to '← Back to Blogs', manage_website_blogs_path, class: 'nata-sans text-blue-600 hover:text-blue-800 font-medium' %>
+
+  <div class="flex gap-3">
+    <%= link_to 'Edit Blog', edit_manage_website_blog_path(@blog["id"]),
+                class: 'nata-sans inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50' %>
+    <%= link_to 'Delete Blog',
+                manage_website_blog_path(@blog["id"]),
+                method: :delete,
+                class: 'nata-sans inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700',
+                confirm: 'Are you sure you want to delete this blog?' %>
+  </div>
+</div>
+
+<div class="flex gap-5">
+  <!-- Main Content - Left Side -->
+  <div class="w-3/4">
+    <!-- Blog Header -->
+    <div class="mb-8">
+      <h1 class="nata-sans text-3xl font-bold text-gray-900 mb-4"><%= @blog["name"] %></h1>
+
+      <div class="flex flex-wrap gap-3 items-center mb-4">
+        <% if @blog["categories"].present? %>
+          <div class="flex flex-wrap gap-2">
+            <% categories = @blog["categories"].is_a?(Array) ? @blog["categories"] : [@blog["categories"]] %>
+            <% categories.each do |category| %>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 nata-sans">
+                <%= category %>
+              </span>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if @blog["parent_page"].present? %>
+          <div class="flex items-center text-sm text-gray-500 nata-sans">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Page:
+            <% if @blog["parent_page"].is_a?(Hash) %>
+              <%= @blog["parent_page"]["name"].titleize %>
+            <% else %>
+              <% page_name = @website.pages["theme_pages"].find { |name, page| page["slug"] == @v["parent_page"] }&.first %>
+              <%= page_name ? page_name.titleize : @blog["parent_page"] %>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if @blog["slug"].present? %>
+          <div class="flex items-center text-sm text-gray-500 nata-sans">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.1a1 1 0 011.414 1.414l-1.102 1.1a6 6 0 11-8.484-8.484l4-4a6 6 0 018.484 8.484z" />
+            </svg>
+            <% if @blog["parent_page"]["slug"].present? %>
+              Slug: <code class="bg-gray-100 px-2 py-1 rounded text-xs">/<%= @blog["parent_page"]["slug"] %>/<%= @blog["slug"] %></code>
+            <% else %>
+              Slug: <code class="bg-gray-100 px-2 py-1 rounded text-xs">/<%= @blog["slug"] %></code>
+            <% end %>
+
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Blog Excerpt -->
+    <% if @blog["excerpt"].present? %>
+      <div class="mb-8">
+        <h2 class="nata-sans text-xl font-semibold text-gray-900 mb-4">Summary</h2>
+        <div class="bg-gray-50 rounded-lg p-6">
+          <p class="nata-sans text-gray-700 text-lg leading-relaxed"><%= @blog["excerpt"] %></p>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Blog Content -->
+    <% if @blog["content"].present? %>
+      <div class="mb-8">
+        <h2 class="nata-sans text-xl font-semibold text-gray-900 mb-4">Full Description</h2>
+        <div class="prose prose-gray max-w-none">
+          <div class="nata-sans text-gray-700 leading-relaxed whitespace-pre-line">
+            <%= simple_format(@blog["content"]) %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Sidebar - Right Side -->
+  <div class="w-1/4 space-y-6">
+
+    <!-- Featured Image -->
+    <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <h3 class="nata-sans font-semibold text-gray-900 mb-3">Featured Image</h3>
+      <% if @blog["featured_image"].present? %>
+        <div class="rounded-lg overflow-hidden">
+          <%= image_tag @blog["featured_image"],
+                        alt: @blog["name"],
+                        class: 'w-full h-auto object-cover' %>
+        </div>
+      <% else %>
+        <div class="flex items-center justify-center h-32 bg-gray-100 rounded-lg">
+          <div class="text-center">
+            <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p class="text-sm text-gray-500 nata-sans mt-1">No image set</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Blog Details -->
+    <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <h3 class="nata-sans font-semibold text-gray-900 mb-4">Blog Details</h3>
+
+      <div class="space-y-4">
+        <div>
+          <dt class="text-sm font-medium text-gray-500 nata-sans">ID</dt>
+          <dd class="mt-1 text-sm text-gray-900 nata-sans font-mono bg-gray-50 p-2 rounded text-xs">
+            <%= @blog["id"] %>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-gray-500 nata-sans">Name</dt>
+          <dd class="mt-1 text-sm text-gray-900 nata-sans">
+            <%= @blog["name"].present? ? @blog["name"] : 'Not set' %>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-gray-500 nata-sans">Slug</dt>
+          <dd class="mt-1 text-sm text-gray-900 nata-sans">
+            <%= @blog["slug"].present? ? @blog["slug"] : 'Not set' %>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-gray-500 nata-sans">Categories</dt>
+          <dd class="mt-1">
+            <% if @blog["categories"].present? %>
+              <% categories = @blog["categories"].is_a?(Array) ? @blog["categories"] : [@blog["categories"]] %>
+              <div class="flex flex-wrap gap-1">
+                <% categories.each do |category| %>
+                  <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800 nata-sans">
+                    <%= category %>
+                  </span>
+                <% end %>
+              </div>
+            <% else %>
+              <span class="text-sm text-gray-500 nata-sans">Not set</span>
+            <% end %>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-gray-500 nata-sans">Parent Page</dt>
+          <dd class="mt-1 text-sm text-gray-900 nata-sans">
+            <% if @blog["parent_page"].present? %>
+              <% if @blog["parent_page"].is_a?(Hash) %>
+                <%= @blog["parent_page"]["name"].titleize %>
+                <div class="text-xs text-gray-500 mt-1">
+                  Slug: <%= @blog["parent_page"]["slug"] %>
+                </div>
+              <% else %>
+                <% page_name = @website.pages["theme_pages"].find { |name, page| page["slug"] == @blog["parent_page"] }&.first %>
+                <%= page_name ? page_name.titleize : @blog["parent_page"] %>
+              <% end %>
+            <% else %>
+              <span class="text-gray-500">Not set</span>
+            <% end %>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-gray-500 nata-sans">Content Status</dt>
+          <dd class="mt-1">
+            <div class="flex items-center space-x-4 text-sm">
+              <div class="flex items-center">
+                <% if @blog["content"].present? %>
+                  <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-green-700 nata-sans">Has content</span>
+                <% else %>
+                  <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-red-700 nata-sans">No content</span>
+                <% end %>
+              </div>
+
+              <div class="flex items-center">
+                <% if @blog["excerpt"].present? %>
+                  <svg class="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-green-700 nata-sans">Has excerpt</span>
+                <% else %>
+                  <svg class="w-4 h-4 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-red-700 nata-sans">No excerpt</span>
+                <% end %>
+              </div>
+            </div>
+          </dd>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <h3 class="nata-sans font-semibold text-gray-900 mb-4">Quick Actions</h3>
+      <div class="space-y-3">
+        <%= link_to edit_manage_website_blog_path(@blog["id"]),
+                    class: 'w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 nata-sans' do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Edit Blog
+        <% end %>
+
+        <%= link_to manage_website_blogs_path,
+                    class: 'w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 nata-sans' do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+          All Blogs
+        <% end %>
+
+        <%= link_to new_manage_website_blog_path,
+                    class: 'w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 nata-sans' do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          New Blog
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

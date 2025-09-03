@@ -3,12 +3,10 @@
   <div class="bg-white shadow-sm border border-gray-200 overflow-hidden sm:rounded-lg">
     <div class="px-4 py-5 sm:px-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
       <div class="flex-1">
-        <h3 class="text-xl leading-6 font-semibold text-gray-900 capitalize"><%= @theme.name %> - <%= @pageName %></h3>
+        <h3 class="text-xl leading-6 font-semibold text-gray-900 capitalize"><%= @theme.name %> - <%= @pageName %> - Inner Pages</h3>
         <p class="mt-2 max-w-2xl text-sm text-gray-600"><%= @theme.description %></p>
       </div>
       <div class="flex flex-wrap gap-2 sm:gap-3">
-        <%= link_to "Edit Inner Page", admin_theme_page_inner_page_path(@theme),
-                    class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" %>
         <%= link_to "Edit Theme", edit_admin_theme_path(@theme),
                     class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" %>
         <%= link_to "Preview", admin_dashboard_path(id: @theme.id, theme_page_id: @themePage['theme_page_id']),
@@ -29,7 +27,7 @@
       <div class="p-5">
         <div id="available-components" class="space-y-3">
           <% @components.each do |component| %>
-            <%= render 'component',
+            <%= render 'inner_component',
                        component: component %>
           <% end %>
         </div>
@@ -44,9 +42,9 @@
       </div>
       <div class="p-5">
         <div id="page-components" class="space-y-3">
-          <% if @themePage['components'].any? %>
-            <% @themePage['components'].sort_by { |component| component[:position] || component['position'] || 0 }.each do |theme_page_component| %>
-              <%= render 'theme_page_component', theme_page_component: theme_page_component %>
+          <% if @themePage['inner_pages_components'].any? %>
+            <% @themePage['inner_pages_components'].sort_by { |component| component[:position] || component['position'] || 0 }.each do |theme_page_component| %>
+              <%= render 'inner_theme_page_component', theme_page_component: theme_page_component %>
             <% end %>
           <% else %>
             <div id="empty-components-message" class="text-center py-8">
@@ -76,7 +74,7 @@
 
     <div id="component-stats" class="text-sm text-gray-500">
       <%= pluralize(@components.count, 'component') %> available •
-      <%= pluralize(@themePage['components'].count, 'component') %> added
+      <%= pluralize(@themePage['inner_pages_components'].count, 'component') %> added
     </div>
   </div>
 </div>
