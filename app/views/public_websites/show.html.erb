@@ -1,4 +1,3 @@
-
 <% if @page_data && @page_data["components"] && @page_data["components"].any? %>
   <%
     # Track which CSS and JS we've already included
@@ -6,28 +5,23 @@
     included_js = Set.new
   %>
 
-  <!-- Add data attributes for drag and drop -->
-  <div >
-
-    <style>
-      <% @page_data["components"].each do |component| %>
-      <% foundComponent = Component.find(component["component_id"]) %>
-      <% component_css = foundComponent.content['css'] %>
-      <% if component_css.present? && !included_css.include?(foundComponent.id) %>
-      <%= raw(component_css) %>
-      <% included_css.add(foundComponent.id) %>
-      <% end %>
-      <% end %>
-    </style>
-
-    <% @page_data["components"].sort_by { |c| c["position"] }.each do |component| %>
-      <% foundComponent = Component.find(component["component_id"]) %>
-      <section class="relative edit-content-section">
-        <%= raw(test_data('test')) %>
-      </section>
+  <style>
+    <% @page_data["components"].each do |component| %>
+    <% foundComponent = Component.find(component["component_id"]) %>
+    <% component_css = foundComponent.content['css'] %>
+    <% if component_css.present? && !included_css.include?(foundComponent.id) %>
+    <%= raw(component_css) %>
+    <% included_css.add(foundComponent.id) %>
     <% end %>
+    <% end %>
+  </style>
 
-  </div>
+  <% @page_data["components"].each do |component| %>
+    <% foundComponent = Component.find(component["component_id"]) %>
+    <section class="relative edit-content-section">
+      <%= current_website.user_id %>
+    </section>
+  <% end %>
 
   <script>
       <% @page_data["components"].each do |component| %>
@@ -39,7 +33,6 @@
       <% end %>
       <% end %>
   </script>
-
 <% else %>
   <p>No components on this page.</p>
 <% end %>
