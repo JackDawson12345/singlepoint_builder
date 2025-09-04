@@ -118,3 +118,13 @@
 .h-50{
     height: 200px;
 }
+
+.h-25{
+    height: 100px;
+}
+.w-25{
+    width: 100px;
+}
+.bg-black\/70{
+    background: rgb(0,0,0,0.7);
+}
