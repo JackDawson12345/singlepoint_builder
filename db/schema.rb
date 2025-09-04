@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_28_085758) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_04_110513) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -62,6 +62,98 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_085758) do
     t.datetime "updated_at", null: false
     t.string "notification_type"
     t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
+  create_table "solid_queue_blocked_executions", force: :cascade do |t|
+    t.bigint "job_id", null: false
+    t.string "queue_name", null: false
+    t.integer "priority", default: 0
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.index ["expires_at", "priority"], name: "idx_on_expires_at_priority_e4efd7566c"
+    t.index ["job_id"], name: "index_solid_queue_blocked_executions_on_job_id"
+  end
+
+  create_table "solid_queue_claimed_executions", force: :cascade do |t|
+    t.bigint "job_id", null: false
+    t.bigint "process_id"
+    t.string "queue_name", null: false
+    t.integer "priority", default: 0
+    t.datetime "created_at", null: false
+    t.index ["job_id"], name: "index_solid_queue_claimed_executions_on_job_id"
+    t.index ["process_id", "queue_name"], name: "idx_on_process_id_queue_name_09b5bd9b00"
+  end
+
+  create_table "solid_queue_failed_executions", force: :cascade do |t|
+    t.bigint "job_id", null: false
+    t.text "error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_id"], name: "index_solid_queue_failed_executions_on_job_id"
+  end
+
+  create_table "solid_queue_jobs", force: :cascade do |t|
+    t.string "queue_name", null: false
+    t.string "class_name", null: false
+    t.text "arguments"
+    t.integer "priority", default: 0
+    t.string "active_job_id"
+    t.datetime "scheduled_at"
+    t.datetime "finished_at"
+    t.string "finished_successfully"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active_job_id"], name: "index_solid_queue_jobs_on_active_job_id", unique: true
+    t.index ["queue_name", "finished_at"], name: "index_solid_queue_jobs_on_queue_name_and_finished_at"
+    t.index ["scheduled_at"], name: "index_solid_queue_jobs_on_scheduled_at"
+  end
+
+  create_table "solid_queue_paused_queues", force: :cascade do |t|
+    t.string "queue_name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["queue_name"], name: "index_solid_queue_paused_queues_on_queue_name", unique: true
+  end
+
+  create_table "solid_queue_processes", force: :cascade do |t|
+    t.string "kind", null: false
+    t.datetime "last_heartbeat_at", null: false
+    t.bigint "supervisor_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["last_heartbeat_at"], name: "index_solid_queue_processes_on_last_heartbeat_at"
+    t.index ["supervisor_id"], name: "index_solid_queue_processes_on_supervisor_id"
+  end
+
+  create_table "solid_queue_ready_executions", force: :cascade do |t|
+    t.bigint "job_id", null: false
+    t.string "queue_name", null: false
+    t.integer "priority", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_id"], name: "index_solid_queue_ready_executions_on_job_id"
+    t.index ["priority", "job_id"], name: "index_solid_queue_ready_executions_on_priority_and_job_id"
+  end
+
+  create_table "solid_queue_scheduled_executions", force: :cascade do |t|
+    t.bigint "job_id", null: false
+    t.string "queue_name", null: false
+    t.integer "priority", default: 0
+    t.datetime "scheduled_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_id"], name: "index_solid_queue_scheduled_executions_on_job_id"
+    t.index ["scheduled_at", "priority"], name: "idx_on_scheduled_at_priority_85695a030a"
+  end
+
+  create_table "solid_queue_semaphores", force: :cascade do |t|
+    t.string "key", null: false
+    t.integer "value", default: 1
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expires_at"], name: "index_solid_queue_semaphores_on_expires_at"
+    t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
   create_table "themes", force: :cascade do |t|
@@ -128,6 +220,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_28_085758) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "notifications", "users"
+  add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id"
+  add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id"
+  add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id"
+  add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id"
+  add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id"
   add_foreign_key "user_setups", "themes"
   add_foreign_key "user_setups", "users"
   add_foreign_key "websites", "themes"
