@@ -1,6 +1,7 @@
 class Component < ApplicationRecord
   # Active Storage association for component image
   has_one_attached :component_image
+  has_many_attached :images  # For storing all dynamic images
 
   # Validations
   validates :name, presence: true

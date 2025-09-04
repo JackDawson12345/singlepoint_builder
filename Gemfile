@@ -64,3 +64,5 @@ gem 'devise'
 gem 'byebug'
 gem 'image_processing', '~> 1.2'
 gem 'stripe', '~> 13.0'
+gem 'aws-sdk-s3', require: false
+gem 'image_processing', '~> 1.2' # for variants

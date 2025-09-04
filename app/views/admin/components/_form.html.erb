@@ -145,6 +145,15 @@
       </div>
     </div>
 
+    <div class="bg-white shadow-sm rounded-lg border border-gray-200 image-section">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="nata-sans text-lg font-medium text-gray-900">Images</h3>
+      </div>
+      <div class="p-6">
+        <p>test</p>
+      </div>
+    </div>
+
     <!-- Code Content Card -->
     <div class="bg-white shadow-sm rounded-lg border border-gray-200">
       <div class="px-6 py-4 border-b border-gray-200">
@@ -353,4 +362,152 @@
             }
         }
     });
+
+    // Function to toggle image section visibility and render image fields
+    function toggleImageSection() {
+        const fieldTypesTextarea = document.querySelector('textarea[name="component[field_types]"]');
+        const imageSection = document.querySelector('.image-section');
+        const imageContent = document.querySelector('.image-section .p-6');
+
+        if (!fieldTypesTextarea || !imageSection || !imageContent) return;
+
+        const fieldTypesValue = fieldTypesTextarea.value.trim();
+        let imageFields = [];
+
+        try {
+            // Try to parse the JSON
+            if (fieldTypesValue) {
+                const fieldTypesJson = JSON.parse(fieldTypesValue);
+
+                // Find all fields with type "image"
+                imageFields = Object.entries(fieldTypesJson)
+                    .filter(([key, value]) => value === 'image')
+                    .map(([key, value]) => key);
+            }
+        } catch (e) {
+            // If JSON is invalid, hide the section
+            imageFields = [];
+        }
+
+        if (imageFields.length > 0) {
+            // Show the image section
+            imageSection.style.display = 'block';
+            imageSection.classList.remove('hidden');
+
+            // Generate HTML for image fields
+            const imageFieldsHtml = imageFields.map(fieldName => {
+                const displayName = fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                return `
+                <div class="mb-6">
+                    <label class="nata-sans block text-sm font-medium text-gray-700 mb-2" for="${fieldName}_image">
+                        ${displayName}
+                    </label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <input type="file"
+                                       name="component[${fieldName}_image]"
+                                       id="${fieldName}_image"
+                                       class="sr-only"
+                                       accept="image/*"
+                                       onchange="previewImageField(this, '${fieldName}')">
+                                <label for="${fieldName}_image" class="nata-sans relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                    <span>Upload ${displayName.toLowerCase()}</span>
+                                </label>
+                                <p class="nata-sans pl-1">or drag and drop</p>
+                            </div>
+                            <p class="nata-sans text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }).join('');
+
+            imageContent.innerHTML = imageFieldsHtml;
+        } else {
+            // Hide the image section if no image fields
+            imageSection.style.display = 'none';
+            imageSection.classList.add('hidden');
+        }
+    }
+
+    // Function to preview individual image fields
+    function previewImageField(input, fieldName) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            const file = input.files[0];
+
+            // Validate file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                input.value = '';
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file');
+                input.value = '';
+                return;
+            }
+
+            reader.onload = function(e) {
+                // Find the upload area for this specific field
+                const uploadArea = input.closest('.border-dashed');
+                const svg = uploadArea.querySelector('svg');
+
+                if (svg) {
+                    // Create image preview
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'mx-auto h-32 w-auto object-cover rounded-lg shadow-sm mb-4';
+
+                    // Replace SVG with image
+                    svg.parentNode.insertBefore(img, svg);
+                    svg.style.display = 'none';
+
+                    // Update label text
+                    const label = uploadArea.querySelector('label span');
+                    if (label) {
+                        const displayName = fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        label.textContent = `Change ${displayName.toLowerCase()}`;
+                    }
+                }
+            };
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Function to initialize image section toggle
+    function initializeImageSectionToggle() {
+        const fieldTypesTextarea = document.querySelector('textarea[name="component[field_types]"]');
+
+        if (fieldTypesTextarea) {
+            // Check initial state
+            toggleImageSection();
+
+            // Remove existing listeners to prevent duplicates
+            fieldTypesTextarea.removeEventListener('input', toggleImageSection);
+            fieldTypesTextarea.removeEventListener('change', toggleImageSection);
+            fieldTypesTextarea.removeEventListener('keyup', toggleImageSection);
+
+            // Add event listeners for real-time updates
+            fieldTypesTextarea.addEventListener('input', toggleImageSection);
+            fieldTypesTextarea.addEventListener('change', toggleImageSection);
+            fieldTypesTextarea.addEventListener('keyup', toggleImageSection);
+            fieldTypesTextarea.addEventListener('paste', function() {
+                // Small delay to allow paste content to be processed
+                setTimeout(toggleImageSection, 10);
+            });
+        }
+    }
+
+    // Add event listeners for both initial load and Turbo navigation
+    document.addEventListener('DOMContentLoaded', initializeImageSectionToggle);
+    document.addEventListener('turbo:load', initializeImageSectionToggle);
+    document.addEventListener('turbo:frame-load', initializeImageSectionToggle);
 </script>

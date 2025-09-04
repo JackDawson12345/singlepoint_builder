@@ -26,6 +26,9 @@ class Admin::ComponentsController < Admin::BaseController
     Rails.logger.debug "Component attributes before save: #{@component.attributes.inspect}"
 
     if @component.save
+      # Process dynamic image uploads and update editable_fields
+      process_dynamic_image_uploads
+
       Rails.logger.debug "Component saved successfully: #{@component.attributes.inspect}"
       redirect_to admin_components_show_path(@component), notice: 'Component was successfully created.'
     else
@@ -33,6 +36,7 @@ class Admin::ComponentsController < Admin::BaseController
       render :new, status: :unprocessable_entity
     end
   end
+
 
   def update
     Rails.logger.debug "Updating component with params: #{component_params.inspect}"
@@ -43,6 +47,9 @@ class Admin::ComponentsController < Admin::BaseController
     end
 
     if @component.update(component_params.except(:remove_component_image))
+      # Process dynamic image uploads and update editable_fields
+      process_dynamic_image_uploads
+
       Rails.logger.debug "Component updated successfully: #{@component.attributes.inspect}"
       redirect_to admin_components_show_path(@component), notice: 'Component was successfully updated.'
     else
@@ -92,5 +99,43 @@ class Admin::ComponentsController < Admin::BaseController
 
     Rails.logger.debug "Final permitted params: #{permitted_params.inspect}"
     permitted_params
+  end
+
+  def process_dynamic_image_uploads
+    return unless @component.field_types.is_a?(Hash)
+
+    # Find all image fields from field_types
+    image_fields = @component.field_types.select { |key, value| value == 'image' }.keys
+
+    # Get current editable_fields
+    editable_fields = @component.editable_fields.is_a?(Hash) ? @component.editable_fields.dup : {}
+
+    image_fields.each do |field_name|
+      image_param_name = "#{field_name}_image"
+
+      if params[:component] && params[:component][image_param_name].present?
+        # Remove any existing image for this field
+        existing_attachment = @component.images.attachments.find { |att| att.metadata['field_name'] == field_name }
+        existing_attachment&.purge
+
+        # Attach new image with metadata
+        @component.images.attach(
+          io: params[:component][image_param_name],
+          filename: "#{field_name}_#{params[:component][image_param_name].original_filename}",
+          metadata: { field_name: field_name }
+        )
+
+        # Find the just-attached image and get its URL
+        attached_image = @component.images.attachments.find { |att| att.metadata['field_name'] == field_name }
+        if attached_image
+          editable_fields[field_name] = Rails.application.routes.url_helpers.rails_blob_url(attached_image, only_path: true)
+        end
+      end
+    end
+
+    # Update the component with new editable_fields if they changed
+    if editable_fields != @component.editable_fields
+      @component.update_column(:editable_fields, editable_fields)
+    end
   end
 end
