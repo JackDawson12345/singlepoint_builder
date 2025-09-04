@@ -1,6 +1,22 @@
 <!-- app/views/admin/media/index.html.erb -->
 <div class="media-gallery">
-  <h1>Media Gallery (<%= @images.count %> files)</h1>
+  <div class="header-section">
+    <h1>Media Gallery (<%= @images.count %> files)</h1>
+
+    <!-- Upload Form -->
+    <div class="upload-section">
+      <%= form_with url: admin_media_path, method: :post, multipart: true, local: true, class: "upload-form" do |form| %>
+        <div class="upload-controls">
+          <%= form.file_field :images, multiple: true, accept: "image/*", class: "file-input", id: "file-input" %>
+          <label for="file-input" class="file-label">
+            📁 Choose Images
+          </label>
+          <%= form.submit "Upload Images", class: "upload-btn" %>
+        </div>
+        <div id="file-preview" class="file-preview"></div>
+      <% end %>
+    </div>
+  </div>
 
   <% if @images.present? %>
     <div class="images-grid">
@@ -45,6 +61,101 @@
 <style>
     .media-gallery {
         padding: 20px;
+    }
+
+    .header-section {
+        margin-bottom: 30px;
+    }
+
+    .upload-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border: 2px dashed #dee2e6;
+        margin-top: 20px;
+    }
+
+    .upload-form {
+        margin: 0;
+    }
+
+    .upload-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .file-label {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #6c757d;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .file-label:hover {
+        background: #5a6268;
+    }
+
+    .upload-btn {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .upload-btn:hover {
+        background: #0056b3;
+    }
+
+    .upload-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .file-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .preview-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .preview-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .preview-filename {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 2px 5px;
+        font-size: 0.7em;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
     }
 
     .images-grid {
@@ -117,3 +228,45 @@
         text-decoration: underline;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('file-input');
+        const filePreview = document.getElementById('file-preview');
+        const uploadBtn = document.querySelector('.upload-btn');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const files = Array.from(e.target.files);
+                filePreview.innerHTML = '';
+
+                if (files.length > 0) {
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = `Upload ${files.length} Image${files.length > 1 ? 's' : ''}`;
+
+                    files.forEach(function(file) {
+                        if (file.type.startsWith('image/')) {
+                            const previewItem = document.createElement('div');
+                            previewItem.className = 'preview-item';
+
+                            const img = document.createElement('img');
+                            img.className = 'preview-image';
+                            img.src = URL.createObjectURL(file);
+
+                            const filename = document.createElement('div');
+                            filename.className = 'preview-filename';
+                            filename.textContent = file.name;
+
+                            previewItem.appendChild(img);
+                            previewItem.appendChild(filename);
+                            filePreview.appendChild(previewItem);
+                        }
+                    });
+                } else {
+                    uploadBtn.disabled = true;
+                    uploadBtn.textContent = 'Upload Images';
+                }
+            });
+        }
+    });
+</script>

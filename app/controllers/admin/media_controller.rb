@@ -5,6 +5,29 @@ class Admin::MediaController < Admin::BaseController
     @images = get_all_images(bucket_name)
   end
 
+  def create
+    if params[:images].present?
+      uploaded_count = 0
+
+      params[:images].each do |image|
+        # Create Active Storage attachment (this will automatically upload to S3)
+        blob = ActiveStorage::Blob.create_and_upload!(
+          io: image.open,
+          filename: image.original_filename,
+          content_type: image.content_type
+        )
+        uploaded_count += 1
+      end
+
+      redirect_to admin_media_path, notice: "Successfully uploaded #{uploaded_count} image#{uploaded_count > 1 ? 's' : ''}!"
+    else
+      redirect_to admin_media_path, alert: "Please select at least one image to upload."
+    end
+  rescue => e
+    Rails.logger.error "Upload error: #{e.message}"
+    redirect_to admin_media_path, alert: "Upload failed: #{e.message}"
+  end
+
   private
 
   def get_all_images(bucket_name)
