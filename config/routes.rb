@@ -153,11 +153,15 @@ Rails.application.routes.draw do
   constraints(CustomDomainConstraint.new) do
     get '/', to: 'public_websites#show', as: 'custom_domain_root'
     get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
-    get '*path', to: 'public_websites#show'
+    get '*path', to: 'public_websites#show', constraints: lambda { |req|
+      !req.path.start_with?('/rails/active_storage')
+    }
   end
 
   # Main domain page slug routes - after all specific routes
-  get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
+  get '/:page_slug', to: 'public_websites#show', constraints: lambda { |req|
+    !req.path.start_with?('/rails/active_storage')
+  }
 
   # Main domain root route - LAST
   root "frontend#home"
