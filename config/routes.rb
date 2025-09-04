@@ -1,21 +1,11 @@
 Rails.application.routes.draw do
-  get '/about', to: 'frontend#about', as: 'about'
-  get '/contact', to: 'frontend#contact', as: 'contact'
-  get '/themes', to: 'frontend#themes', as: 'themes'
-  get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
-
+  # Health check should be first
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Devise routes
   devise_for :users
 
-  # IMPORTANT: Custom domain routes must come FIRST before the root route
-  # Constraint for custom domains - MOVED TO TOP
-  constraints(CustomDomainConstraint.new) do
-    get '/', to: 'public_websites#show', as: 'custom_domain_root'
-    get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
-    get '*path', to: 'public_websites#show'
-  end
-
+  # Admin routes - MUST come before wildcard routes
   namespace :admin do
     namespace :website do
       get "/", to: "website#index", as: "websites"
@@ -94,6 +84,7 @@ Rails.application.routes.draw do
     resources :themes
   end
 
+  # Manage routes - MUST come before wildcard routes
   namespace :manage do
     namespace :website do
       namespace :editor do
@@ -153,6 +144,21 @@ Rails.application.routes.draw do
     get "/settings/website-settings", to: "settings#website_settings", as: "website_settings"
   end
 
-  # Main domain root route - MOVED TO BOTTOM so it only catches main domain requests
+  # Specific frontend routes
+  get '/about', to: 'frontend#about', as: 'about'
+  get '/contact', to: 'frontend#contact', as: 'contact'
+  get '/themes', to: 'frontend#themes', as: 'themes'
+
+  # Custom domain constraint routes - MOVED TO END
+  constraints(CustomDomainConstraint.new) do
+    get '/', to: 'public_websites#show', as: 'custom_domain_root'
+    get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
+    get '*path', to: 'public_websites#show'
+  end
+
+  # Main domain page slug routes - after all specific routes
+  get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
+
+  # Main domain root route - LAST
   root "frontend#home"
 end

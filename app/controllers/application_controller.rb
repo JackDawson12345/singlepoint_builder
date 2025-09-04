@@ -2,7 +2,7 @@ class ApplicationController < ActionController::Base
 
 
   # Add multi-tenant domain detection before all actions
-  before_action :find_current_website
+  before_action :find_current_website, if: -> { Rails.env.production? }
 
   private
 

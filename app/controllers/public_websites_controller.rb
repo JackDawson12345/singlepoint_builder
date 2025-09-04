@@ -7,13 +7,9 @@ class PublicWebsitesController < ApplicationController
   layout 'public_website'
 
   def show
-    # Enhanced logging for debugging
-    Rails.logger.info "=== PUBLIC WEBSITES CONTROLLER DEBUG ==="
-    Rails.logger.info "Request host: #{request.host}"
-    Rails.logger.info "Is main domain: #{is_main_domain?}"
-    Rails.logger.info "Is custom domain: #{is_custom_domain?}"
-    Rails.logger.info "Current website: #{current_website.inspect}"
-    Rails.logger.info "======================================="
+    if request.path.start_with?('/admin', '/manage', '/up', '/users/sign_in', '/users/sign_out')
+      raise ActionController::RoutingError, 'Not Found'
+    end
 
     # Handle main domain vs custom domain logic
     if is_main_domain?

@@ -1,6 +1,8 @@
 # lib/custom_domain_constraint.rb
 class CustomDomainConstraint
   def matches?(request)
+    return true if Rails.env.development? && request.host.include?('localhost')
+
     # Check if the request is for a custom domain (not your main Heroku domain)
     domain = request.host.downcase
     main_domains = [
