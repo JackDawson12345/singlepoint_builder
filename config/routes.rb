@@ -35,6 +35,9 @@ Rails.application.routes.draw do
 
     get "/", to: "dashboard#index", as: "dashboard"
 
+    # Media
+    get "/media", to: "media#index", as: "media"
+
     # Components
     get "/components", to: 'components#index', as: 'components'
     get "/components/:id/preview", to: 'components#preview', as: 'component_preview'
