@@ -4,19 +4,10 @@ class FrontendController < ApplicationController
   layout 'frontend'
 
   def home
-    Rails.logger.info "=== FRONTEND CONTROLLER DEBUG ==="
-    Rails.logger.info "Request host: #{request.host}"
-    Rails.logger.info "Is main domain: #{is_main_domain?}"
-    Rails.logger.info "Is custom domain: #{is_custom_domain?}"
-    Rails.logger.info "Current website: #{current_website.inspect}"
-    Rails.logger.info "==============================="
-
     # If this is a custom domain request, handle it as a public website
     if is_custom_domain? && current_website
-      Rails.logger.info "Custom domain detected - serving public website content"
       serve_public_website
     else
-      Rails.logger.info "Main domain detected - serving frontend home"
       # Your existing frontend home logic - render the normal frontend view
       # Add any existing logic you had in the home method here
     end

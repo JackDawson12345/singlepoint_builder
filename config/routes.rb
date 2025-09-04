@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   get '/about', to: 'frontend#about', as: 'about'
   get '/contact', to: 'frontend#contact', as: 'contact'
   get '/themes', to: 'frontend#themes', as: 'themes'
+  get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
 
   get "up" => "rails/health#show", as: :rails_health_check
 
