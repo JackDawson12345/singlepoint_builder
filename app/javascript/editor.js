@@ -722,3 +722,181 @@ document.addEventListener('DOMContentLoaded', function() {
         document.head.appendChild(style);
     }
 });
+
+
+
+
+window.ImageUploadHandler = {
+    triggerFileInput(fieldId) {
+        document.getElementById(fieldId).click();
+    },
+
+    handleFileSelect(event, fieldId) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const container = document.querySelector(`[data-field-id="${fieldId}"]`);
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            this.showError(container, 'Please select a valid image file');
+            return;
+        }
+
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            this.showError(container, 'Image size must be less than 5MB');
+            return;
+        }
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.createImagePreview(container, e.target.result, fieldId);
+        };
+        reader.readAsDataURL(file);
+    },
+
+    createImagePreview(container, imageSrc, fieldId) {
+        const previewHTML = `
+      <div class="current-image-display group relative overflow-hidden rounded-xl border-2 border-green-300 bg-white shadow-lg transition-all duration-300 hover:shadow-xl animate-fade-in">
+        <div class="aspect-video relative overflow-hidden bg-gray-50">
+          <img src="${imageSrc}" 
+               class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+               id="preview-${fieldId}">
+          
+          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="flex space-x-3">
+                <button type="button" 
+                        class="change-image-btn bg-white text-gray-700 px-4 py-2 rounded-lg font-medium shadow-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
+                        onclick="ImageUploadHandler.triggerFileInput('${fieldId}')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                  </svg>
+                  <span>Change</span>
+                </button>
+                <button type="button" 
+                        class="remove-image-btn bg-red-500 text-white px-4 py-2 rounded-lg font-medium shadow-lg hover:bg-red-600 transition-colors flex items-center space-x-2"
+                        onclick="ImageUploadHandler.removeImage('${fieldId}')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                  <span>Remove</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-4 bg-gradient-to-r from-green-50 to-emerald-50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span class="text-sm font-medium text-gray-700">New Image Selected</span>
+            </div>
+            <span class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">Ready to Upload</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+        container.innerHTML = previewHTML + container.querySelector('input[type="file"]').outerHTML;
+    },
+
+    removeImage(fieldId) {
+        const container = document.querySelector(`[data-field-id="${fieldId}"]`);
+        const fileInput = document.getElementById(fieldId);
+
+        fileInput.value = '';
+
+        const uploadHTML = `
+      <div class="upload-drop-zone border-3 border-dashed border-gray-300 rounded-xl p-8 text-center transition-all duration-300 hover:border-blue-400 hover:bg-blue-50/30 cursor-pointer group"
+           onclick="ImageUploadHandler.triggerFileInput('${fieldId}')"
+           ondrop="ImageUploadHandler.handleDrop(event, '${fieldId}')"
+           ondragover="ImageUploadHandler.handleDragOver(event)"
+           ondragleave="ImageUploadHandler.handleDragLeave(event)">
+        
+        <div class="upload-content">
+          <div class="mx-auto w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-full flex items-center justify-center mb-4 group-hover:from-blue-200 group-hover:to-indigo-300 transition-all duration-300">
+            <svg class="w-8 h-8 text-blue-600 group-hover:text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+          </div>
+          
+          <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-900 transition-colors">
+            Drop your image here
+          </h3>
+          <p class="text-gray-600 mb-4 group-hover:text-gray-700 transition-colors">
+            or <span class="text-blue-600 font-medium">browse</span> to choose a file
+          </p>
+          
+          <div class="flex items-center justify-center space-x-4 text-xs text-gray-500">
+            <span class="bg-gray-100 px-2 py-1 rounded">JPG</span>
+            <span class="bg-gray-100 px-2 py-1 rounded">PNG</span>
+            <span class="bg-gray-100 px-2 py-1 rounded">GIF</span>
+            <span class="bg-gray-100 px-2 py-1 rounded">WEBP</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+        container.innerHTML = uploadHTML + fileInput.outerHTML;
+    },
+
+    handleDrop(event, fieldId) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const dropZone = event.currentTarget;
+        dropZone.classList.remove('border-blue-500', 'bg-blue-100');
+        dropZone.classList.add('border-gray-300');
+
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            const fileInput = document.getElementById(fieldId);
+            fileInput.files = files;
+            this.handleFileSelect({target: fileInput}, fieldId);
+        }
+    },
+
+    handleDragOver(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const dropZone = event.currentTarget;
+        dropZone.classList.add('border-blue-500', 'bg-blue-100');
+        dropZone.classList.remove('border-gray-300');
+    },
+
+    handleDragLeave(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const dropZone = event.currentTarget;
+        dropZone.classList.remove('border-blue-500', 'bg-blue-100');
+        dropZone.classList.add('border-gray-300');
+    },
+
+    showError(container, message) {
+        const errorHTML = `
+      <div class="error-message mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm animate-fade-in">
+        ${message}
+      </div>
+    `;
+
+        const existingError = container.querySelector('.error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+
+        container.insertAdjacentHTML('beforeend', errorHTML);
+
+        setTimeout(() => {
+            const errorElement = container.querySelector('.error-message');
+            if (errorElement) {
+                errorElement.remove();
+            }
+        }, 5000);
+    }
+};
