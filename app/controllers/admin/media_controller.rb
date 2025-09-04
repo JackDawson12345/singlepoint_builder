@@ -9,17 +9,24 @@ class Admin::MediaController < Admin::BaseController
     if params[:images].present?
       uploaded_count = 0
 
-      params[:images].each do |image|
+      # Filter out empty strings and only process actual file uploads
+      params[:images].reject(&:blank?).each do |image|
+        next unless image.respond_to?(:tempfile) # Make sure it's an uploaded file
+
         # Create Active Storage attachment (this will automatically upload to S3)
         blob = ActiveStorage::Blob.create_and_upload!(
-          io: image.open,
+          io: image.tempfile,  # Use .tempfile instead of .open
           filename: image.original_filename,
           content_type: image.content_type
         )
         uploaded_count += 1
       end
 
-      redirect_to admin_media_path, notice: "Successfully uploaded #{uploaded_count} image#{uploaded_count > 1 ? 's' : ''}!"
+      if uploaded_count > 0
+        redirect_to admin_media_path, notice: "Successfully uploaded #{uploaded_count} image#{uploaded_count > 1 ? 's' : ''}!"
+      else
+        redirect_to admin_media_path, alert: "No valid images were uploaded."
+      end
     else
       redirect_to admin_media_path, alert: "Please select at least one image to upload."
     end
