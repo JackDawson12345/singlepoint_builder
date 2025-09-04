@@ -808,8 +808,29 @@ window.ImageUploadHandler = {
         const container = document.querySelector(`[data-field-id="${fieldId}"]`);
         const fileInput = document.getElementById(fieldId);
 
+        // Clear the file input
         fileInput.value = '';
 
+        // Create a hidden input to indicate image removal
+        const existingRemoveInput = container.querySelector('.remove-image-input');
+        if (existingRemoveInput) {
+            existingRemoveInput.remove();
+        }
+
+        // Extract field name from fieldId
+        // fieldId format: 'field_{theme_page_id}_{component_page_id}_{field_name}'
+        const fieldIdParts = fieldId.split('_');
+        const fieldName = fieldIdParts.slice(3).join('_'); // Get everything after the first 3 parts
+
+        // Add hidden input to signal that this image should be removed
+        const removeInput = document.createElement('input');
+        removeInput.type = 'hidden';
+        removeInput.name = `remove_${fieldName}`;
+        removeInput.value = '1';
+        removeInput.className = 'remove-image-input';
+        container.appendChild(removeInput);
+
+        // Show upload zone
         const uploadHTML = `
       <div class="upload-drop-zone border-3 border-dashed border-gray-300 rounded-xl p-8 text-center transition-all duration-300 hover:border-blue-400 hover:bg-blue-50/30 cursor-pointer group"
            onclick="ImageUploadHandler.triggerFileInput('${fieldId}')"
@@ -841,7 +862,11 @@ window.ImageUploadHandler = {
       </div>
     `;
 
-        container.innerHTML = uploadHTML + fileInput.outerHTML;
+        // Replace current content with upload zone, preserving the file input
+        const fileInputElement = fileInput.cloneNode(true);
+        container.innerHTML = uploadHTML;
+        container.appendChild(fileInputElement);
+        container.appendChild(removeInput);
     },
 
     handleDrop(event, fieldId) {

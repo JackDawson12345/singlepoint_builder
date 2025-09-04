@@ -189,15 +189,77 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
   end
 
   def sidebar_editor_fields_save
+    Rails.logger.debug "=== DEBUG EDITOR FIELDS SAVE ==="
+    Rails.logger.debug "All params: #{params.inspect}"
+    Rails.logger.debug "Request content type: #{request.content_type}"
+    Rails.logger.debug "Request format: #{request.format}"
+
     component = Component.find(params[:component_id])
     theme_page_id = params[:theme_page_id]
     user = User.find(params[:user_id])
     component_page_id = params[:component_page_id]
 
+    Rails.logger.debug "Component field_types: #{component.field_types.inspect}"
+
     field_values = {}
+
+    # Process each field based on its type, handling images with Active Storage
     component.field_types.each do |name, type|
-      field_values[name] = params[name] if params[name].present?
+      Rails.logger.debug "Processing field: #{name} of type: #{type}"
+
+      # Try multiple parameter locations
+      param_value = params[name] || params.dig(:manage_website_editor_website_editor, name) || params.dig(:website_editor, name)
+
+      Rails.logger.debug "Param value for #{name}: #{param_value.inspect}"
+      Rails.logger.debug "Param class for #{name}: #{param_value.class}" if param_value
+
+      if type == 'image'
+        remove_param = params["remove_#{name}"] || params.dig(:manage_website_editor_website_editor, "remove_#{name}")
+
+        if remove_param == '1'
+          Rails.logger.debug "Removing image for field: #{name}"
+          field_values[name] = ''
+        elsif params[name].present? && params[name].respond_to?(:original_filename)
+          Rails.logger.debug "Uploading new image for field: #{name}"
+          Rails.logger.debug "Image filename: #{params[name].original_filename}"
+          Rails.logger.debug "Image content type: #{params[name].content_type}"
+
+          # Handle image upload with Active Storage
+          begin
+            blob = ActiveStorage::Blob.create_and_upload!(
+              io: params[name].open,
+              filename: params[name].original_filename,
+              content_type: params[name].content_type
+            )
+
+            # Store the blob URL as the field value
+            field_values[name] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
+            Rails.logger.debug "Image uploaded successfully. Blob URL: #{field_values[name]}"
+          rescue => e
+            Rails.logger.error "Error uploading image for field #{name}: #{e.message}"
+            Rails.logger.error e.backtrace.join("\n")
+            # Keep existing value if upload fails
+            next
+          end
+        elsif params[name].blank?
+          Rails.logger.debug "No new image for field: #{name}, keeping existing value"
+          # If no new image and field is empty, keep existing value
+          # This will be handled by not including it in field_values,
+          # so existing customization will be preserved
+          next
+        else
+          Rails.logger.debug "Image field #{name} present but not a valid file: #{params[name].inspect}"
+        end
+      else
+        # Handle text and textarea fields as before
+        if params[name].present?
+          field_values[name] = params[name]
+          Rails.logger.debug "Added text field #{name}: #{params[name]}"
+        end
+      end
     end
+
+    Rails.logger.debug "Final field_values: #{field_values.inspect}"
 
     # Get current customisations
     website = user.website
@@ -227,40 +289,93 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       theme_page_ids.each do |page_id|
 
         page = website.pages["theme_pages"].values.find { |page| page["theme_page_id"] == page_id }
-        component_data = page['components'].find { |comp| comp['component_id'] == component.id }
+        next unless page # Skip if page not found
 
-        field_values.each do |field_name, field_value|
-          new_customisations << {
-            "component_id" => component.id.to_s,
-            "component_page_id" => component_data['component_page_id'],
-            "theme_page_id" => page_id.to_s,
-            "field_name" => field_name.to_s,
-            "field_value" => field_value.to_s,
-            "field_styling" => ""
-          }
+        component_data = page['components']&.find { |comp| comp['component_id'] == component.id }
+        next unless component_data # Skip if component not found in page
+
+        # For global components, we need to preserve existing values for fields not being updated
+        if field_values.empty?
+          # If no fields are being updated, preserve all existing customisations for this component
+          existing_customisations_for_page = current_customisations.select do |c|
+            c["component_id"] == component.id.to_s && c["theme_page_id"] == page_id.to_s
+          end
+          new_customisations.concat(existing_customisations_for_page)
+        else
+          # Get existing customisations for fields not being updated
+          existing_for_page = current_customisations.select do |c|
+            c["component_id"] == component.id.to_s &&
+              c["theme_page_id"] == page_id.to_s &&
+              c["component_page_id"] == component_data['component_page_id'] &&
+              !field_values.key?(c["field_name"])
+          end
+          new_customisations.concat(existing_for_page)
+
+          # Add new/updated field values
+          field_values.each do |field_name, field_value|
+            new_customisations << {
+              "component_id" => component.id.to_s,
+              "component_page_id" => component_data['component_page_id'],
+              "theme_page_id" => page_id.to_s,
+              "field_name" => field_name.to_s,
+              "field_value" => field_value.to_s,
+              "field_styling" => ""
+            }
+          end
         end
       end
     else
       # Create new customisation entries for each theme_page_id
       new_customisations = []
-      theme_page_ids.each do |page_id|
-        field_values.each do |field_name, field_value|
-          new_customisations << {
-            "component_id" => component.id.to_s,
-            "component_page_id" => component_page_id,
-            "theme_page_id" => page_id.to_s,
-            "field_name" => field_name.to_s,
-            "field_value" => field_value.to_s,
-            "field_styling" => ""
-          }
+
+      # For non-global components, preserve existing values for fields not being updated
+      if field_values.empty?
+        # If no fields are being updated, preserve all existing customisations for this component
+        existing_customisations_for_component = current_customisations.select do |c|
+          c["component_id"] == component.id.to_s &&
+            c["theme_page_id"] == theme_page_id.to_s &&
+            c["component_page_id"] == component_page_id
+        end
+        new_customisations.concat(existing_customisations_for_component)
+      else
+        # Get existing customisations for fields not being updated
+        existing_for_component = current_customisations.select do |c|
+          c["component_id"] == component.id.to_s &&
+            c["theme_page_id"] == theme_page_id.to_s &&
+            c["component_page_id"] == component_page_id &&
+            !field_values.key?(c["field_name"])
+        end
+        new_customisations.concat(existing_for_component)
+
+        # Add new/updated field values
+        theme_page_ids.each do |page_id|
+          field_values.each do |field_name, field_value|
+            new_customisations << {
+              "component_id" => component.id.to_s,
+              "component_page_id" => component_page_id,
+              "theme_page_id" => page_id.to_s,
+              "field_name" => field_name.to_s,
+              "field_value" => field_value.to_s,
+              "field_styling" => ""
+            }
+          end
         end
       end
     end
 
+    # Add customisations that are NOT for this component (preserve other components' data)
+    other_customisations = current_customisations.reject do |c|
+      if component.global == true
+        c["component_id"] == component.id.to_s
+      else
+        c["component_id"] == component.id.to_s && c["theme_page_id"] == theme_page_id.to_s && c["component_page_id"] == component_page_id
+      end
+    end
 
+    # Combine all customisations
+    all_customisations = other_customisations + new_customisations
 
-    # Add new customisations
-    all_customisations = filtered_customisations + new_customisations
+    Rails.logger.debug "Final customisations to save: #{all_customisations.inspect}"
 
     # Update the website
     website.update!(customisations: { "customisations" => all_customisations })
@@ -268,6 +383,15 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     respond_to do |format|
       format.html { redirect_back(fallback_location: manage_website_editor_website_editor_path, notice: 'Customisations saved!') }
       format.js # This will render sidebar_editor_fields_save.js.erb
+    end
+
+  rescue StandardError => e
+    Rails.logger.error "Error saving editor fields: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: manage_website_editor_website_editor_path, alert: 'Error saving changes!') }
+      format.js { render json: { error: 'An error occurred while saving' }, status: :internal_server_error }
     end
   end
 
