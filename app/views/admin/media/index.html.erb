@@ -46,9 +46,14 @@
             <% if image[:content_type] %>
               <p class="content-type"><%= image[:content_type] %></p>
             <% end %>
-            <a href="<%= image[:blob] ? url_for(image[:blob]) : (image[:url] || '#') %>" target="_blank" class="view-link">
-              <%= image[:content_type]&.start_with?('image/') ? 'View Image' : 'Download File' %>
-            </a>
+            <div class="action-buttons">
+              <a href="<%= image[:blob] ? url_for(image[:blob]) : (image[:url] || '#') %>" target="_blank" class="view-link">
+                <%= image[:content_type]&.start_with?('image/') ? 'View Image' : 'Download File' %>
+              </a>
+              <button class="copy-link-btn" onclick="copyToClipboard('<%= image[:blob] ? url_for(image[:blob]) : (image[:url] || '#') %>', this)">
+                📋 Copy Link
+              </button>
+            </div>
           </div>
         </div>
       <% end %>
@@ -216,16 +221,51 @@
         margin: 2px 0;
     }
 
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
+
     .view-link {
         display: inline-block;
-        margin-top: 5px;
         color: #0066cc;
         text-decoration: none;
         font-size: 0.8em;
+        padding: 5px 8px;
+        border: 1px solid #0066cc;
+        border-radius: 3px;
+        transition: all 0.2s;
     }
 
     .view-link:hover {
-        text-decoration: underline;
+        background: #0066cc;
+        color: white;
+    }
+
+    .copy-link-btn {
+        display: inline-block;
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 5px 8px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.8em;
+        transition: all 0.2s;
+    }
+
+    .copy-link-btn:hover {
+        background: #218838;
+    }
+
+    .copy-link-btn.copied {
+        background: #6c757d;
+    }
+
+    .copy-link-btn.copied:after {
+        content: " ✓";
     }
 </style>
 
@@ -269,4 +309,58 @@
             });
         }
     });
+
+    // Copy to clipboard function
+    function copyToClipboard(url, button) {
+        // Use the modern clipboard API
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url).then(function() {
+                showCopyFeedback(button);
+            }).catch(function(err) {
+                // Fallback for clipboard API failure
+                fallbackCopyToClipboard(url, button);
+            });
+        } else {
+            // Fallback for older browsers
+            fallbackCopyToClipboard(url, button);
+        }
+    }
+
+    // Fallback copy method for older browsers
+    function fallbackCopyToClipboard(url, button) {
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+            showCopyFeedback(button);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            button.textContent = '❌ Failed';
+            setTimeout(function() {
+                button.textContent = '📋 Copy Link';
+                button.classList.remove('copied');
+            }, 2000);
+        }
+
+        document.body.removeChild(textArea);
+    }
+
+    // Show visual feedback when copy succeeds
+    function showCopyFeedback(button) {
+        const originalText = button.textContent;
+        button.textContent = '✓ Copied!';
+        button.classList.add('copied');
+
+        setTimeout(function() {
+            button.textContent = originalText;
+            button.classList.remove('copied');
+        }, 2000);
+    }
 </script>
