@@ -1,7 +1,7 @@
 class Admin::MediaController < Admin::BaseController
   require 'aws-sdk-s3'
   def index
-    bucket_name = Rails.application.credentials.dig(:aws, :bucket) || ENV['S3_BUCKET_NAME']
+    bucket_name = Rails.application.credentials.dig(:aws, :bucket) || ENV['S3_BUCKET']
     @images = get_all_images(bucket_name)
   end
 
