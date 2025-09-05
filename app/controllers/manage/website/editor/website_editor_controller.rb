@@ -268,7 +268,11 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     # Determine which theme_page_ids to update
     if component.global == true
       # For global components, get all theme_page_ids from the website
-      theme_page_ids = website.pages["theme_pages"].values.map { |page_data| page_data["theme_page_id"] }
+      theme_page_ids = website.pages["theme_pages"].values.flat_map do |page_data|
+        ids = [page_data["theme_page_id"]]
+        ids += page_data["inner_pages"].values.map { |inner_page| inner_page["theme_page_id"] }
+        ids
+      end
 
       # Remove old entries for this component across ALL theme_pages
       filtered_customisations = current_customisations.reject do |c|
@@ -289,9 +293,23 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       theme_page_ids.each do |page_id|
 
         page = website.pages["theme_pages"].values.find { |page| page["theme_page_id"] == page_id }
-        next unless page # Skip if page not found
 
-        component_data = page['components']&.find { |comp| comp['component_id'] == component.id }
+        if page
+          # It's a main page
+          component_data = page['components']&.find { |comp| comp['component_id'] == component.id }
+        else
+          # It might be an inner page - search through all main pages' inner_pages
+          component_data = nil
+          website.pages["theme_pages"].values.each do |main_page|
+            inner_page = main_page["inner_pages"].values.find { |ip| ip["theme_page_id"] == page_id }
+            if inner_page
+              # Found the inner page, now get component data from parent's inner_pages_components
+              component_data = main_page['inner_pages_components']&.find { |comp| comp['component_id'] == component.id }
+              break if component_data
+            end
+          end
+        end
+
         next unless component_data # Skip if component not found in page
 
         # For global components, we need to preserve existing values for fields not being updated
