@@ -152,6 +152,19 @@ Rails.application.routes.draw do
   get '/contact', to: 'frontend#contact', as: 'contact'
   get '/themes', to: 'frontend#themes', as: 'themes'
 
+  # www. domain routes for custom domains (inner pages and single pages)
+  get '/:page_slug/:inner_page_slug', to: 'frontend#page_slug', constraints: lambda { |req|
+    req.host.start_with?('www.') &&
+      !req.path.start_with?('/rails/active_storage') &&
+      req.params[:page_slug] !~ /^(about|contact|themes)$/ &&
+      req.params[:inner_page_slug] !~ /^(about|contact|themes)$/
+  }, as: 'www_domain_inner_page'
+  get '/:page_slug', to: 'frontend#page_slug', constraints: lambda { |req|
+    req.host.start_with?('www.') &&
+      !req.path.start_with?('/rails/active_storage') &&
+      req.params[:page_slug] !~ /^(about|contact|themes)$/
+  }, as: 'www_domain_page'
+
   # Custom domain constraint routes - MOVED TO END
   constraints(CustomDomainConstraint.new) do
     get '/', to: 'public_websites#show', as: 'custom_domain_root'
