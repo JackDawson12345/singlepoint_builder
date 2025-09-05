@@ -24,7 +24,7 @@ module PublicWebsitesHelper
 
     if updated_content.include?('{{service_items}}')
       unless component.template_patterns == ""
-        service_items_html = render_service_items(component, user_id)
+        service_items_html = render_show_service_items(component, user_id)
         updated_content = updated_content.gsub!('{{service_items}}', service_items_html)
       end
     end
@@ -100,7 +100,7 @@ module PublicWebsitesHelper
     end.join("\n")
   end
 
-  def render_service_items(component, user_id)
+  def render_show_service_items(component, user_id)
     raw_template = component.template_patterns
 
     user = User.find(user_id)
@@ -135,18 +135,10 @@ module PublicWebsitesHelper
 
         service_page = user.website.pages["theme_pages"]["services"]
         # Build the service link
-        if controller_name == "preview"
-          if service_page['slug'].present?
-            link = '/manage/website/preview/' + service_page['slug'] + '/' + service_slug
-          else
-            link = '/manage/website/preview/' + service_slug
-          end
-        elsif controller_name == "website_editor"
-          if service_page['slug'].present?
-            link = '/manage/website/editor/' + service_page['slug'] + '/' + service_slug
-          else
-            link = '/manage/website/editor/' + service_slug
-          end
+        if service_page['slug'].present?
+          link = '/' + service_page['slug'] + '/' + service_slug
+        else
+          link = '/' + service_slug
         end
 
         item_html.gsub!('{{service_link}}', link)
