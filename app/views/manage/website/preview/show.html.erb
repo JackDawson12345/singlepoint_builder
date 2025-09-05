@@ -18,7 +18,7 @@
 
   <% @page_data["components"].sort_by { |c| c["position"] }.each do |component| %>
     <% foundComponent = Component.find(component["component_id"]) %>
-    <section class="relative edit-content-section">
+    <section class="relative">
       <%= raw(render_preview_content(foundComponent, current_user.id, @page_data['theme_page_id'], component['component_page_id'])) %>
     </section>
   <% end %>
