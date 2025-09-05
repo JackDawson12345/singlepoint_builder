@@ -51,6 +51,12 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       'website_editor/editor_navigator_sidebar'
     ]
 
+    possible_colour_paths = [
+      'editor_colour_sidebar',
+      'manage/website/editor/website_editor/editor_colour_sidebar',
+      'website_editor/editor_colour_sidebar'
+    ]
+
 
     if title == 'Sections'
       menu = component_types
@@ -100,9 +106,9 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
         end
       end
     elsif title == 'Colours'
-      menu = ['Colour Theme', 'Text Theme', 'Page Background', 'Page Transitions']
-      content = 'Colours'
-      possible_paths.each do |path|
+      menu = ['Colour Theme', 'Text Theme', 'Page Background']
+      content = current_user.website.settings
+      possible_colour_paths.each do |path|
         begin
           test_render = render_to_string(partial: path, locals: { menu: menu, options: content })
 
@@ -702,6 +708,76 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
         success: false,
         message: "Error: #{e.message}"
       }
+    end
+  end
+
+  def update_colour_scheme
+    current_settings = current_user.website.settings || {}
+
+    # Extract params
+    primary_colour = params[:primary_colour]
+    secondary_colour = params[:secondary_colour]
+    primary_hover_colour = params[:primary_hover_colour]
+    secondary_hover_colour = params[:secondary_hover_colour]
+
+    # Update the Colour Scheme section
+    current_settings["Colour Scheme"] = {
+      "primary_colour" => primary_colour,
+      "secondary_colour" => secondary_colour,
+      "primary_hover_colour" => primary_hover_colour,
+      "secondary_hover_colour" => secondary_hover_colour
+    }
+
+    # Save back to website
+    current_user.website.update(settings: current_settings)
+
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: manage_website_editor_website_editor_path, notice: 'Customisations saved!') }
+      format.js # This will render sidebar_editor_fields_save.js.erb
+    end
+
+  end
+  def update_font_scheme
+    current_settings = current_user.website.settings || {}
+
+    # Extract params
+    title_font = params[:title_font]
+    text_font = params[:text_font]
+    button_font = params[:button_font]
+
+    # Update the Colour Scheme section
+    current_settings["Font Scheme"] = {
+      "title_font" => title_font,
+      "text_font" => text_font,
+      "button_font" => button_font
+    }
+
+    # Save back to website
+    current_user.website.update(settings: current_settings)
+
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: manage_website_editor_website_editor_path, notice: 'Customisations saved!') }
+      format.js # This will render sidebar_editor_fields_save.js.erb
+    end
+  end
+  def update_background_scheme
+
+    current_settings = current_user.website.settings || {}
+
+    # Extract params
+    background_colour = params[:background_colour]
+
+    # Update the Colour Scheme section
+    current_settings["Background Colour Scheme"] = {
+      "background_colour" => background_colour
+    }
+
+    # Save back to website
+    current_user.website.update(settings: current_settings)
+
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: manage_website_editor_website_editor_path, notice: 'Customisations saved!') }
+      format.js # This will render sidebar_editor_fields_save.js.erb
     end
   end
 

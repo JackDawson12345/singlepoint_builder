@@ -107,6 +107,10 @@ Rails.application.routes.draw do
         post '/add_section_above', to: "website_editor#add_section_above", as: "website_editor_add_section_above"
         post '/remove_section', to: "website_editor#remove_section", as: "website_editor_remove_section"
         post '/reorder_components', to: "website_editor#reorder_components", as: "website_editor_reorder_components"
+
+        patch 'update_colour_scheme', to: 'website_editor#update_colour_scheme'
+        patch 'update_font_scheme', to: 'website_editor#update_font_scheme'
+        patch 'update_background_scheme', to: 'website_editor#update_background_scheme'
       end
 
       get "/", to: "website#index", as: "website"

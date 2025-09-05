@@ -1,0 +1,192 @@
+<div class="flex">
+  <div class="w-2/5 bg-gray-50 p-5" style="min-height: calc(100vh - 146px); max-height: calc(100vh - 146px); overflow: auto">
+    <div class="menu-sidebar">
+      <% menu.each do |item| %>
+        <% if item == 'Colour Theme' %>
+          <div onclick="showColourOption()" class="bg-blue-100 border-l-4 border-blue-500 menu-item cursor-pointer hover:bg-gray-200 transition-colors duration-200 p-2 rounded" data-category="<%= item %>">
+            <h2 class="nata-sans text-sm font-semibold py-2 border-b"><%= item %></h2>
+          </div>
+        <% elsif item == 'Text Theme' %>
+          <div onclick="showTextOption()" class="menu-item cursor-pointer hover:bg-gray-200 transition-colors duration-200 p-2 rounded" data-category="<%= item %>">
+            <h2 class="nata-sans text-sm font-semibold py-2 border-b"><%= item %></h2>
+          </div>
+        <% elsif item == 'Page Background' %>
+          <div onclick="showBackgroundOption()" class="menu-item cursor-pointer hover:bg-gray-200 transition-colors duration-200 p-2 rounded" data-category="<%= item %>">
+            <h2 class="nata-sans text-sm font-semibold py-2 border-b"><%= item %></h2>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+  <div class="w-3/5 p-5">
+    <div class="options-sidebar">
+      <!-- Colour Theme Tab -->
+      <div class="tab-content colour-theme-tab show-sidebar-option" data-tab="Colour Theme" style="display: none;">
+        <h3 class="text-lg font-bold mb-4">Colour Scheme Settings</h3>
+        <%= form_with url: manage_website_editor_update_colour_scheme_path, method: :patch, local: true, class: "space-y-4", data: { remote: true } do |f| %>
+          <div>
+            <label for="primary_colour" class="block text-sm font-medium text-gray-700 mb-1">Primary Colour</label>
+            <%= f.color_field :primary_colour,
+                              value: options.dig("Colour Scheme", "primary_colour") || "#9900ff",
+                              class: "w-full h-10 border border-gray-300 rounded cursor-pointer" %>
+          </div>
+
+          <div>
+            <label for="secondary_colour" class="block text-sm font-medium text-gray-700 mb-1">Secondary Colour</label>
+            <%= f.color_field :secondary_colour,
+                              value: options.dig("Colour Scheme", "secondary_colour") || "#0033ff",
+                              class: "w-full h-10 border border-gray-300 rounded cursor-pointer" %>
+          </div>
+
+          <div>
+            <label for="primary_hover_colour" class="block text-sm font-medium text-gray-700 mb-1">Primary Hover Colour</label>
+            <%= f.color_field :primary_hover_colour,
+                              value: options.dig("Colour Scheme", "primary_hover_colour") || "#47b300",
+                              class: "w-full h-10 border border-gray-300 rounded cursor-pointer" %>
+          </div>
+
+          <div>
+            <label for="secondary_hover_colour" class="block text-sm font-medium text-gray-700 mb-1">Secondary Hover Colour</label>
+            <%= f.color_field :secondary_hover_colour,
+                              value: options.dig("Colour Scheme", "secondary_hover_colour") || "#000985",
+                              class: "w-full h-10 border border-gray-300 rounded cursor-pointer" %>
+          </div>
+
+          <div class="pt-4">
+            <%= f.submit "Update Colour Scheme", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Text Theme Tab -->
+      <div class="tab-content text-theme-tab" data-tab="Text Theme" style="display: none;">
+        <h3 class="text-lg font-bold mb-4">Font Scheme Settings</h3>
+        <%= form_with url: manage_website_editor_update_font_scheme_path, method: :patch, local: true, class: "space-y-4", data: { remote: true } do |f| %>
+          <div>
+            <label for="title_font" class="block text-sm font-medium text-gray-700 mb-1">Title Font</label>
+            <%= f.select :title_font,
+                         options_for_select([
+                                              ['Arial, sans-serif', 'Arial, sans-serif'],
+                                              ['Helvetica, sans-serif', 'Helvetica, sans-serif'],
+                                              ['Georgia, serif', 'Georgia, serif'],
+                                              ['Times New Roman, serif', 'Times New Roman, serif'],
+                                              ['Courier New, monospace', 'Courier New, monospace'],
+                                              ['Verdana, sans-serif', 'Verdana, sans-serif']
+                                            ], options.dig("Font Scheme", "title_font") || "Arial, sans-serif"),
+                         {},
+                         { class: "w-full p-2 border border-gray-300 rounded" } %>
+          </div>
+
+          <div>
+            <label for="text_font" class="block text-sm font-medium text-gray-700 mb-1">Text Font</label>
+            <%= f.select :text_font,
+                         options_for_select([
+                                              ['Arial, sans-serif', 'Arial, sans-serif'],
+                                              ['Helvetica, sans-serif', 'Helvetica, sans-serif'],
+                                              ['Georgia, serif', 'Georgia, serif'],
+                                              ['Times New Roman, serif', 'Times New Roman, serif'],
+                                              ['Courier New, monospace', 'Courier New, monospace'],
+                                              ['Verdana, sans-serif', 'Verdana, sans-serif']
+                                            ], options.dig("Font Scheme", "text_font") || "Helvetica, sans-serif"),
+                         {},
+                         { class: "w-full p-2 border border-gray-300 rounded" } %>
+          </div>
+
+          <div>
+            <label for="button_font" class="block text-sm font-medium text-gray-700 mb-1">Button Font</label>
+            <%= f.select :button_font,
+                         options_for_select([
+                                              ['Arial, sans-serif', 'Arial, sans-serif'],
+                                              ['Helvetica, sans-serif', 'Helvetica, sans-serif'],
+                                              ['Georgia, serif', 'Georgia, serif'],
+                                              ['Times New Roman, serif', 'Times New Roman, serif'],
+                                              ['Courier New, monospace', 'Courier New, monospace'],
+                                              ['Verdana, sans-serif', 'Verdana, sans-serif']
+                                            ], options.dig("Font Scheme", "button_font") || "Georgia, serif"),
+                         {},
+                         { class: "w-full p-2 border border-gray-300 rounded" } %>
+          </div>
+
+          <div class="pt-4">
+            <%= f.submit "Update Font Scheme", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Page Background Tab -->
+      <div class="tab-content page-background-tab" data-tab="Page Background" style="display: none;">
+        <h3 class="text-lg font-bold mb-4">Background Colour Settings</h3>
+        <%= form_with url: manage_website_editor_update_background_scheme_path, method: :patch, local: true, class: "space-y-4", data: { remote: true } do |f| %>
+
+          <div>
+            <label for="background_colour" class="block text-sm font-medium text-gray-700 mb-1">Background Colour</label>
+            <% background_colour = options.is_a?(Hash) && options["Background Colour Scheme"].is_a?(Hash) ? options["Background Colour Scheme"]["background_colour"] : nil %>
+            <%= f.color_field :background_colour,
+                              value: background_colour || "#6f1515",
+                              class: "w-full h-10 border border-gray-300 rounded cursor-pointer" %>
+          </div>
+
+          <div class="pt-4">
+            <%= f.submit "Update Background Colour", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeColourTabs();
+    });
+
+    // Also call this function when sidebar content is loaded via AJAX
+    function initializeColourTabs() {
+        const menuItems = document.querySelectorAll('.menu-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Hide all tabs initially
+        tabContents.forEach(tab => {
+            tab.style.display = 'none';
+        });
+
+        // Show first tab by default
+        if (tabContents.length > 0) {
+            tabContents[0].style.display = 'block';
+            if (menuItems[0]) {
+                menuItems[0].classList.add('bg-gray-200');
+            }
+        }
+
+        menuItems.forEach(item => {
+            // Remove any existing event listeners to prevent duplicates
+            item.removeEventListener('click', handleMenuClick);
+            item.addEventListener('click', handleMenuClick);
+        });
+    }
+
+    function handleMenuClick() {
+        const category = this.getAttribute('data-category');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Remove active state from all menu items
+        menuItems.forEach(menuItem => {
+            menuItem.classList.remove('bg-gray-200');
+        });
+
+        // Add active state to clicked item
+        this.classList.add('bg-gray-200');
+
+        // Hide all tab contents
+        tabContents.forEach(tab => {
+            tab.style.display = 'none';
+        });
+
+        // Show selected tab content
+        const selectedTab = document.querySelector(`.tab-content[data-tab="${category}"]`);
+        if (selectedTab) {
+            selectedTab.style.display = 'block';
+        }
+    }
+</script>

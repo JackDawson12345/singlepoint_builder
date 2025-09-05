@@ -128,3 +128,11 @@
 .bg-black\/70{
     background: rgb(0,0,0,0.7);
 }
+
+.hidden-sidebar-option{
+    display: none !important;
+}
+
+.show-sidebar-option{
+    display: block !important;
+}

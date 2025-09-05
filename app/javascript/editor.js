@@ -13,6 +13,9 @@ window.initializeDragAndDrop = initializeDragAndDrop;
 window.updateComponentPositions = updateComponentPositions;
 window.updateContentWidth = updateContentWidth;
 window.initializeRealtimeUpdates = initializeRealtimeUpdates; // NEW
+window.showColourOption = showColourOption;
+window.showTextOption = showTextOption;
+window.showBackgroundOption = showBackgroundOption;
 
 function hideSidebar(){
     const sidebar = document.querySelector('.editor-sidebar');
@@ -138,6 +141,7 @@ function fetchSidebarData(title) {
         });
 }
 
+
 function updateSidebarContent(data) {
     const sidebar = document.querySelector('.editor-sidebar');
     const contentArea = sidebar.querySelector('.sidebar-content');
@@ -157,6 +161,32 @@ function updateSidebarContent(data) {
 }
 
 function fetchNavigatorSidebarData(title, theme_page_id) {
+    // Get CSRF token for Rails
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch('/manage/website/editor/sidebar_data', {  // Updated to match your namespace
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': token,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            title: title,
+            theme_page_id: theme_page_id
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Update sidebar content with the received data
+            updateSidebarContent(data);
+        })
+        .catch(error => {
+            console.error('Error fetching sidebar data:', error);
+        });
+}
+
+function fetchColourSidebarData(title, theme_page_id){
     // Get CSRF token for Rails
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -723,6 +753,44 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+function showColourOption(){
+    const colourOption = document.querySelector('.colour-theme-tab');
+    const textOption = document.querySelector('.text-theme-tab');
+    const backgroundOption = document.querySelector('.page-background-tab');
 
+    colourOption.classList.remove("show-sidebar-option");
+    textOption.classList.remove("show-sidebar-option");
+    backgroundOption.classList.remove("show-sidebar-option");
+
+    colourOption.classList.add("show-sidebar-option");
+    textOption.classList.add("hidden-sidebar-option");
+    backgroundOption.classList.add("hidden-sidebar-option");
+}
+
+function showTextOption(){
+    const colourOption = document.querySelector('.colour-theme-tab');
+    const textOption = document.querySelector('.text-theme-tab');
+    const backgroundOption = document.querySelector('.page-background-tab');
+    colourOption.classList.remove("show-sidebar-option");
+    textOption.classList.remove("show-sidebar-option");
+    backgroundOption.classList.remove("show-sidebar-option");
+
+    colourOption.classList.add("hidden-sidebar-option");
+    textOption.classList.add("show-sidebar-option");
+    backgroundOption.classList.add("hidden-sidebar-option");
+}
+
+function showBackgroundOption(){
+    const colourOption = document.querySelector('.colour-theme-tab');
+    const textOption = document.querySelector('.text-theme-tab');
+    const backgroundOption = document.querySelector('.page-background-tab');
+    colourOption.classList.remove("show-sidebar-option");
+    textOption.classList.remove("show-sidebar-option");
+    backgroundOption.classList.remove("show-sidebar-option");
+
+    colourOption.classList.add("hidden-sidebar-option");
+    textOption.classList.add("hidden-sidebar-option");
+    backgroundOption.classList.add("show-sidebar-option");
+}
 
 
