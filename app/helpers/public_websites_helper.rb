@@ -43,6 +43,25 @@ module PublicWebsitesHelper
     updated_content
   end
 
+  def render_show_css(component, user_id)
+    componentCSS = component.content['css']
+    updated_css_content = componentCSS
+
+    user = User.find(user_id)
+    website = user.website
+
+    theme_settings = website.theme.settings
+
+    theme_settings['Colour Scheme'].to_a.each do |name, value|
+
+      if componentCSS.include? '{{' + name + '}}'
+        updated_css_content = updated_css_content.gsub!('{{' + name + '}}', value)
+      end
+
+    end
+
+    updated_css_content
+  end
   private
 
   def get_show_component_field_values(component, user_id, theme_page_id, component_page_id)

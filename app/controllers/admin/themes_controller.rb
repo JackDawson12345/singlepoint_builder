@@ -136,6 +136,27 @@ class Admin::ThemesController < Admin::BaseController
     redirect_to admin_themes_path, notice: 'Theme was successfully deleted.'
   end
 
+  def settings
+    @theme = Theme.find(params[:id])
+  end
+
+  def update_settings
+    @theme = Theme.find(params[:id])
+
+    # Get existing settings or initialize empty hash
+    current_settings = @theme.settings || {}
+
+    # Merge new settings with existing ones
+    new_settings = current_settings.merge(settings_params)
+
+    if @theme.update(settings: new_settings)
+      redirect_to admin_themes_settings_path(@theme), notice: 'Theme settings were successfully updated.'
+    else
+      flash.now[:alert] = 'There was an error updating the theme settings.'
+      render :settings
+    end
+  end
+
   private
 
   def set_theme
@@ -155,5 +176,16 @@ class Admin::ThemesController < Admin::BaseController
     params.require(:new_pages).values.map do |page_params|
       page_params.permit(:page_name, :page_slug, :package_type)
     end
+  end
+
+  def settings_params
+    # Updated to properly permit nested parameters
+    params.require(:theme).permit(
+      settings: {
+        "Colour Scheme" => [:primary_colour, :secondary_colour, :primary_hover_colour, :secondary_hover_colour],
+        "Font Scheme" => [:title_font, :text_font, :button_font],
+        "Background Colour Scheme" => [:background_colour]
+      }
+    )[:settings]
   end
 end

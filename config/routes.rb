@@ -54,6 +54,7 @@ Rails.application.routes.draw do
     post "/themes/:id/pages", to: 'themes#create_pages', as: 'create_pages'
 
     get "/themes/:id/page/:theme_page_id", to: 'theme_pages#index', as: 'theme_page'
+    get "/themes/:id/page/:theme_page_id/preview", to: 'theme_pages#preview', as: 'theme_page_preview'
     get "/themes/:id/page/:theme_page_id/inner-page", to: 'theme_pages#inner_page', as: 'theme_page_inner_page'
     patch "themes/:id/theme-page/:theme_page_id/add", to: 'theme_pages#add_component', as: 'theme_pages_add_component'
     delete "/themes/:id/theme-pages/:theme_page_id/remove", to: 'theme_pages#remove_component', as: 'theme_pages_remove_component'
@@ -85,6 +86,9 @@ Rails.application.routes.draw do
     patch "/users/:id/update_setup", to: "users#update_setup", as: "update_setup"
 
     resources :themes
+    get '/themes/:id/settings', to: 'themes#settings', as: 'themes_settings'
+    patch '/themes/:id/settings', to: 'themes#update_settings', as: 'themes_update_settings'
+
   end
 
   # Manage routes - MUST come before wildcard routes

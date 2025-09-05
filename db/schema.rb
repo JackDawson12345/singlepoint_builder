@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_04_110756) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_05_101309) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -164,6 +164,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_04_110756) do
     t.json "pages"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "settings"
   end
 
   create_table "user_setups", force: :cascade do |t|
@@ -215,6 +216,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_04_110756) do
     t.boolean "published"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "settings"
     t.index ["theme_id"], name: "index_websites_on_theme_id"
     t.index ["user_id"], name: "index_websites_on_user_id", unique: true
   end

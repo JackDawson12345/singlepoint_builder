@@ -1,0 +1,162 @@
+<!-- app/views/admin/themes/show.html.erb -->
+<div class="min-h-screen">
+  <div class="">
+
+    <!-- Theme Header Card -->
+    <div class="bg-white shadow-sm border border-gray-200 overflow-hidden sm:rounded-lg">
+      <div class="px-4 py-5 sm:px-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div class="flex-1">
+          <h3 class="text-xl leading-6 font-semibold text-gray-900"><%= @theme.name %> - Settings</h3>
+          <p class="mt-2 max-w-2xl text-sm text-gray-600"><%= @theme.description %></p>
+        </div>
+        <div class="flex flex-wrap gap-2 sm:gap-3">
+          <%= link_to "Edit Theme", edit_admin_theme_path(@theme),
+                      class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" %>
+          <%= link_to "Back To Themes", admin_themes_path,
+                      class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Theme Pages Section -->
+    <div class="mt-8">
+      <div class="bg-white p-5 shadow-sm border border-gray-200 rounded-xl overflow-hidden">
+        <%= form_with model: [:admin, @theme], url: admin_themes_update_settings_path(@theme), method: :patch, local: true do |form| %>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h4>Colour Scheme</h4>
+                </div>
+                <div class="card-body">
+                  <div class="form-group mb-3">
+                    <%= label_tag "theme[settings][Colour Scheme][primary_colour]", "Primary Colour", class: "form-label" %>
+                    <%= color_field_tag "theme[settings][Colour Scheme][primary_colour]", (@theme.settings&.dig("Colour Scheme", "primary_colour") || "#007bff"), class: "form-control" %>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <%= label_tag "theme[settings][Colour Scheme][secondary_colour]", "Secondary Colour", class: "form-label" %>
+                    <%= color_field_tag "theme[settings][Colour Scheme][secondary_colour]", (@theme.settings&.dig("Colour Scheme", "secondary_colour") || "#6c757d"), class: "form-control" %>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <%= label_tag "theme[settings][Colour Scheme][primary_hover_colour]", "Primary Hover Colour", class: "form-label" %>
+                    <%= color_field_tag "theme[settings][Colour Scheme][primary_hover_colour]", (@theme.settings&.dig("Colour Scheme", "primary_hover_colour") || "#0056b3"), class: "form-control" %>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <%= label_tag "theme[settings][Colour Scheme][secondary_hover_colour]", "Secondary Hover Colour", class: "form-label" %>
+                    <%= color_field_tag "theme[settings][Colour Scheme][secondary_hover_colour]", (@theme.settings&.dig("Colour Scheme", "secondary_hover_colour") || "#545b62"), class: "form-control" %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h4>Font Scheme</h4>
+                </div>
+                <div class="card-body">
+                  <div class="form-group mb-3">
+                    <%= label_tag "theme[settings][Font Scheme][title_font]", "Title Font", class: "form-label" %>
+                    <%= select_tag "theme[settings][Font Scheme][title_font]",
+                                   options_for_select([
+                                                        ['Arial', 'Arial, sans-serif'],
+                                                        ['Helvetica', 'Helvetica, sans-serif'],
+                                                        ['Georgia', 'Georgia, serif'],
+                                                        ['Times New Roman', 'Times New Roman, serif'],
+                                                        ['Courier New', 'Courier New, monospace'],
+                                                        ['Roboto', 'Roboto, sans-serif'],
+                                                        ['Open Sans', 'Open Sans, sans-serif'],
+                                                        ['Lato', 'Lato, sans-serif'],
+                                                        ['Montserrat', 'Montserrat, sans-serif'],
+                                                        ['Poppins', 'Poppins, sans-serif']
+                                                      ], @theme.settings&.dig("Font Scheme", "title_font")),
+                                   { prompt: 'Select a font', class: "form-select" } %>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <%= label_tag "theme[settings][Font Scheme][text_font]", "Text Font", class: "form-label" %>
+                    <%= select_tag "theme[settings][Font Scheme][text_font]",
+                                   options_for_select([
+                                                        ['Arial', 'Arial, sans-serif'],
+                                                        ['Helvetica', 'Helvetica, sans-serif'],
+                                                        ['Georgia', 'Georgia, serif'],
+                                                        ['Times New Roman', 'Times New Roman, serif'],
+                                                        ['Courier New', 'Courier New, monospace'],
+                                                        ['Roboto', 'Roboto, sans-serif'],
+                                                        ['Open Sans', 'Open Sans, sans-serif'],
+                                                        ['Lato', 'Lato, sans-serif'],
+                                                        ['Montserrat', 'Montserrat, sans-serif'],
+                                                        ['Poppins', 'Poppins, sans-serif']
+                                                      ], @theme.settings&.dig("Font Scheme", "text_font")),
+                                   { prompt: 'Select a font', class: "form-select" } %>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <%= label_tag "theme[settings][Font Scheme][button_font]", "Button Font", class: "form-label" %>
+                    <%= select_tag "theme[settings][Font Scheme][button_font]",
+                                   options_for_select([
+                                                        ['Arial', 'Arial, sans-serif'],
+                                                        ['Helvetica', 'Helvetica, sans-serif'],
+                                                        ['Georgia', 'Georgia, serif'],
+                                                        ['Times New Roman', 'Times New Roman, serif'],
+                                                        ['Courier New', 'Courier New, monospace'],
+                                                        ['Roboto', 'Roboto, sans-serif'],
+                                                        ['Open Sans', 'Open Sans, sans-serif'],
+                                                        ['Lato', 'Lato, sans-serif'],
+                                                        ['Montserrat', 'Montserrat, sans-serif'],
+                                                        ['Poppins', 'Poppins, sans-serif']
+                                                      ], @theme.settings&.dig("Font Scheme", "button_font")),
+                                   { prompt: 'Select a font', class: "form-select" } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header">
+                  <h4>Background Colour Scheme</h4>
+                </div>
+                <div class="card-body">
+                  <div class="form-group mb-3">
+                    <%= label_tag "theme[settings][Background Colour Scheme][background_colour]", "Background Colour", class: "form-label" %>
+                    <%= color_field_tag "theme[settings][Background Colour Scheme][background_colour]", (@theme.settings&.dig("Background Colour Scheme", "background_colour") || "#ffffff"), class: "form-control" %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <div class="d-flex justify-content-between">
+                <%= link_to "Back to Theme", admin_theme_path(@theme), class: "btn btn-secondary" %>
+                <%= submit_tag "Save Theme Settings", class: "btn btn-primary" %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="mt-8 flex justify-between items-center">
+      <%= link_to admin_themes_path,
+                  class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" do %>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Themes
+      <% end %>
+
+      <div class="text-sm text-gray-500">
+        Last updated <%= time_ago_in_words(@theme.updated_at) %> ago
+      </div>
+    </div>
+  </div>
+</div>

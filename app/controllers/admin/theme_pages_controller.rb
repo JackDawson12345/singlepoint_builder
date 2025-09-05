@@ -366,4 +366,13 @@ class Admin::ThemePagesController < Admin::BaseController
       format.json { head :ok }
     end
   end
+
+  def preview
+    theme = Theme.find(params[:id])
+    @page_data = theme.pages["theme_pages"].find { |key, page_data| page_data["theme_page_id"] == params[:theme_page_id] }&.last
+
+    render layout: 'preview'
+  end
+
+
 end

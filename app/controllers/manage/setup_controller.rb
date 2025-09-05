@@ -258,7 +258,8 @@ class Manage::SetupController < Manage::BaseController
       name: 'My Website',
       description: 'Description Of My Website',
       pages: updated_pages,
-      domain_name: current_user.user_setup.domain_name
+      domain_name: current_user.user_setup.domain_name,
+      settings: theme.settings
     )
 
     @user_setup = current_user.user_setup.update(theme_id: theme.id)

@@ -8,20 +8,20 @@
   <style>
     <% @page_data["components"].each do |component| %>
     <% foundComponent = Component.find(component["component_id"]) %>
+    <% theme = Theme.find(params[:id]) %>
     <% component_css = foundComponent.content['css'] %>
     <% if component_css.present? && !included_css.include?(foundComponent.id) %>
-    <%= raw(render_show_css(foundComponent, current_website.user_id)) %>
+    <%= raw(render_theme_preview_css(foundComponent, theme)) %>
     <% included_css.add(foundComponent.id) %>
     <% end %>
     <% end %>
   </style>
 
-  <% @page_data["components"].sort_by { |c| c["position"] }.each do |component| %>
+  <% @page_data["components"].each do |component| %>
     <% foundComponent = Component.find(component["component_id"]) %>
-    <section class="">
-      <%= raw(render_show_content(foundComponent, current_website.user_id, @page_data['theme_page_id'], component['component_page_id'])) %>
+    <section class="relative">
+      <%= raw(render_theme_preview_content(foundComponent, @page_data['theme_page_id'], component['component_page_id'])) %>
     </section>
-
   <% end %>
 
   <script>

@@ -14,7 +14,7 @@
       <% foundComponent = Component.find(component["component_id"]) %>
       <% component_css = foundComponent.content['css'] %>
       <% if component_css.present? && !included_css.include?(foundComponent.id) %>
-      <%= raw(component_css) %>
+      <%= raw(render_editor_css(foundComponent, current_user.id)) %>
       <% included_css.add(foundComponent.id) %>
       <% end %>
       <% end %>

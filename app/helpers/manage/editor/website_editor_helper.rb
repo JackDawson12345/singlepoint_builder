@@ -54,6 +54,48 @@ module Manage::Editor::WebsiteEditorHelper
     updated_content
   end
 
+  def render_editor_css(component, user_id)
+    componentCSS = component.content['css']
+    updated_css_content = componentCSS
+
+    user = User.find(user_id)
+    website = user.website
+
+    theme_settings = website.theme.settings
+
+    theme_settings['Colour Scheme'].to_a.each do |name, value|
+
+      if componentCSS.include? '{{' + name + '}}'
+        updated_css_content = updated_css_content.gsub!('{{' + name + '}}', value)
+      end
+
+    end
+
+
+
+
+    updated_css_content
+  end
+
+  def render_preview_css(component, user_id)
+    componentCSS = component.content['css']
+    updated_css_content = componentCSS
+
+    user = User.find(user_id)
+    website = user.website
+
+    theme_settings = website.theme.settings
+
+    theme_settings['Colour Scheme'].to_a.each do |name, value|
+
+      if componentCSS.include? '{{' + name + '}}'
+        updated_css_content = updated_css_content.gsub!('{{' + name + '}}', value)
+      end
+
+    end
+
+    updated_css_content
+  end
 
   def render_preview_content(component, user_id = nil, theme_page_id = nil, component_page_id)
     componentHTML = component.content['html']
