@@ -338,7 +338,7 @@ function updateEditorFieldsContent(data, theme_page_id, component_page_id) {
 function initializeRealtimeUpdates(themePageId, componentPageId) {
     // Get all form fields for this component
     const fieldSelector = `.field_${themePageId}_${componentPageId}_`;
-    const formFields = document.querySelectorAll(`input[class*="field_${themePageId}_${componentPageId}_"]`);
+    const formFields = document.querySelectorAll(`input[class*="field_${themePageId}_${componentPageId}_"], textarea[class*="field_${themePageId}_${componentPageId}_"]`);
 
     console.log(`Initializing real-time updates for ${themePageId}_${componentPageId}`);
     console.log(`Found ${formFields.length} form fields`);
