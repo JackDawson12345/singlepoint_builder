@@ -25,11 +25,14 @@ class PublicWebsitesController < ApplicationController
       return
     end
 
-    # Get the page slug from params or default to 'home'
-    @page_slug = params[:page_slug] || 'home'
-
-    # Find the page data
-    @page_data = find_page_data(@page_slug)
+    # Check if this is an inner page request
+    if params[:inner_page_slug]
+      load_inner_page_data(params[:page_slug], params[:inner_page_slug])
+    else
+      # Get the page slug from params or default to 'home'
+      @page_slug = params[:page_slug] || 'home'
+      load_page_data(@page_slug)
+    end
 
     # If page not found, try to find a default page
     unless @page_data
@@ -41,7 +44,8 @@ class PublicWebsitesController < ApplicationController
     @page_description = @page_data&.dig('description') || current_website.description
 
     # Log for debugging
-    Rails.logger.info "Serving page '#{@page_slug}' for website '#{current_website.name}' (#{current_website.domain_name})"
+    page_info = params[:inner_page_slug] ? "#{@page_slug}/#{params[:inner_page_slug]}" : @page_slug
+    Rails.logger.info "Serving page '#{page_info}' for website '#{current_website.name}' (#{current_website.domain_name})"
     Rails.logger.info "Page data found: #{@page_data.present?}"
     Rails.logger.info "Page data: #{@page_data.inspect}" if @page_data
 
@@ -57,10 +61,8 @@ class PublicWebsitesController < ApplicationController
 
   private
 
-  def find_page_data(slug)
-    return nil unless current_website&.pages
-
-    @website = current_website # Adjust this to however you're finding the website
+  def load_page_data(slug)
+    @website = current_website
     @page_slug = slug
 
     pages = @website.pages["theme_pages"]
@@ -73,7 +75,54 @@ class PublicWebsitesController < ApplicationController
         normalized_slug == slug || page_slug == "/#{slug}"
       end
     end&.last
+  end
 
+  def load_inner_page_data(slug, inner_slug)
+    @website = current_website
+    @page_slug = slug
+    @inner_page_slug = inner_slug
+
+    pages = @website.pages["theme_pages"]
+    @all_page_data = pages.find do |key, page|
+      page_slug = page["slug"]
+      if slug == "/"
+        page_slug == "/"
+      else
+        normalized_slug = page_slug.start_with?("/") ? page_slug[1..-1] : page_slug
+        normalized_slug == slug || page_slug == "/#{slug}"
+      end
+    end&.last
+
+    return unless @all_page_data&.dig('inner_pages')
+
+    # Capture both the key (page name) and the data
+    @page_name, @page_data = @all_page_data['inner_pages'].find do |key, page|
+      page_slug = page["slug"]
+      if inner_slug == "/"
+        page_slug == "/"
+      else
+        normalized_slug = page_slug.start_with?("/") ? page_slug[1..-1] : page_slug
+        normalized_slug == inner_slug || page_slug == "/#{inner_slug}"
+      end
+    end
+  end
+
+  def find_page_data(slug)
+    return nil unless current_website&.pages
+
+    @website = current_website
+    @page_slug = slug
+
+    pages = @website.pages["theme_pages"]
+    @page_data = pages.find do |key, page|
+      page_slug = page["slug"]
+      if slug == "/"
+        page_slug == "/"
+      else
+        normalized_slug = page_slug.start_with?("/") ? page_slug[1..-1] : page_slug
+        normalized_slug == slug || page_slug == "/#{slug}"
+      end
+    end&.last
   end
 
   def find_default_page

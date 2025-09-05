@@ -26,6 +26,7 @@
 </head>
 
 <body class="bg-black-gray">
+
 <!-- Manage Navigation -->
 <nav class="bg-black-gray px-6 py-3 flex gap-5">
   <div class="w-auto">
@@ -279,6 +280,16 @@
                 <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Benchmarks</a></li>
                 <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">All Reports</a></li>
               </ul>
+            </li>
+
+            <li>
+              <%= link_to admin_media_path, class: 'w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group' do %>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="currentColor" id="Image-Light--Streamline-Phosphor" height="18" width="18">
+                  <path d="M14.76391875 1.38980625H1.23608125c-0.59430625 0 -1.07608125 0.481775 -1.07608125 1.076075v11.0682375c0 0.5943 0.481775 1.076075 1.07608125 1.076075h13.5278375c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.076075V2.46588125c0 -0.5943 -0.481775 -1.076075 -1.07608125 -1.076075ZM1.23608125 2.31215625h13.5278375c0.0849 0.00000625 0.15373125 0.06883125 0.15373125 0.153725v8.268125L12.6525 8.4688625c-0.42024375 -0.4202875 -1.1016375 -0.4202875 -1.52188125 0l-1.6464 1.6464 -3.4903375 -3.49110625c-0.42024375 -0.4202875 -1.1016375 -0.4202875 -1.52188125 0l-3.38965 3.38965V2.46588125c0 -0.0849 0.068825 -0.15373125 0.15373125 -0.153725Zm-0.15373125 11.2219625v-2.21595625l4.04144375 -4.04144375c0.0601375 -0.060625 0.15815625 -0.060625 0.21829375 0l6.41111875 6.411125H1.23608125c-0.08490625 0 -0.15373125 -0.068825 -0.15373125 -0.153725Zm13.68156875 0.153725h-1.70635l-2.9207875 -2.9207875 1.64563125 -1.6464c0.06005 -0.0601125 0.157475 -0.0601125 0.217525 0l2.92078125 2.9207875v1.492675c0.00001875 0.0861125 -0.0707 0.15544375 -0.1568 0.153725Zm-5.3803875 -7.84c0 -0.5916875 0.64051875 -0.96149375 1.1529375 -0.66565 0.51241875 0.29584375 0.51241875 1.03545625 0 1.3313 -0.11684375 0.0674625 -0.2493875 0.102975 -0.3843125 0.102975 -0.4245 0 -0.768625 -0.344125 -0.768625 -0.768625Z" stroke-width="0.0625"></path>
+                </svg>
+                <span class="font-medium sidebar-navigation pl-4 nata-sans">Media</span>
+              <% end %>
+
             </li>
 
             <!-- Settings without Dropdown -->

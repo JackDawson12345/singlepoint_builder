@@ -155,6 +155,11 @@ Rails.application.routes.draw do
   # Custom domain constraint routes - MOVED TO END
   constraints(CustomDomainConstraint.new) do
     get '/', to: 'public_websites#show', as: 'custom_domain_root'
+    # Inner page routes - must come before the single page_slug route
+    get '/:page_slug/:inner_page_slug', to: 'public_websites#show', constraints: {
+      page_slug: /[^\/]+/,
+      inner_page_slug: /[^\/]+/
+    }, as: 'custom_domain_inner_page'
     get '/:page_slug', to: 'public_websites#show', constraints: { page_slug: /[^\/]+/ }
     get '*path', to: 'public_websites#show', constraints: lambda { |req|
       !req.path.start_with?('/rails/active_storage')
@@ -162,6 +167,11 @@ Rails.application.routes.draw do
   end
 
   # Main domain page slug routes - after all specific routes
+  # Inner page routes for main domain - must come before single page_slug route
+  get '/:page_slug/:inner_page_slug', to: 'public_websites#show', constraints: {
+    page_slug: /[^\/]+/,
+    inner_page_slug: /[^\/]+/
+  }, as: 'main_domain_inner_page'
   get '/:page_slug', to: 'public_websites#show', constraints: lambda { |req|
     !req.path.start_with?('/rails/active_storage')
   }
