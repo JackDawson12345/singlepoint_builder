@@ -50,9 +50,9 @@ module PublicWebsitesHelper
     user = User.find(user_id)
     website = user.website
 
-    theme_settings = website.theme.settings
+    website_settings = website.settings
 
-    theme_settings['Colour Scheme'].to_a.each do |name, value|
+    website_settings['Colour Scheme'].to_a.each do |name, value|
 
       if componentCSS.include? '{{' + name + '}}'
         updated_css_content = updated_css_content.gsub!('{{' + name + '}}', value)
