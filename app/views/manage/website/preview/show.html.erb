@@ -7,12 +7,12 @@
 
   <style>
     <% @page_data["components"].each do |component| %>
-    <% foundComponent = Component.find(component["component_id"]) %>
-    <% component_css = foundComponent.content['css'] %>
-    <% if component_css.present? && !included_css.include?(foundComponent.id) %>
-    <%= raw(render_preview_css(foundComponent, current_user.id)) %>
-    <% included_css.add(foundComponent.id) %>
-    <% end %>
+      <% foundComponent = Component.find(component["component_id"]) %>
+      <% component_css = foundComponent.content['css'] %>
+      <% if component_css.present? && !included_css.include?(foundComponent.id) %>
+        <%= raw(render_preview_css(foundComponent, current_user.id)) %>
+        <% included_css.add(foundComponent.id) %>
+      <% end %>
     <% end %>
   </style>
 
@@ -24,14 +24,14 @@
   <% end %>
 
   <script>
-      <% @page_data["components"].each do |component| %>
+    <% @page_data["components"].each do |component| %>
       <% foundComponent = Component.find(component["component_id"]) %>
       <% component_js = foundComponent.content['js'] %>
       <% if component_js.present? && !included_js.include?(foundComponent.id) %>
-      <%= raw(component_js) %>
-      <% included_js.add(foundComponent.id) %>
+        <%= raw(component_js) %>
+        <% included_js.add(foundComponent.id) %>
       <% end %>
-      <% end %>
+    <% end %>
   </script>
 <% else %>
   <p>No components on this page.</p>

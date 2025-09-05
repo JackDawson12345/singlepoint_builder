@@ -153,6 +153,8 @@ Rails.application.routes.draw do
     # Settings
     get "/settings", to: "settings#index", as: "settings"
     get "/settings/website-settings", to: "settings#website_settings", as: "website_settings"
+    patch "/settings/website-settings", to: "settings#update_website"
+    delete "/settings/website-settings/favicon", to: "settings#remove_favicon", as: "remove_favicon"
   end
 
   # Specific frontend routes
