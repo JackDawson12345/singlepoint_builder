@@ -155,6 +155,7 @@ Rails.application.routes.draw do
     get "/settings/website-settings", to: "settings#website_settings", as: "website_settings"
     patch "/settings/website-settings", to: "settings#update_website"
     delete "/settings/website-settings/favicon", to: "settings#remove_favicon", as: "remove_favicon"
+    patch '/settings/website-settings/update_website_name', to: 'settings#update_website_name', as: 'update_website_name'
   end
 
   # Specific frontend routes

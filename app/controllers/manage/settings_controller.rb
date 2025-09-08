@@ -17,8 +17,34 @@ class Manage::SettingsController < Manage::BaseController
   end
 
   def remove_favicon
-    @website.favicon.purge
+
+    byebug
+
+    if @website.favicon.attached?
+      result = @website.favicon.purge
+    end
+
     redirect_to manage_website_settings_path, notice: 'Favicon removed successfully.'
+  rescue => e
+    puts "Error: #{e.message}"
+    puts e.backtrace
+    redirect_to manage_website_settings_path, alert: "Error removing favicon: #{e.message}"
+  end
+
+  def update_website_name
+    if current_user.website.update(name: params[:site_name])
+      flash.now[:notice] = "Website name updated successfully"
+      status = 'success'
+    else
+      flash.now[:alert] = "Failed to update website name"
+      status = 'error'
+    end
+
+    render json: {
+      status: status,
+      message: flash.now[:notice] || flash.now[:alert],
+      flash_type: flash.now[:notice] ? 'notice' : 'alert'
+    }
   end
 
   private
