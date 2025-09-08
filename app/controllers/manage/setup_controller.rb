@@ -439,7 +439,7 @@ class Manage::SetupController < Manage::BaseController
     Rails.logger.info "Starting domain search for: #{query}"
 
     general_key = Rails.application.credentials.dig(:twenty_i, :general_key) ||
-                  ENV["TWENTYI_GENERAL_KEY"]
+                  ENV["TWENTY_I_GENERAL_KEY="]
 
     Rails.logger.info "API key present: #{general_key.present?}"
     Rails.logger.info "API key length: #{general_key&.length || 0}"
