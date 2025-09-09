@@ -29,6 +29,13 @@ module PublicWebsitesHelper
       end
     end
 
+    if updated_content.include?('{{product_items}}')
+      unless component.template_patterns == ""
+        service_items_html = render_product_items(component, user_id)
+        updated_content = updated_content.gsub!('{{product_items}}', service_items_html)
+      end
+    end
+
     if component.component_type == 'Service Inner'
       service = user.website.services.find { |s| s["id"] == theme_page_id }
       updated_content = updated_content.gsub!('{{service_title}}', service['name'])
@@ -216,6 +223,55 @@ module PublicWebsitesHelper
     end
 
 
+  end
+
+  def render_product_items(component, user_id)
+    user = User.find(user_id)
+    raw_template = component.template_patterns
+
+    # Since raw_template is a Hash, access the service_items key directly
+    if raw_template.is_a?(Hash) && raw_template["product_items"]
+      product_template = raw_template["product_items"]
+    elsif raw_template.is_a?(String)
+      # Fallback for string format (your original regex approach)
+      if match = raw_template.match(/"product_items":\s*"(.+)"\s*}/)
+        product_template = match[1].gsub('\\"', '"')
+      else
+        product_template = raw_template
+      end
+    else
+      product_template = raw_template.to_s
+    end
+
+    unless user.website.products.blank?
+      user.website.products.map do |service|
+
+        # Use service attributes instead of undefined page variables
+        product_name = service['data']['name'].to_s  # or whatever attribute holds the service name
+        product_slug = service['seo']['url_handle'].to_s  # or whatever attribute holds the service slug
+        product_description = service['data']['description'].to_s
+        product_price =service['price']['price'].to_s
+
+        item_html = product_template.dup
+
+        # Replace service template placeholders with actual service data
+        item_html.gsub!('{{product_name}}', product_name)
+        item_html.gsub!('{{product_excerpt}}', product_description.truncate(50)) # or service.description
+        item_html.gsub!('{{product_image}}', service['images'].first) # or whatever holds the image
+        item_html.gsub!('{{product_image_alt}}', product_name)
+        item_html.gsub!('{{product_price}}', product_price)
+        item_html.gsub!('{{rating_count}}', '8')
+
+        # Build the service link
+        link = '/manage/website/editor/' + params['page_slug'] + '/' + product_slug
+
+        item_html.gsub!('{{product_link}}', link)
+        item_html
+      end.join("\n")
+    else
+      item_html = '<p style="text-align: center;">No Products Found</p>'
+      item_html
+    end
   end
 
   def render_product_images(component, product)
