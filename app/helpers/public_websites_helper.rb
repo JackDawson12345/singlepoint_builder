@@ -250,7 +250,9 @@ module PublicWebsitesHelper
         product_name = service['data']['name'].to_s  # or whatever attribute holds the service name
         product_slug = service['seo']['url_handle'].to_s  # or whatever attribute holds the service slug
         product_description = service['data']['description'].to_s
-        product_price =service['price']['price'].to_s
+        product_price = service['price']['price'].to_s
+
+        product_slug
 
         item_html = product_template.dup
 
@@ -263,7 +265,7 @@ module PublicWebsitesHelper
         item_html.gsub!('{{rating_count}}', '8')
 
         # Build the service link
-        link = '/manage/website/editor/' + params['page_slug'] + '/' + product_slug
+        link = '/' + params['page_slug'] + '/' + product_slug
 
         item_html.gsub!('{{product_link}}', link)
         item_html

@@ -16,6 +16,8 @@ class Manage::Website::ProductsController < Manage::BaseController
 
     image_urls = handle_image_uploads_and_get_urls(product_id)
 
+    url_slug  = product_params[:seo_url].gsub(' ', '-')
+
     new_product = {
       'id' => product_id,
       'data' => {
@@ -55,7 +57,7 @@ class Manage::Website::ProductsController < Manage::BaseController
       'seo' => {
         'title' => product_params[:seo_title] || '',
         'description' => product_params[:seo_description] || '',
-        'url_handle' => product_params[:seo_url] || ''
+        'url_handle' => url_slug || ''
       },
       'status' => product_params[:status] || 'active',
       'created_at' => Time.current.iso8601
