@@ -55,7 +55,6 @@ module Manage::Editor::WebsiteEditorHelper
     elsif component.component_type == 'Product Inner'
 
           pages = current_user.website.pages
-          theme_page_id = "5622a296-72e7-4d3e-99c4-cd72a9180502"
 
           main_page = nil
 
@@ -196,7 +195,6 @@ module Manage::Editor::WebsiteEditorHelper
     elsif component.component_type == 'Product Inner'
 
       pages = current_user.website.pages
-      theme_page_id = "5622a296-72e7-4d3e-99c4-cd72a9180502"
 
       main_page = nil
 
