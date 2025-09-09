@@ -252,7 +252,8 @@ module PublicWebsitesHelper
         product_description = service['data']['description'].to_s
         product_price = service['price']['price'].to_s
 
-        product_slug
+        product_slug = product_slug.gsub(' ', '-')
+
 
         item_html = product_template.dup
 
