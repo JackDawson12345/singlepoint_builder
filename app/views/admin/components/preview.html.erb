@@ -31,7 +31,13 @@
   </style>
 
   <section>
-    <%= raw(render_component_preview(@component)) %>
+    <% if @component.component_type == 'Login Section' %>
+      <%= raw(render_log_in_preview(@component)) %>
+    <% elsif @component.component_type == 'Sign Up Section' %>
+      <%= raw(render_sign_up_preview(@component)) %>
+    <% else %>
+      <%= raw(render_component_preview(@component)) %>
+    <% end %>
   </section>
 
   <script>

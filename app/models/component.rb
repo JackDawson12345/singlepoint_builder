@@ -71,7 +71,9 @@ class Component < ApplicationRecord
       'Blogs',
       'Service Inner',
       'Blog Inner',
-      'Product Inner'
+      'Product Inner',
+      'Login Section',
+      'Sign Up Section'
     ]
   end
 
