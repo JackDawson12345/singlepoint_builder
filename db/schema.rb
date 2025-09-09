@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_05_101309) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_09_092924) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -183,6 +183,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_101309) do
     t.boolean "domain_purchased", default: false
     t.json "domain_purchase_details"
     t.text "domain_purchase_error"
+    t.json "dns_configurations", default: {}
     t.index ["theme_id"], name: "index_user_setups_on_theme_id"
     t.index ["user_id"], name: "index_user_setups_on_user_id"
   end
@@ -198,6 +199,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_101309) do
     t.datetime "updated_at", null: false
     t.string "first_name"
     t.string "last_name"
+    t.string "first_address_line"
+    t.string "second_address_line"
+    t.string "town"
+    t.string "county"
+    t.string "state_province"
+    t.string "postcode"
+    t.string "country"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

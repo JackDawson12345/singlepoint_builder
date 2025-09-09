@@ -47,6 +47,10 @@ class Manage::SettingsController < Manage::BaseController
     }
   end
 
+  def publish_website
+    PublishWebsiteJob.perform_async(current_user.id)
+  end
+
   private
 
   def set_website

@@ -18,6 +18,15 @@
   </div>
 
   <div class="space-y-5">
+    <div class="bg-gray-50 rounded-lg flex py-4 px-6">
+      <div class="w-1/2">
+        <p>Site is unpublished</p>
+      </div>
+      <div class="w-1/2">
+        <%= button_to 'Publish Website', manage_publish_website_path, remote: true %>
+      </div>
+    </div>
+
     <div class="bg-gray-50 rounded-lg">
       <div class="py-4 px-6 border-b">
         <h2 class="nata-sans text-lg font-semibold">Site Name</h2>

@@ -14,22 +14,15 @@ class Manage::SetupController < Manage::BaseController
   def search_domain
     query = params[:name]&.strip
 
-    Rails.logger.info "Domain search initiated for query: '#{query}'"
-
     if query.blank?
-      Rails.logger.warn "Domain search failed: empty query"
       render json: { error: "Please enter a domain name" }, status: 400
       return
     end
 
     begin
       domains = search_available_domains(query)
-      Rails.logger.info "Domain search completed successfully. Found #{domains.length} domains"
       render json: { domains: domains, debug_info: "Search completed successfully" }
     rescue => e
-      Rails.logger.error "Domain search failed with error: #{e.class.name}: #{e.message}"
-      Rails.logger.error "Backtrace: #{e.backtrace.first(5).join(', ')}"
-
       # Return detailed error for debugging
       render json: {
         error: "Search failed: #{e.message}",
@@ -89,16 +82,9 @@ class Manage::SetupController < Manage::BaseController
 
   # Add this action to handle payment processing
   def create_payment_intent
-    Rails.logger.info "=== Payment Intent Creation Started ==="
-    Rails.logger.info "Current user: #{current_user&.id}"
 
     user_setup = current_user.user_setup
     payment_summary = user_setup.payment_summary
-
-    Rails.logger.info "Package type: #{user_setup.package_type}"
-    Rails.logger.info "Support option: #{user_setup.support_option}"
-    Rails.logger.info "Payment summary: #{payment_summary}"
-    Rails.logger.info "Stripe API key present: #{Stripe.api_key.present?}"
 
     begin
       # Create the payment intent with Stripe
@@ -117,27 +103,19 @@ class Manage::SetupController < Manage::BaseController
                                               }
                                             })
 
-      Rails.logger.info "Payment intent created successfully: #{intent.id}"
-      Rails.logger.info "Amount: #{payment_summary[:payment_amount_pence]} pence (£#{payment_summary[:payment_amount]})"
-
       # Store the payment intent ID in the user setup
       user_setup.update(
         stripe_payment_intent_id: intent.id,
         payment_status: 'pending'
       )
 
-      Rails.logger.info "User setup updated successfully"
-
       render json: {
         client_secret: intent.client_secret,
         payment_details: payment_summary
       }
     rescue Stripe::StripeError => e
-      Rails.logger.error "Stripe error: #{e.message}"
       render json: { error: e.message }, status: :unprocessable_entity
     rescue => e
-      Rails.logger.error "Payment intent creation error: #{e.message}"
-      Rails.logger.error "Error backtrace: #{e.backtrace.join("\n")}"
       render json: { error: 'Something went wrong. Please try again.' }, status: :internal_server_error
     end
   end
@@ -146,19 +124,12 @@ class Manage::SetupController < Manage::BaseController
   def confirm_payment
     payment_intent_id = params[:payment_intent_id]
 
-    Rails.logger.info "=== Payment Confirmation Started ==="
-    Rails.logger.info "Payment Intent ID: #{payment_intent_id}"
-
     begin
       # Retrieve the payment intent from Stripe
       intent = Stripe::PaymentIntent.retrieve(payment_intent_id)
-      Rails.logger.info "Payment Intent Status: #{intent.status}"
 
       if intent.status == 'succeeded'
         user_setup = current_user.user_setup
-
-        Rails.logger.info "Payment succeeded for user: #{current_user.id}"
-        Rails.logger.info "Domain to purchase: #{user_setup.domain_name}"
 
         # Update payment status first
         user_setup.update!(
@@ -170,7 +141,6 @@ class Manage::SetupController < Manage::BaseController
         domain_purchase_result = purchase_domain_for_user(user_setup)
 
         if domain_purchase_result[:success]
-          Rails.logger.info "Domain purchase successful"
 
           # Update user setup with domain purchase details
           user_setup.update!(
@@ -188,7 +158,6 @@ class Manage::SetupController < Manage::BaseController
             redirect_url: manage_setup_path
           }
         else
-          Rails.logger.warn "Domain purchase failed: #{domain_purchase_result[:error]}"
 
           # Payment succeeded but domain purchase failed
           # Store the error for later retry
@@ -206,21 +175,17 @@ class Manage::SetupController < Manage::BaseController
           }
         end
       else
-        Rails.logger.warn "Payment not successful: #{intent.status}"
         render json: {
           success: false,
           message: 'Payment was not successful. Please try again.'
         }
       end
     rescue Stripe::StripeError => e
-      Rails.logger.error "Stripe confirmation error: #{e.message}"
       render json: {
         success: false,
         message: 'Unable to confirm payment. Please contact support.'
       }
     rescue => e
-      Rails.logger.error "Payment confirmation error: #{e.message}"
-      Rails.logger.error "Error backtrace: #{e.backtrace.join("\n")}"
       render json: {
         success: false,
         message: 'An error occurred during confirmation. Please contact support.'
@@ -281,8 +246,6 @@ class Manage::SetupController < Manage::BaseController
       redirect_to manage_setup_path, notice: "Domain has already been purchased"
       return
     end
-
-    Rails.logger.info "Retrying domain purchase for user: #{current_user.id}"
 
     result = purchase_domain_for_user(user_setup)
 
@@ -350,9 +313,6 @@ class Manage::SetupController < Manage::BaseController
 
   # New method to handle domain purchasing
   def purchase_domain_for_user(user_setup)
-    Rails.logger.info "=== Starting Domain Purchase ==="
-    Rails.logger.info "Domain: #{user_setup.domain_name}"
-    Rails.logger.info "User: #{user_setup.user.email}"
 
     unless user_setup.domain_name.present?
       return {
@@ -389,14 +349,8 @@ class Manage::SetupController < Manage::BaseController
         "privacyService" => false  # Changed from true to false
       }
 
-      Rails.logger.info "Domain registration payload prepared"
-      Rails.logger.info "Payload: #{payload.inspect}"
-
       # Register the domain
       result = client.register_domain!(payload)
-
-      Rails.logger.info "Domain registration completed successfully"
-      Rails.logger.info "Registration result: #{result.inspect}"
 
       {
         success: true,
@@ -410,7 +364,6 @@ class Manage::SetupController < Manage::BaseController
       }
 
     rescue TwentyIClient::Error => e
-      Rails.logger.error "20i API error during domain purchase: #{e.message}"
 
       # Handle specific error cases
       error_message = if e.message.include?("Payment required") || e.message.include?("402")
@@ -426,8 +379,6 @@ class Manage::SetupController < Manage::BaseController
         error: error_message
       }
     rescue => e
-      Rails.logger.error "Unexpected error during domain purchase: #{e.message}"
-      Rails.logger.error "Backtrace: #{e.backtrace.join("\n")}"
       {
         success: false,
         error: "An unexpected error occurred during domain registration"
@@ -436,25 +387,17 @@ class Manage::SetupController < Manage::BaseController
   end
 
   def search_available_domains(query)
-    Rails.logger.info "Starting domain search for: #{query}"
 
     general_key = Rails.application.credentials.dig(:twenty_i, :general_key) ||
                   ENV["TWENTY_I_GENERAL_KEY"]
 
-    Rails.logger.info "API key present: #{general_key.present?}"
-    Rails.logger.info "API key length: #{general_key&.length || 0}"
-
     if general_key.to_s.strip.empty?
-      Rails.logger.error "Missing 20i general key - no key found in credentials or ENV"
       raise "Missing 20i general key. Please check credentials or TWENTYI_GENERAL_KEY environment variable."
     end
 
     bearer = Base64.strict_encode64(general_key.strip)
     encoded_query = URI.encode_www_form_component(query)
     uri = URI("https://api.20i.com/domain-search/#{encoded_query}")
-
-    Rails.logger.info "Making request to: #{uri}"
-    Rails.logger.info "Bearer token (first 10 chars): #{bearer[0..9]}..."
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -465,31 +408,20 @@ class Manage::SetupController < Manage::BaseController
     req["Authorization"] = "Bearer #{bearer}"
     req["Accept"] = "application/json"
 
-    Rails.logger.info "Sending HTTP request..."
-
     res = http.request(req)
 
-    Rails.logger.info "HTTP Response code: #{res.code}"
-    Rails.logger.info "HTTP Response headers: #{res.to_hash}"
-    Rails.logger.info "HTTP Response body (first 500 chars): #{res.body[0..499]}"
-
     unless res.code.to_i.between?(200, 299)
-      Rails.logger.error "API returned non-success status: #{res.code}"
       raise "API returned #{res.code}: #{res.body}"
     end
 
     begin
       response_data = JSON.parse(res.body)
-      Rails.logger.info "Parsed JSON response: #{response_data.inspect}"
     rescue JSON::ParserError => e
-      Rails.logger.error "Failed to parse JSON response: #{e.message}"
-      Rails.logger.error "Raw response body: #{res.body}"
       raise "Invalid JSON response from API: #{e.message}"
     end
 
     # Process the response based on its structure
     domains = process_domain_response(response_data, query)
-    Rails.logger.info "Processed #{domains.length} domains: #{domains.inspect}"
 
     domains
   end
@@ -499,25 +431,18 @@ class Manage::SetupController < Manage::BaseController
   end
 
   def process_domain_response(response_data, base_query = nil)
-    Rails.logger.info "Processing response data type: #{response_data.class.name}"
-    Rails.logger.info "Full response data: #{response_data.inspect}"
-    Rails.logger.info "Base query: #{base_query}"
 
     domains = []
 
     if response_data.is_a?(Hash)
-      Rails.logger.info "Response is hash with keys: #{response_data.keys}"
 
       # Handle different possible response structures
       if response_data["domains"]
-        Rails.logger.info "Found 'domains' key with #{response_data['domains'].length} items"
         domains = response_data["domains"].map { |domain| format_domain(domain, base_query) }.compact
       elsif response_data["results"]
-        Rails.logger.info "Found 'results' key with #{response_data['results'].length} items"
         domains = response_data["results"].map { |domain| format_domain(domain, base_query) }.compact
       elsif response_data["header"] && response_data["header"]["names"]
         # Handle the specific structure we're seeing: {"header" => {"names" => ["domain.com"]}}
-        Rails.logger.info "Found header with names structure"
         domains = response_data["header"]["names"].map do |domain_name|
           {
             name: domain_name,
@@ -527,20 +452,16 @@ class Manage::SetupController < Manage::BaseController
         end
       else
         # Try to extract domain names from any nested structure
-        Rails.logger.info "Searching for domain names in response structure"
         domains = extract_domain_names_from_response(response_data, base_query)
       end
     elsif response_data.is_a?(Array)
-      Rails.logger.info "Response is array with #{response_data.length} items"
       domains = response_data.map { |domain| format_domain(domain, base_query) }.compact
     else
-      Rails.logger.warn "Unexpected response format: #{response_data.class.name}"
       domains = []
     end
 
     # Filter out any invalid domains (format_domain returns nil for invalid domains)
     valid_domains = domains.select { |d| d.present? && d[:name].present? && d[:name].is_a?(String) }
-    Rails.logger.info "Filtered to #{valid_domains.length} valid domains: #{valid_domains.inspect}"
 
     valid_domains
   end
@@ -590,7 +511,6 @@ class Manage::SetupController < Manage::BaseController
   end
 
   def format_domain(domain, base_query = nil)
-    Rails.logger.debug "Formatting domain: #{domain.inspect} with base query: #{base_query}"
 
     # Handle different input types
     case domain
@@ -610,13 +530,11 @@ class Manage::SetupController < Manage::BaseController
           price: nil
         }
       else
-        Rails.logger.warn "Invalid domain string: #{domain}"
         return nil # Invalid domain string
       end
     when Hash
       # Handle header objects
       if domain["header"] && domain["header"]["names"]
-        Rails.logger.debug "Skipping header object"
         return nil
       end
 
@@ -636,22 +554,18 @@ class Manage::SetupController < Manage::BaseController
         price: domain["price"] || domain["cost"] || domain["annual_price"] || nil
       }
     else
-      Rails.logger.warn "Unknown domain format: #{domain.class.name}"
       return nil
     end
 
     # Validate the domain name
     if formatted[:name].blank? || !formatted[:name].is_a?(String)
-      Rails.logger.warn "Invalid domain name: #{formatted[:name]}"
       return nil
     end
 
-    Rails.logger.debug "Formatted domain: #{formatted.inspect}"
     formatted
   end
 
   def determine_domain_availability(domain_data)
-    Rails.logger.debug "Determining availability for: #{domain_data.inspect}"
 
     # Check explicit availability field first
     if domain_data.key?("available")
@@ -678,7 +592,6 @@ class Manage::SetupController < Manage::BaseController
       # No 'can' field might mean it's available for registration
       return true
     else
-      Rails.logger.warn "Unknown 'can' value: #{can_value}"
       # Default to unavailable if we're not sure
       return false
     end

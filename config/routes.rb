@@ -1,3 +1,4 @@
+require "sidekiq/web"
 Rails.application.routes.draw do
   # Health check should be first
   get "up" => "rails/health#show", as: :rails_health_check
@@ -7,6 +8,9 @@ Rails.application.routes.draw do
 
   # Admin routes - MUST come before wildcard routes
   namespace :admin do
+
+    mount Sidekiq::Web => "/sidekiq"
+
     namespace :website do
       get "/", to: "website#index", as: "websites"
       get "/:id/preview", to: "website#show", as: "website_show"
@@ -156,6 +160,7 @@ Rails.application.routes.draw do
     patch "/settings/website-settings", to: "settings#update_website"
     delete "/settings/website-settings/favicon", to: "settings#remove_favicon", as: "remove_favicon"
     patch '/settings/website-settings/update_website_name', to: 'settings#update_website_name', as: 'update_website_name'
+    post "/settings/website-settings", to: "settings#publish_website", as: "publish_website"
   end
 
   # Specific frontend routes

@@ -4,6 +4,9 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  encrypts :first_address_line, :second_address_line, :town,
+           :county, :state_province, :postcode, :country
+
   has_one :website, dependent: :destroy
 
   has_many :notifications, dependent: :destroy
