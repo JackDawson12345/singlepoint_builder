@@ -16,13 +16,6 @@ class Manage::Website::ProductsController < Manage::BaseController
 
     image_urls = handle_image_uploads_and_get_urls(product_id)
 
-    # Debug logging
-    Rails.logger.debug "=== FORM PARAMS DEBUG ==="
-    Rails.logger.debug "Full params: #{params.inspect}"
-    Rails.logger.debug "Product params: #{product_params.inspect}"
-    Rails.logger.debug "Variants param: #{product_params[:variants].inspect}"
-    Rails.logger.debug "=========================="
-
     new_product = {
       'id' => product_id,
       'data' => {
@@ -72,8 +65,27 @@ class Manage::Website::ProductsController < Manage::BaseController
 
     if current_user.website
       current_user.website.update(products: current_products)
-    else
-      current_user.create_website(products: [new_product])
+    end
+
+    product_page = current_user.website.pages["theme_pages"]["shop"]
+
+    if product_page.present?
+      # Calculate the next position
+      next_position = if product_page['inner_pages'].empty?
+                        1
+                      else
+                        product_page['inner_pages'].values.map { |page| page['position'].to_i }.max + 1
+                      end
+
+      product_page['inner_pages'][new_product['data']['name']] = {
+        "theme_page_id" => new_product['id'],
+        "components" => product_page['inner_pages_components'],
+        "slug" => new_product['seo']['url_handle'],
+        "position" => next_position.to_s
+      }
+
+      current_user.website.save
+
     end
 
     redirect_to manage_website_products_path, notice: 'Product was successfully created!'

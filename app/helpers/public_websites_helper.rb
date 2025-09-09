@@ -38,6 +38,53 @@ module PublicWebsitesHelper
 
     elsif component.component_type == 'Product Inner'
 
+      pages = user.website.pages
+
+      main_page = nil
+
+      pages["theme_pages"].each do |page_name, page_data|
+        # Check if it's a main page
+        if page_data["theme_page_id"] == theme_page_id
+          main_page = page_name
+          break
+        end
+
+        # Check if it's in inner_pages
+        if page_data["inner_pages"].present?
+          page_data["inner_pages"].each do |inner_page_name, inner_page_data|
+            if inner_page_data["theme_page_id"] == theme_page_id
+              main_page = page_name  # This will be "shop" in your case
+              break
+            end
+          end
+        end
+
+        break if main_page
+      end
+
+      product = user.website.products.find { |s| s["id"] == theme_page_id }
+
+      updated_content = updated_content.gsub!('{{service_page_name}}', main_page)
+
+      updated_content = updated_content.gsub!('{{product_name}}', product['data']['name'])
+      updated_content = updated_content.gsub!('{{product_description}}', product['data']['description'])
+      updated_content = updated_content.gsub!('{{review_count}}', '10')
+
+      updated_content = updated_content.gsub!('{{product_category}}', product['data']['category'])
+      updated_content = updated_content.gsub!('{{product_sku}}', product['inventory']['sku'])
+      updated_content = updated_content.gsub!('{{product_weight}}', product['shipping']['weight'])
+      updated_content = updated_content.gsub!('{{product_width}}', product['shipping']['sizes']['width'])
+      updated_content = updated_content.gsub!('{{product_height}}', product['shipping']['sizes']['height'])
+      updated_content = updated_content.gsub!('{{product_depth}}', product['shipping']['sizes']['depth'])
+
+      updated_content = updated_content.gsub!('{{product_main_image}}', product['images'].first)
+
+      render_product_price = render_product_price(component, product['price']['price'], product['price']['sale_price'])
+      updated_content = updated_content.gsub!('{{product_price}}', render_product_price)
+
+      render_product_images = render_product_images(component, product)
+      updated_content = updated_content.gsub!('{{product_images}}', render_product_images)
+
     end
 
     updated_content
@@ -169,5 +216,36 @@ module PublicWebsitesHelper
     end
 
 
+  end
+
+  def render_product_images(component, product)
+
+    raw_template = component.template_patterns['product_images']
+
+    images = product['images']
+
+    images.map.with_index do |image, index|
+      item_html = raw_template.dup
+
+      item_html.gsub!('{{product_image}}', image.to_s)
+      item_html.gsub!('{{product_image_count}}', (index + 1).to_s)
+
+      item_html
+    end.join("\n")
+
+  end
+
+  def render_product_price(component, price, sale_price)
+
+    unless price.blank? && sale_price.blank?
+      raw_template = component.template_patterns['product_price']['sale']
+      raw_template.gsub!('{{product_sale_price}}', sprintf('%.2f', sale_price))
+      raw_template.gsub!('{{product_price}}', sprintf('%.2f', price))
+      raw_template.gsub!('{{product_price_discount}}', (((price - sale_price) / price) * 100).round(0).to_s)
+    else
+      raw_template = component.template_patterns['product_price']['normal']
+    end
+
+    raw_template
   end
 end
