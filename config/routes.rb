@@ -123,44 +123,87 @@ Rails.application.routes.draw do
       get "preview/:page_slug", to: "preview#show", as: "website_preview_page"
       get "preview/:page_slug/:inner_page_slug", to: "preview#inner_page", as: "preview_inner_page"
 
-      resources :products do
-        member do
-          delete :remove_image
+      namespace :shop do
+        post '/products/import_csv', to: 'products#import_csv', as: "products_import_csv"
+        get '/products/upload_csv', to: 'products#upload', as: 'products_upload_csv'
+
+        resources :products do
+          member do
+            delete :remove_image
+          end
         end
+
+
+        get "categories", to: "product_categories#index", as: "categories"
+        post "categories/create_category", to: "product_categories#create_category", as: "create_category"
+
       end
 
       resources :services do
+        collection do
+          get :categories
+          post :categories, action: :create_category
+        end
       end
       resources :blogs do
+        collection do
+          get :categories
+          post :categories, action: :create_category
+        end
       end
     end
 
     get "/", to: "dashboard#index", as: "dashboard"
     get "/setup", to: "setup#index", as: "setup"
-
     # Domain search routes
     post "/setup/search-domain", to: "setup#search_domain", as: "setup_search_domain"
     post "/setup/select-domain", to: "setup#select_domain", as: "setup_select_domain"
-
     post "/setup/package", to: "setup#package", as: "setup_package"
     post "/setup/support", to: "setup#support", as: "setup_support"
-
     # Payment routes
     post "/setup/create-payment-intent", to: "setup#create_payment_intent", as: "setup_create_payment_intent"
     post "/setup/confirm-payment", to: "setup#confirm_payment", as: "setup_confirm_payment"
-
     # Domain purchase retry route
     post "/setup/retry-domain-purchase", to: "setup#retry_domain_purchase", as: "setup_retry_domain_purchase"
-
     match "/set-website-theme/:theme_id", to: "setup#set_website_theme", as: "set_website_theme", via: [:get, :post]
 
+    get "/account-settings", to: "account_settings#index", as: "account_settings"
+
     # Settings
-    get "/settings", to: "settings#index", as: "settings"
-    get "/settings/website-settings", to: "settings#website_settings", as: "website_settings"
-    patch "/settings/website-settings", to: "settings#update_website"
-    delete "/settings/website-settings/favicon", to: "settings#remove_favicon", as: "remove_favicon"
-    patch '/settings/website-settings/update_website_name', to: 'settings#update_website_name', as: 'update_website_name'
-    post "/settings/website-settings", to: "settings#publish_website", as: "publish_website"
+    namespace :settings do
+      namespace :payments do
+        get "/accept-payments", to: "accept_payments#accept_payments", as: "accept_payments"
+        get "/accept-payments/more", to: "accept_payments#accept_more_payments", as: "accept_more_payments"
+      end
+      namespace :website do
+        # Website Settings Controller
+        get "website-settings", to: "website_settings#website_settings", as: "website_settings"
+        patch "website-settings", to: "website_settings#update_website"
+        delete "website-settings/favicon", to: "website_settings#remove_favicon", as: "remove_favicon"
+        patch 'website-settings/update_website_name', to: 'website_settings#update_website_name', as: 'update_website_name'
+        post "website-settings", to: "website_settings#publish_website", as: "publish_website"
+        # SEO Settings Controller
+        get "/seo", to: "seo_settings#seo_settings", as: "seo_settings"
+        get "/seo/main-page-settings", to: "seo_settings#main_page_settings", as: "seo_main_page_settings"
+        patch 'seo/main-page-settings/seo-settings', to: 'seo_settings#update_seo_field', as: "seo_update_seo_field"
+        get "/seo/blog-posts-settings", to: "seo_settings#blog_posts_settings", as: "seo_blog_posts_settings"
+        get "/seo/blog-categories-settings", to: "seo_settings#blog_categories_settings", as: "seo_blog_categories_settings"
+        get "/seo/services-settings", to: "seo_settings#services_settings", as: "seo_services_settings"
+        get "/seo/service-categories-settings", to: "seo_settings#service_categories_settings", as: "seo_service_categories_settings"
+        get "/seo/products-settings", to: "seo_settings#products_settings", as: "seo_products_settings"
+        get "/seo/product-categories-settings", to: "seo_settings#product_categories_settings", as: "seo_product_categories_settings"
+        # Website Settings Controller
+        get "/domains", to: "domains#index", as: "domains_index"
+
+      end
+      namespace :general do
+        get "/business-info", to: "business_info#business_info", as: "business_info"
+        patch '/business-info/update-business-info', to: 'business_info#update_business_info', as: 'update_business_info'
+        patch '/business-info/update-business-location', to: 'business_info#update_business_location', as: 'update_business_location'
+        patch '/business-info/update-business-contact', to: 'business_info#update_business_contact', as: 'update_business_contact'
+      end
+      get "/", to: "home#index", as: "settings"
+    end
   end
 
   # Specific frontend routes

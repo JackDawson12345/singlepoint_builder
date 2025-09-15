@@ -70,3 +70,5 @@ gem 'image_processing', '~> 1.2' # for variants
 gem "sidekiq", "~> 8.0"
 
 gem 'platform-api'
+
+gem 'csv'

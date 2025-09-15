@@ -1,16 +1,12 @@
-class Manage::SettingsController < Manage::BaseController
+class Manage::Settings::Website::WebsiteSettingsController < Manage::BaseController
   before_action :set_website, only: [:website_settings, :update_website, :remove_favicon]
-
-  def index
-  end
-
   def website_settings
     # @website is already set by before_action
   end
 
   def update_website
     if @website.update(website_params)
-      redirect_to manage_website_settings_path, notice: 'Website settings updated successfully.'
+      redirect_to manage_settings_website_path, notice: 'Website settings updated successfully.'
     else
       render :website_settings
     end
@@ -24,11 +20,11 @@ class Manage::SettingsController < Manage::BaseController
       result = @website.favicon.purge
     end
 
-    redirect_to manage_website_settings_path, notice: 'Favicon removed successfully.'
+    redirect_to manage_settings_website_path, notice: 'Favicon removed successfully.'
   rescue => e
     puts "Error: #{e.message}"
     puts e.backtrace
-    redirect_to manage_website_settings_path, alert: "Error removing favicon: #{e.message}"
+    redirect_to manage_settings_website_path, alert: "Error removing favicon: #{e.message}"
   end
 
   def update_website_name

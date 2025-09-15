@@ -64,6 +64,29 @@ class Manage::Website::BlogsController < Manage::BaseController
     blogs = @website.blogs || []
     blogs << @blog
 
+    blog_page = current_user.website.pages["theme_pages"]["news"]
+
+    if blog_page.present?
+      # Calculate the next position
+      next_position = if blog_page['inner_pages'].empty?
+                        1
+                      else
+                        blog_page['inner_pages'].values.map { |page| page['position'].to_i }.max + 1
+                      end
+
+      blog_page['inner_pages'][@blog['name']] = {
+        "theme_page_id" => @blog['id'],
+        "components" => blog_page['inner_pages_components'],
+        "slug" => @blog['slug'],
+        "position" => next_position.to_s,
+        "seo" => {"focus_keyword" => '',
+                  "title_tag" => '',
+                  "meta_description" => ''}
+      }
+    else
+
+    end
+
     if @website.update(blogs: blogs)
       redirect_to manage_website_blog_path(@blog["id"]), notice: 'Blog was successfully created.'
     else
@@ -134,6 +157,68 @@ class Manage::Website::BlogsController < Manage::BaseController
     end
   end
 
+  def categories
+    # Initialize categories structure if it doesn't exist
+    categories = @website.categories || {}
+    categories["blogs"] ||= {}
+    categories["services"] ||= {}
+    categories["products"] ||= {}
+
+    @blog_categories = categories["blogs"]
+
+    # Create a new category object for the form
+    @new_category = {
+      "id" => SecureRandom.uuid,
+      "name" => "",
+      "slug" => "",
+      "parent_category" => "",
+      "description" => "",
+      "image" => "",
+      "seo" => {"focus_keyword" => '',
+                "title_tag" => '',
+                "meta_description" => ''}
+    }
+  end
+
+  def create_category
+    @category = category_params.to_h
+    @category["id"] = SecureRandom.uuid
+    @category['seo'] = {"focus_keyword" => '',
+                        "title_tag" => '',
+                        "meta_description" => ''}
+
+    # Handle file upload for category image
+    if params[:category][:image].present?
+      uploaded_file = params[:category][:image]
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: uploaded_file.open,
+        filename: uploaded_file.original_filename,
+        content_type: uploaded_file.content_type
+      )
+      @category["image"] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
+    end
+
+    # Generate slug from name if not provided
+    @category["slug"] = @category["name"].parameterize if @category["slug"].blank?
+
+    # Get existing categories or initialize
+    categories = @website.categories || {}
+    categories["blogs"] ||= {}
+    categories["services"] ||= {}
+    categories["products"] ||= {}
+
+    # Add new category to blogs categories
+    categories["blogs"][@category["id"]] = @category
+
+    if @website.update(categories: categories)
+      redirect_to categories_manage_website_blogs_path, notice: 'Blog category was successfully created.'
+    else
+      @blog_categories = categories["blogs"]
+      @new_category = @category
+      render :categories
+    end
+  end
+
   private
 
   def set_website
@@ -153,5 +238,9 @@ class Manage::Website::BlogsController < Manage::BaseController
 
   def blog_params
     params.require(:blog).permit(:name, :slug, :content, :excerpt, :categories, :parent_page)
+  end
+
+  def category_params
+    params.require(:category).permit(:name, :slug, :parent_category, :description, :image)
   end
 end

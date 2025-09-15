@@ -4,7 +4,7 @@
   <div class="mb-5">
     <h2 class="nata-sans text-lg font-normal mb-2">Finance & Payments</h2>
     <div class="bg-gray-50 rounded-lg">
-      <div class="flex border-b py-4 px-6 hover:bg-blue-50">
+      <%= link_to manage_settings_payments_accept_payments_path, class: 'flex border-b py-4 px-6 hover:bg-blue-50' do %>
         <div class="w-4/5">
           <h3 class="nata-sans text-base font-semibold">Accept payments</h3>
           <p class="nata-sans text-sm font-normal">Choose the way you get paid by customers.</p>
@@ -14,7 +14,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </div>
-      </div>
+      <% end %>
       <div class="flex border-b py-4 px-6 hover:bg-blue-50">
         <div class="w-4/5">
           <h3 class="nata-sans text-base font-semibold">Getting Paid Settings</h3>
@@ -42,7 +42,7 @@
   <div class="mb-5">
     <h2 class="nata-sans text-lg font-normal mb-2">Site, domain & SEO</h2>
     <div class="bg-gray-50 rounded-lg">
-      <div class="flex border-b py-4 px-6 hover:bg-blue-50">
+      <%= link_to manage_settings_website_seo_settings_path, class: 'flex border-b py-4 px-6 hover:bg-blue-50' do %>
         <div class="w-4/5">
           <h3 class="nata-sans text-base font-semibold">SEO Settings</h3>
           <p class="nata-sans text-sm font-normal">Customize your pages and meta tags for SEO and set your site preferences.</p>
@@ -52,8 +52,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </div>
-      </div>
-      <%= link_to manage_website_settings_path, class: 'flex border-b py-4 px-6 hover:bg-blue-50' do %>
+      <% end %>
+      <%= link_to manage_settings_website_website_settings_path, class: 'flex border-b py-4 px-6 hover:bg-blue-50' do %>
         <div class="w-4/5">
           <h3 class="nata-sans text-base font-semibold">Website settings</h3>
           <p class="nata-sans text-sm font-normal">Manage your site’s name, URL, favicon and more.</p>
@@ -64,7 +64,7 @@
           </svg>
         </div>
       <% end %>
-      <div class="flex border-b py-4 px-6 hover:bg-blue-50">
+      <%= link_to manage_settings_website_domains_index_path, class: 'flex border-b py-4 px-6 hover:bg-blue-50' do %>
         <div class="w-4/5">
           <h3 class="nata-sans text-base font-semibold">Domains</h3>
           <p class="nata-sans text-sm font-normal">Connect, manage and edit your website's address.</p>
@@ -74,7 +74,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </div>
-      </div>
+      <% end %>
       <div class="flex border-b py-4 px-6 hover:bg-blue-50">
         <div class="w-4/5">
           <h3 class="nata-sans text-base font-semibold">Manage Plan</h3>
@@ -146,7 +146,7 @@
           </svg>
         </div>
       </div>
-      <div class="flex border-b py-4 px-6 hover:bg-blue-50">
+      <%= link_to manage_settings_general_business_info_path, class: 'flex border-b py-4 px-6 hover:bg-blue-50' do %>
         <div class="w-4/5">
           <h3 class="nata-sans text-base font-semibold">Business info</h3>
           <p class="nata-sans text-sm font-normal">Set your business name, logo, location and contact info.</p>
@@ -156,7 +156,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </div>
-      </div>
+      <% end %>
       <div class="flex border-b py-4 px-6 hover:bg-blue-50">
         <div class="w-4/5">
           <h3 class="nata-sans text-base font-semibold">Mobile App</h3>

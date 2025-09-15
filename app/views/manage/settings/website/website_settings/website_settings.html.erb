@@ -1,21 +1,5 @@
 <div>
-  <div class="mb-5">
-    <div class="flex gap-3">
-      <%= link_to 'Settings', manage_settings_path, class: 'nata-sans font-normal text-sm' %>
-      <svg style="transform: rotate(270deg)" class="w-5 h-5 ml-1 transform transition-transform duration-200 text-gray-300" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-      </svg>
-      <p class="nata-sans font-normal text-sm">Website Settings</p>
-    </div>
-    <div class="flex items-center gap-3">
-      <%= link_to manage_settings_path do %>
-        <svg style="transform: rotate(90deg)" class="w-5 h-5 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      <% end %>
-      <h1 class="nata-sans page-title">Website Settings</h1>
-    </div>
-  </div>
+  <%= render 'manage/settings/settings_header', page_name: "Website Settings", subpage_name: nil, subpage_path: nil, page_description: nil %>
 
   <div class="space-y-5">
     <div class="bg-gray-50 rounded-lg flex py-4 px-6">
@@ -23,7 +7,7 @@
         <p>Site is unpublished</p>
       </div>
       <div class="w-1/2">
-        <%= button_to 'Publish Website', manage_publish_website_path, remote: true %>
+        <%= button_to 'Publish Website', manage_settings_website_publish_website_path, remote: true %>
       </div>
     </div>
 
@@ -35,7 +19,7 @@
       <div class="py-4 px-6">
         <div class="border-b pb-4 flex">
           <div class="w-3/10 pr-4">
-            <%= form_with url: manage_update_website_name_path, method: :patch, local: false, class: "w-full", id: "site-name-form" do |form| %>
+            <%= form_with url: manage_settings_website_update_website_name_path, method: :patch, local: false, class: "w-full", id: "site-name-form" do |form| %>
               <%= form.text_field :site_name,
                                   placeholder: "Site name",
                                   value: @website.name,
@@ -126,7 +110,7 @@
       <div class="py-4 px-6">
         <div class="flex">
           <div class="w-full">
-            <%= form_with model: @website, url: manage_website_settings_path, method: :patch, local: true, multipart: true, class: "space-y-4" do |form| %>
+            <%= form_with model: @website, url: manage_settings_website_website_settings_path, method: :patch, local: true, multipart: true, class: "space-y-4" do |form| %>
               <div class="flex items-center gap-4">
                 <% if @website.favicon.attached? %>
                   <div class="flex flex-col gap-3 w-full">

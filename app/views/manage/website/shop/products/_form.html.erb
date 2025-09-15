@@ -48,7 +48,7 @@
                 <div class="relative">
                   <%= image_tag image_url, class: "h-24 w-24 rounded-lg object-cover" %>
                   <%= link_to "×",
-                              remove_image_manage_website_product_path(@product['id'], image_index: index),
+                              remove_image_manage_website_shop_product_path(@product['id'], image_index: index),
                               method: :delete,
                               data: { confirm: "Remove this image?" },
                               class: "absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600" %>
@@ -59,12 +59,110 @@
         <% end %>
 
         <div>
-          <%= form.label :category, class: "block text-sm font-medium text-gray-700 nata-sans" %>
-          <div class="mt-1">
-            <%= form.text_field :category,
-                                value: @product ? @product.dig('data', 'category') : '',
-                                class: "w-full p-2 border rounded text-sm nata-sans" %>
+          <%= form.label :categories, class: "block text-sm font-medium text-gray-700 nata-sans" %>
+
+          <!-- Hidden input to store selected category IDs -->
+          <%= form.hidden_field :categories,
+                                value: (selected_categories(@product).join(',') if selected_categories(@product).any?),
+                                data: { 'categories-hidden': true } %>
+
+          <!-- Custom dropdown -->
+          <div class="relative mt-1" data-category-dropdown>
+            <button type="button"
+                    class="w-full p-2 border rounded text-sm nata-sans bg-white text-left flex justify-between items-center"
+                    data-category-trigger>
+              <span data-category-placeholder>Select categories...</span>
+              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+
+            <!-- Dropdown menu -->
+            <div class="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg hidden" data-category-menu>
+              <div class="max-h-60 overflow-y-auto">
+                <%
+                  # Get current selected categories as an array
+                  current_categories = selected_categories(@product)
+
+                  # Get all product categories
+                  all_categories = []
+                  if current_user.website&.categories&.dig('products')
+                    current_user.website.categories['products'].each do |id, category|
+                      all_categories << {
+                        id: id,
+                        name: category['name'],
+                        parent_category: category['parent_category'],
+                        selected: current_categories.include?(id)
+                      }
+                    end
+                  end
+
+                  # Sort categories to show parent categories first, then children
+                  def sort_categories_hierarchically(categories)
+                    # First get all top-level categories (no parent)
+                    top_level = categories.select { |cat| cat[:parent_category].blank? }
+                    # Then get categories with parents
+                    with_parents = categories.select { |cat| cat[:parent_category].present? }
+
+                    result = []
+
+                    # Add top-level categories and their children recursively
+                    top_level.each do |parent_cat|
+                      result << parent_cat
+                      # Find and add children
+                      add_children_recursively(result, with_parents, parent_cat[:id], 1)
+                    end
+
+                    # Add any remaining categories that might have invalid parent references
+                    remaining = with_parents.select { |cat| !result.include?(cat) }
+                    result.concat(remaining)
+
+                    result
+                  end
+
+                  def add_children_recursively(result, remaining_categories, parent_id, level)
+                    children = remaining_categories.select { |cat| cat[:parent_category] == parent_id }
+                    children.each do |child|
+                      child[:level] = level
+                      result << child
+                      remaining_categories.delete(child)
+                      # Recursively add grandchildren
+                      add_children_recursively(result, remaining_categories, child[:id], level + 1)
+                    end
+                  end
+
+                  sorted_categories = sort_categories_hierarchically(all_categories)
+                %>
+
+                <% if sorted_categories.empty? %>
+                  <div class="p-3 text-gray-500 text-sm">No categories available</div>
+                <% else %>
+                  <div class="p-2">
+                    <% sorted_categories.each do |category| %>
+                      <% indent_class = category[:level] ? "ml-#{category[:level] * 4}" : "" %>
+                      <label class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer <%= indent_class %>">
+                        <input type="checkbox"
+                               value="<%= category[:id] %>"
+                               data-category-name="<%= category[:name] %>"
+                               data-category-checkbox
+                               <%= 'checked' if category[:selected] %>
+                               class="mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <div class="flex-1">
+                          <div class="text-sm font-medium text-gray-900">
+                            <%= '└─ ' if category[:level] && category[:level] > 0 %>
+                            <%= category[:name] %>
+                          </div>
+                        </div>
+                      </label>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
           </div>
+
+          <p class="mt-1 text-xs text-gray-500">Select one or more categories for this product</p>
+          <div data-category-preview class="mt-2"></div>
         </div>
       </div>
 
@@ -329,6 +427,28 @@
 
 <% end %>
 
+<style>
+    /* Custom dropdown styling */
+    [data-category-dropdown] .relative {
+        position: relative;
+    }
+
+    [data-category-menu] {
+        z-index: 50;
+    }
+
+    [data-category-checkbox]:focus {
+        ring: 2px;
+        ring-color: rgb(59 130 246 / 0.5);
+        border-color: rgb(59 130 246);
+    }
+
+    /* Indentation classes for hierarchical display */
+    .ml-4 { margin-left: 1rem; }
+    .ml-8 { margin-left: 2rem; }
+    .ml-12 { margin-left: 3rem; }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Track quantity checkbox functionality
@@ -387,5 +507,96 @@
 
         // Add event listener
         physicalProductCheckbox.addEventListener('change', togglePhysicalProductFields);
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initProductCategoryDropdown();
+    });
+
+    function initProductCategoryDropdown() {
+        const dropdown = document.querySelector('[data-category-dropdown]');
+        if (!dropdown) return;
+
+        const trigger = dropdown.querySelector('[data-category-trigger]');
+        const menu = dropdown.querySelector('[data-category-menu]');
+        const placeholder = dropdown.querySelector('[data-category-placeholder]');
+        const hiddenInput = document.querySelector('[data-categories-hidden]');
+        const checkboxes = dropdown.querySelectorAll('[data-category-checkbox]');
+        const categoryPreview = document.querySelector('[data-category-preview]');
+
+        if (!trigger || !menu || !placeholder || !hiddenInput) return;
+
+        // Toggle dropdown
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            menu.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        // Handle checkbox changes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSelectedCategories();
+            });
+        });
+
+        function updateSelectedCategories() {
+            const selectedCategories = [];
+            const selectedNames = [];
+
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedCategories.push(checkbox.value);
+                    selectedNames.push(checkbox.dataset.categoryName);
+                }
+            });
+
+            // Update hidden input
+            hiddenInput.value = selectedCategories.join(',');
+
+            // Update placeholder text
+            if (selectedNames.length === 0) {
+                placeholder.textContent = 'Select categories...';
+                placeholder.className = 'text-gray-500';
+            } else if (selectedNames.length === 1) {
+                placeholder.textContent = selectedNames[0];
+                placeholder.className = 'text-gray-900';
+            } else {
+                placeholder.textContent = `${selectedNames.length} categories selected`;
+                placeholder.className = 'text-gray-900';
+            }
+
+            // Update preview badges
+            updateCategoryPreview(selectedNames);
+        }
+
+        function updateCategoryPreview(categoryNames) {
+            if (!categoryPreview) return;
+
+            if (categoryNames.length > 0) {
+                const badges = categoryNames.map(name =>
+                    `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1">${name}</span>`
+                ).join('');
+                categoryPreview.innerHTML = badges;
+            } else {
+                categoryPreview.innerHTML = '';
+            }
+        }
+
+        // Initialize on load
+        updateSelectedCategories();
+    }
+
+    // Handle Turbo events if you're using Hotwire
+    document.addEventListener('turbo:load', function() {
+        initProductCategoryDropdown();
     });
 </script>

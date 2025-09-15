@@ -1,0 +1,278 @@
+<!-- app/views/manage/website/blogs/categories.html.erb -->
+
+<div class="sm:flex sm:items-center">
+  <div class="sm:flex-auto">
+    <h1 class="nata-sans page-title">Shop Categories</h1>
+    <p class="nata-sans font-normal text-base">A list of all Shop on your website including their name, image, status and Inventory.</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+  <div class="lg:col-span-2">
+    <div class="bg-white shadow-sm border border-gray-200 rounded-lg">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Existing Categories</h3>
+      </div>
+      <div class="">
+        <% if @product_categories.any? %>
+          <%
+            # Helper method to build hierarchical structure
+            def build_category_tree(categories)
+              # Get root categories (no parent)
+              roots = categories.select { |id, cat| cat["parent_category"].blank? }
+
+              # Get children for each category
+              children_map = {}
+              categories.each do |id, cat|
+                if cat["parent_category"].present?
+                  children_map[cat["parent_category"]] ||= []
+                  children_map[cat["parent_category"]] << [id, cat]
+                end
+              end
+
+              [roots, children_map]
+            end
+
+            def render_category_rows(category_id, category, children_map, level = 0)
+              html = ""
+              prefix = level > 0 ? "#{'-' * level} " : ""
+
+              html += "<tr class='hover:bg-blue-50'>"
+
+              # Image column
+              html += "<td class='pl-6 pr-2 py-4 whitespace-nowrap'>"
+              if category['image'].present?
+                html += "<img src='#{category['image']}' alt='#{category['name']}' class='w-10 h-10 rounded-full object-cover'>"
+              else
+                html += "<div class='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center'>"
+                html += "<svg class='w-5 h-5 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>"
+                html += "<path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'></path>"
+                html += "</svg>"
+                html += "</div>"
+              end
+              html += "</td>"
+
+              # Name column with hierarchy
+              html += "<td class='px-2 py-4 whitespace-nowrap'>"
+              html += "<div class='flex items-center'>"
+              html += "<span class='text-sm font-medium text-gray-900'>#{prefix}#{category['name']}</span>"
+              html += "</div>"
+              html += "</td>"
+
+              # Description column
+              html += "<td class='px-2 py-4'>"
+              html += "<div class='text-sm text-gray-900'>#{category['description'].truncate(10) || ''}</div>"
+              html += "</td>"
+
+              # SEO column
+              html += "<td class='px-2 py-4 whitespace-nowrap text-center'>"
+              html += "<div class='w-3 h-3 rounded-full #{seo_state(category)} mx-auto'></div>"
+              html += "</td>"
+
+              # Slug column
+              html += "<td class='px-2 py-4 whitespace-nowrap'>"
+              html += "<code class='bg-gray-100 px-2 py-1 rounded text-xs text-gray-600'>#{category['slug']}</code>"
+              html += "</td>"
+
+              # Count column
+              html += "<td class='pl-2 pr-6 py-4 whitespace-nowrap text-center'>"
+              html += "<span class='text-sm text-gray-500'>0</span>"
+              html += "</td>"
+
+              html += "</tr>"
+
+              # Render children
+              if children_map[category_id]
+                children_map[category_id].each do |child_id, child_category|
+                  html += render_category_rows(child_id, child_category, children_map, level + 1)
+                end
+              end
+
+              html.html_safe
+            end
+
+            roots, children_map = build_category_tree(@product_categories)
+          %>
+
+          <div>
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+              <tr>
+                <th class="pl-6 pr-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SEO</th>
+                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
+                <th class="pr-6 pl-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
+              </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+              <% roots.each do |category_id, category| %>
+                <%= render_category_rows(category_id, category, children_map) %>
+              <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No categories</h3>
+            <p class="mt-1 text-sm text-gray-500">Get started by creating your first blog category.</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="lg:col-span-1">
+    <div class="bg-white shadow-sm border border-gray-200 rounded-lg">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Add New Category</h3>
+      </div>
+      <div class="p-6">
+        <%= form_with model: @new_category, url: manage_website_shop_create_category_path, method: :post, local: true, scope: :category, multipart: true do |form| %>
+          <% if @new_category.is_a?(Hash) && @website.errors.any? %>
+            <div class="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">There were errors with your submission</h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                      <% @website.errors.full_messages.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="space-y-4">
+            <div>
+              <%= form.label :name, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_field :name,
+                                  class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                  value: @new_category["name"],
+                                  placeholder: "Enter category name",
+                                  required: true %>
+            </div>
+
+            <div>
+              <%= form.label :image, "Category Image", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <div class="flex items-start space-x-4">
+                <div id="image-preview" class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <%= form.file_field :image,
+                                      class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                      accept: "image/*",
+                                      onchange: "previewImage(this)" %>
+                  <p class="mt-1 text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <%= form.label :slug, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_field :slug,
+                                  class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                  value: @new_category["slug"],
+                                  placeholder: "auto-generated from name" %>
+              <p class="mt-1 text-xs text-gray-500">Leave blank to auto-generate from name</p>
+            </div>
+
+            <div>
+              <%= form.label :parent_category, "Parent Category", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.select :parent_category,
+                              options_for_select([["None", ""]] + @product_categories.map { |id, cat| [cat["name"], id] }, @new_category["parent_category"]),
+                              { include_blank: false },
+                              { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" } %>
+            </div>
+
+            <div>
+              <%= form.label :description, class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= form.text_area :description,
+                                 class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                                 value: @new_category["description"],
+                                 rows: 3,
+                                 placeholder: "Brief description of this category" %>
+            </div>
+
+            <div>
+              <%= form.submit "Create Category", class: "w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 font-medium" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <%= link_to manage_website_shop_products_path, class: "inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition duration-200" do %>
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to Blogs
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+    // Auto-generate slug from name
+    document.addEventListener('DOMContentLoaded', function() {
+        const nameField = document.getElementById('category_name');
+        const slugField = document.getElementById('category_slug');
+
+        if (nameField && slugField) {
+            nameField.addEventListener('input', function() {
+                if (slugField.value === '' || slugField.dataset.autoGenerated === 'true') {
+                    const slug = this.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+                        .replace(/\s+/g, '-') // Replace spaces with hyphens
+                        .replace(/-+/g, '-') // Replace multiple hyphens with single
+                        .trim()
+                        .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+
+                    slugField.value = slug;
+                    slugField.dataset.autoGenerated = 'true';
+                }
+            });
+
+            slugField.addEventListener('input', function() {
+                this.dataset.autoGenerated = 'false';
+            });
+        }
+    });
+
+    // Image preview function
+    function previewImage(input) {
+        const preview = document.getElementById('image-preview');
+        const file = input.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover rounded-full">`;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = `
+      <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+      </svg>
+    `;
+        }
+    }
+</script>

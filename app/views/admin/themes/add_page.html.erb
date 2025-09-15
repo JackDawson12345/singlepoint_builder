@@ -89,9 +89,8 @@
                     <%= select_tag "new_pages[#{index}][package_type]",
                                    options_for_select([
                                                         ['Select Package Type', ''],
-                                                        ['Bespoke', 'Bespoke'],
-                                                        ['Standard', 'Standard'],
-                                                        ['Premium', 'Premium']
+                                                        ['Bespoke', 'bespoke'],
+                                                        ['E-commerce', 'e-commerce']
                                                       ], page["package_type"]),
                                    class: "block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
                                    required: true %>

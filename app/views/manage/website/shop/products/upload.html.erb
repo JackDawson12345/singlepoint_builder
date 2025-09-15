@@ -1,0 +1,28 @@
+<!-- app/views/manage/website/shop/products/upload.html.erb -->
+<div class="container">
+  <h2>Upload Products CSV</h2>
+
+  <%= form_with url: manage_website_shop_products_import_csv_path, local: true, multipart: true do |form| %>
+    <div class="form-group">
+      <%= form.label :csv_file, "Select CSV File" %>
+      <%= form.file_field :csv_file, accept: ".csv", class: "form-control", required: true %>
+    </div>
+
+    <div class="form-group">
+      <%= form.submit "Upload Products", class: "btn btn-primary" %>
+      <%= link_to "Cancel", manage_website_shop_products_path, class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+
+  <div class="mt-4">
+    <h5>CSV Format Requirements:</h5>
+    <p>Your CSV should include the following columns:</p>
+    <ul>
+      <li>name - Product name</li>
+      <li>description - Product description</li>
+      <li>price - Product price</li>
+      <li>category - Product category</li>
+      <!-- Add other required fields based on your Product model -->
+    </ul>
+  </div>
+</div>

@@ -82,7 +82,11 @@ class Admin::ThemesController < Admin::BaseController
         "inner_pages" => {},
         "slug" => page_data["page_slug"],
         "package_type" => page_data["package_type"],
-        "position" => (next_position + index).to_s
+        "position" => (next_position + index).to_s,
+        "seo" => {"focus_keyword" => '',
+                  "title_tag" => '',
+                  "meta_description" => ''}
+
       }
       success_count += 1
     end

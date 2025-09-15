@@ -1,0 +1,42 @@
+<div class="mb-5">
+  <div class="flex gap-3">
+    <%= link_to 'Settings', manage_settings_settings_path, class: 'nata-sans font-normal text-sm' %>
+    <svg style="transform: rotate(270deg)" class="w-5 h-5 ml-1 transform transition-transform duration-200 text-gray-300" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+    <% unless subpage_name.nil? %>
+      <%= link_to subpage_name, public_send(subpage_path), class: 'nata-sans font-normal text-sm' %>
+      <svg style="transform: rotate(270deg)" class="w-5 h-5 ml-1 transform transition-transform duration-200 text-gray-300" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+      <p class="nata-sans font-normal text-sm"><%= page_name %></p>
+      <% else %>
+      <p class="nata-sans font-normal text-sm"><%= page_name %></p>
+    <% end %>
+
+  </div>
+  <div class="flex items-center gap-3">
+    <% unless subpage_path.nil? %>
+      <%= link_to public_send(subpage_path) do %>
+        <svg style="transform: rotate(90deg)" class="w-5 h-5 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      <% end %>
+    <% else %>
+      <%= link_to manage_settings_settings_path do %>
+        <svg style="transform: rotate(90deg)" class="w-5 h-5 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      <% end %>
+    <% end %>
+
+    <div>
+      <% unless page_description.nil?%>
+        <h1 class="nata-sans page-title"><%= page_name %></h1>
+        <p class="nata-sans"><%= page_description %></p>
+      <% else %>
+        <h1 class="nata-sans page-title"><%= page_name %></h1>
+      <% end %>
+    </div>
+  </div>
+</div>

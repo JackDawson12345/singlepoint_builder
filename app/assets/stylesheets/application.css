@@ -65,6 +65,10 @@
     fill: rgba(59,130,246)
 }
 
+.fill-blue-300{
+    fill: rgba(147,197,253,1)
+}
+
 .fill-green-500{
     fill: rgba(16,185,129)
 }
@@ -155,4 +159,24 @@
 
 .flash-message{
     z-index: 10;
+}
+.h-30{
+    height: 120px;
+}
+.lh-5{
+    line-height: 20px;
+}
+
+.settings-page-row:hover .editable-setting-field{
+    border: 1px dashed rgba(147, 197, 253, 1);
+    width: calc(100% - 4px);
+    cursor: pointer;
+}
+
+.editable-setting-field-pencil{
+    opacity: 0;
+}
+
+.settings-page-row:hover .editable-setting-field-pencil{
+    opacity: 1;
 }

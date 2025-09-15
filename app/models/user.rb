@@ -8,6 +8,7 @@ class User < ApplicationRecord
            :county, :state_province, :postcode, :country
 
   has_one :website, dependent: :destroy
+  has_one_attached :logo
 
   has_many :notifications, dependent: :destroy
 

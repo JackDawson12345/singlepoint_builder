@@ -1,0 +1,346 @@
+<%= render 'manage/settings/settings_header', page_name: "Settings For Main Pages", subpage_name: 'SEO Settings', subpage_path: 'manage_settings_website_seo_settings_path', page_description: 'Customize your default main pages settings and meta tags or edit them individually.' %>
+
+<div class="bg-gray-50 rounded-lg">
+  <div class="py-4 px-6 border-b">
+    <h2 class="nata-sans text-lg font-semibold">Main Pages (<%= @pages.count.to_s %>)</h2>
+    <p class="nata-sans text-sm font-normal">Select a row to edit each page's basic SEO settings.</p>
+  </div>
+  <div class="">
+    <div class="">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-blue-100 border-blue-300 border-t border-b">
+        <tr class="">
+          <th class="pl-6 pr-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+            Page Name
+          </th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+            <div class="inline-flex gap-2 items-center">
+              Page URL
+              <%= render 'shared/help_prompt', help_text: "Every URL ends with a 'slug', which should tell people what the page is about." %>
+            </div>
+          </th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+            <div class="inline-flex gap-2 items-center">
+              Focus Keyword
+              <%= render 'shared/help_prompt', help_text: "The focus keyword is the main phrase you want a specific page to rank for in search results. It should be between 2 to 5 words. Include it in the page's title tag, meta description and page content." %>
+            </div>
+          </th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+            <div class="inline-flex gap-2 items-center">
+              Title Tag
+              <%= render 'shared/help_prompt', help_text: "This is the main title displayed in search results. It's the first thing a potential visitor will read." %>
+            </div>
+          </th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+            <div class="inline-flex gap-2 items-center">
+              Meta Description
+              <%= render 'shared/help_prompt', help_text: "This text displays below the title in search results. It tells people what the page has to offer." %>
+            </div>
+          </th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+            <div class="inline-flex gap-2 items-center">
+              Indexable
+              <%= render 'shared/help_prompt', help_text: "Only pages with a checkmark can be indexed and displayed in search results. If there's no checkmark, you've turned off indexing for the page." %>
+            </div>
+          </th>
+          <th class="pl-3 pr-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+
+          </th>
+        </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+        <!-- Empty row for demonstration -->
+        <% @pages.each do |name, page| %>
+          <tr class="hover:bg-blue-50 bg-gray-50 settings-page-row" data-page-name="<%= name %>">
+            <td class="pr-3 pl-6 py-5 whitespace-nowrap text-sm font-medium text-gray-900 uppercase">
+              <%= name %>
+            </td>
+            <td class="px-3 py-5 whitespace-nowrap text-sm text-gray-500">
+              <% if page['slug'].include? '/' %>
+                <%= page['slug'] %>
+              <% else %>
+                /<%= page['slug'] %>
+              <% end %>
+            </td>
+            <td class="px-3 whitespace-nowrap text-sm text-gray-500">
+              <div class="py-4 editable-setting-field flex gap-2 justify-between items-center relative"
+                   data-field="focus_keyword"
+                   data-current-value="<%= page['seo']['focus_keyword'] %>"
+                   data-page-name="<%= name %>">
+                <% if page['seo']['focus_keyword'].blank? %>
+                  <span class="field-value">No focus keyword set</span>
+                  <div class="bg-white p-2 rounded-full mr-1 editable-setting-field-pencil cursor-pointer">
+                    <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="#000000" id="Pencil-Light--Streamline-Phosphor" height="10" width="10">
+                      <path d="m9.6947109375 2.5394140625 -2.234375 -2.234375c-0.27335546875 -0.27338671875000004 -0.7165859375 -0.27338671875000004 -0.98994140625 0L0.30523828124999997 6.470691406249999c-0.13154296875000002 0.13108984375 -0.20533203125 0.30926171874999997 -0.20498828125000002 0.49497265625000003v2.234375c0 0.386578125 0.3133828125 0.6999609375 0.6999609375 0.6999609375h2.234375c0.1857109375 0.00034375000000000003 0.3638828125 -0.0734453125 0.49497265625000003 -0.20498828125000002L9.6947109375 3.52935546875c0.27338671875000004 -0.27335546875 0.27338671875000004 -0.7165859375 0 -0.98994140625ZM0.8247109375 6.800171874999999 5.19996484375 2.4244179687500003l0.9754453125 0.9759453125L1.8001562500000001 7.7756171875Zm-0.12449218749999999 2.3998671875v-1.67590625l1.7753984375 1.7758984375H0.8002109374999999c-0.0552265625 0.00000390625 -0.0999921875 -0.044765624999999996 -0.0999921875 -0.0999921875Zm2.499859375 -0.0245 -0.9754453125 -0.9754453125L6.59988671875 3.82433984375l0.9754453125 0.9759453125Zm6.070156249999999 -6.070156249999999 -1.27042578125 1.27042578125 -2.3753671874999998 -2.37536328125 1.27042578125 -1.2709296875c0.0390625 -0.03910156249999999 0.10243359375 -0.03910156249999999 0.1414921875 0l2.233875 2.234375c0.03910156249999999 0.03905859375 0.03910156249999999 0.10242968749999999 0 0.1414921875Z" stroke-width="0.0391"></path>
+                    </svg>
+                  </div>
+                <% else %>
+                  <span class="field-value"><%= page['seo']['focus_keyword'] %></span>
+                  <div class="bg-white p-2 rounded-full mr-1 editable-setting-field-pencil cursor-pointer">
+                    <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="#000000" id="Pencil-Light--Streamline-Phosphor" height="10" width="10">
+                      <path d="m9.6947109375 2.5394140625 -2.234375 -2.234375c-0.27335546875 -0.27338671875000004 -0.7165859375 -0.27338671875000004 -0.98994140625 0L0.30523828124999997 6.470691406249999c-0.13154296875000002 0.13108984375 -0.20533203125 0.30926171874999997 -0.20498828125000002 0.49497265625000003v2.234375c0 0.386578125 0.3133828125 0.6999609375 0.6999609375 0.6999609375h2.234375c0.1857109375 0.00034375000000000003 0.3638828125 -0.0734453125 0.49497265625000003 -0.20498828125000002L9.6947109375 3.52935546875c0.27338671875000004 -0.27335546875 0.27338671875000004 -0.7165859375 0 -0.98994140625ZM0.8247109375 6.800171874999999 5.19996484375 2.4244179687500003l0.9754453125 0.9759453125L1.8001562500000001 7.7756171875Zm-0.12449218749999999 2.3998671875v-1.67590625l1.7753984375 1.7758984375H0.8002109374999999c-0.0552265625 0.00000390625 -0.0999921875 -0.044765624999999996 -0.0999921875 -0.0999921875Zm2.499859375 -0.0245 -0.9754453125 -0.9754453125L6.59988671875 3.82433984375l0.9754453125 0.9759453125Zm6.070156249999999 -6.070156249999999 -1.27042578125 1.27042578125 -2.3753671874999998 -2.37536328125 1.27042578125 -1.2709296875c0.0390625 -0.03910156249999999 0.10243359375 -0.03910156249999999 0.1414921875 0l2.233875 2.234375c0.03910156249999999 0.03905859375 0.03910156249999999 0.10242968749999999 0 0.1414921875Z" stroke-width="0.0391"></path>
+                    </svg>
+                  </div>
+                <% end %>
+              </div>
+            </td>
+            <td class="px-3 text-sm text-gray-500">
+              <div class="py-4 my-2 editable-setting-field flex gap-2 justify-between items-center relative"
+                   data-field="title_tag"
+                   data-current-value="<%= page['seo']['title_tag'] %>"
+                   data-page-name="<%= name %>">
+                <% if page['seo']['title_tag'].blank? %>
+                  <span class="field-value">No title tag set</span>
+                  <div class="bg-white p-2 rounded-full mr-1 editable-setting-field-pencil cursor-pointer">
+                    <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="#000000" id="Pencil-Light--Streamline-Phosphor" height="10" width="10">
+                      <path d="m9.6947109375 2.5394140625 -2.234375 -2.234375c-0.27335546875 -0.27338671875000004 -0.7165859375 -0.27338671875000004 -0.98994140625 0L0.30523828124999997 6.470691406249999c-0.13154296875000002 0.13108984375 -0.20533203125 0.30926171874999997 -0.20498828125000002 0.49497265625000003v2.234375c0 0.386578125 0.3133828125 0.6999609375 0.6999609375 0.6999609375h2.234375c0.1857109375 0.00034375000000000003 0.3638828125 -0.0734453125 0.49497265625000003 -0.20498828125000002L9.6947109375 3.52935546875c0.27338671875000004 -0.27335546875 0.27338671875000004 -0.7165859375 0 -0.98994140625ZM0.8247109375 6.800171874999999 5.19996484375 2.4244179687500003l0.9754453125 0.9759453125L1.8001562500000001 7.7756171875Zm-0.12449218749999999 2.3998671875v-1.67590625l1.7753984375 1.7758984375H0.8002109374999999c-0.0552265625 0.00000390625 -0.0999921875 -0.044765624999999996 -0.0999921875 -0.0999921875Zm2.499859375 -0.0245 -0.9754453125 -0.9754453125L6.59988671875 3.82433984375l0.9754453125 0.9759453125Zm6.070156249999999 -6.070156249999999 -1.27042578125 1.27042578125 -2.3753671874999998 -2.37536328125 1.27042578125 -1.2709296875c0.0390625 -0.03910156249999999 0.10243359375 -0.03910156249999999 0.1414921875 0l2.233875 2.234375c0.03910156249999999 0.03905859375 0.03910156249999999 0.10242968749999999 0 0.1414921875Z" stroke-width="0.0391"></path>
+                    </svg>
+                  </div>
+                <% else %>
+                  <span class="field-value"><%= page['seo']['title_tag'] %></span>
+                  <div class="bg-white p-2 rounded-full mr-1 editable-setting-field-pencil cursor-pointer">
+                    <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="#000000" id="Pencil-Light--Streamline-Phosphor" height="10" width="10">
+                      <path d="m9.6947109375 2.5394140625 -2.234375 -2.234375c-0.27335546875 -0.27338671875000004 -0.7165859375 -0.27338671875000004 -0.98994140625 0L0.30523828124999997 6.470691406249999c-0.13154296875000002 0.13108984375 -0.20533203125 0.30926171874999997 -0.20498828125000002 0.49497265625000003v2.234375c0 0.386578125 0.3133828125 0.6999609375 0.6999609375 0.6999609375h2.234375c0.1857109375 0.00034375000000000003 0.3638828125 -0.0734453125 0.49497265625000003 -0.20498828125000002L9.6947109375 3.52935546875c0.27338671875000004 -0.27335546875 0.27338671875000004 -0.7165859375 0 -0.98994140625ZM0.8247109375 6.800171874999999 5.19996484375 2.4244179687500003l0.9754453125 0.9759453125L1.8001562500000001 7.7756171875Zm-0.12449218749999999 2.3998671875v-1.67590625l1.7753984375 1.7758984375H0.8002109374999999c-0.0552265625 0.00000390625 -0.0999921875 -0.044765624999999996 -0.0999921875 -0.0999921875Zm2.499859375 -0.0245 -0.9754453125 -0.9754453125L6.59988671875 3.82433984375l0.9754453125 0.9759453125Zm6.070156249999999 -6.070156249999999 -1.27042578125 1.27042578125 -2.3753671874999998 -2.37536328125 1.27042578125 -1.2709296875c0.0390625 -0.03910156249999999 0.10243359375 -0.03910156249999999 0.1414921875 0l2.233875 2.234375c0.03910156249999999 0.03905859375 0.03910156249999999 0.10242968749999999 0 0.1414921875Z" stroke-width="0.0391"></path>
+                    </svg>
+                  </div>
+                <% end %>
+              </div>
+            </td>
+            <td class="px-3 text-sm text-gray-500">
+              <div class="py-4 editable-setting-field flex gap-2 justify-between items-center relative"
+                   data-field="meta_description"
+                   data-current-value="<%= page['seo']['meta_description'] %>"
+                   data-page-name="<%= name %>">
+                <% if page['seo']['meta_description'].blank? %>
+                  <span class="field-value">No meta description set</span>
+                  <div class="bg-white p-2 rounded-full mr-1 editable-setting-field-pencil cursor-pointer">
+                    <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="#000000" id="Pencil-Light--Streamline-Phosphor" height="10" width="10">
+                      <path d="m9.6947109375 2.5394140625 -2.234375 -2.234375c-0.27335546875 -0.27338671875000004 -0.7165859375 -0.27338671875000004 -0.98994140625 0L0.30523828124999997 6.470691406249999c-0.13154296875000002 0.13108984375 -0.20533203125 0.30926171874999997 -0.20498828125000002 0.49497265625000003v2.234375c0 0.386578125 0.3133828125 0.6999609375 0.6999609375 0.6999609375h2.234375c0.1857109375 0.00034375000000000003 0.3638828125 -0.0734453125 0.49497265625000003 -0.20498828125000002L9.6947109375 3.52935546875c0.27338671875000004 -0.27335546875 0.27338671875000004 -0.7165859375 0 -0.98994140625ZM0.8247109375 6.800171874999999 5.19996484375 2.4244179687500003l0.9754453125 0.9759453125L1.8001562500000001 7.7756171875Zm-0.12449218749999999 2.3998671875v-1.67590625l1.7753984375 1.7758984375H0.8002109374999999c-0.0552265625 0.00000390625 -0.0999921875 -0.044765624999999996 -0.0999921875 -0.0999921875Zm2.499859375 -0.0245 -0.9754453125 -0.9754453125L6.59988671875 3.82433984375l0.9754453125 0.9759453125Zm6.070156249999999 -6.070156249999999 -1.27042578125 1.27042578125 -2.3753671874999998 -2.37536328125 1.27042578125 -1.2709296875c0.0390625 -0.03910156249999999 0.10243359375 -0.03910156249999999 0.1414921875 0l2.233875 2.234375c0.03910156249999999 0.03905859375 0.03910156249999999 0.10242968749999999 0 0.1414921875Z" stroke-width="0.0391"></path>
+                    </svg>
+                  </div>
+                <% else %>
+                  <span class="field-value"><%= page['seo']['meta_description'] %></span>
+                  <div class="bg-white p-2 rounded-full mr-1 editable-setting-field-pencil cursor-pointer">
+                    <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="#000000" id="Pencil-Light--Streamline-Phosphor" height="10" width="10">
+                      <path d="m9.6947109375 2.5394140625 -2.234375 -2.234375c-0.27335546875 -0.27338671875000004 -0.7165859375 -0.27338671875000004 -0.98994140625 0L0.30523828124999997 6.470691406249999c-0.13154296875000002 0.13108984375 -0.20533203125 0.30926171874999997 -0.20498828125000002 0.49497265625000003v2.234375c0 0.386578125 0.3133828125 0.6999609375 0.6999609375 0.6999609375h2.234375c0.1857109375 0.00034375000000000003 0.3638828125 -0.0734453125 0.49497265625000003 -0.20498828125000002L9.6947109375 3.52935546875c0.27338671875000004 -0.27335546875 0.27338671875000004 -0.7165859375 0 -0.98994140625ZM0.8247109375 6.800171874999999 5.19996484375 2.4244179687500003l0.9754453125 0.9759453125L1.8001562500000001 7.7756171875Zm-0.12449218749999999 2.3998671875v-1.67590625l1.7753984375 1.7758984375H0.8002109374999999c-0.0552265625 0.00000390625 -0.0999921875 -0.044765624999999996 -0.0999921875 -0.0999921875Zm2.499859375 -0.0245 -0.9754453125 -0.9754453125L6.59988671875 3.82433984375l0.9754453125 0.9759453125Zm6.070156249999999 -6.070156249999999 -1.27042578125 1.27042578125 -2.3753671874999998 -2.37536328125 1.27042578125 -1.2709296875c0.0390625 -0.03910156249999999 0.10243359375 -0.03910156249999999 0.1414921875 0l2.233875 2.234375c0.03910156249999999 0.03905859375 0.03910156249999999 0.10242968749999999 0 0.1414921875Z" stroke-width="0.0391"></path>
+                    </svg>
+                  </div>
+                <% end %>
+              </div>
+            </td>
+            <td class="px-3 whitespace-nowrap text-sm text-gray-500">
+              <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#000000" id="Check-Light--Streamline-Phosphor" height="20" width="20">
+                  <path d="M19.63871875 4.0076328125 6.819140624999999 16.8272109375c-0.234609375 0.2343203125 -0.6146796875 0.2343203125 -0.8492968750000001 0L0.36128125 11.218640625c-0.3153515625 -0.3384375 -0.1460703125 -0.8913359375000001 0.30469531250000004 -0.9952187499999999 0.1945078125 -0.044828124999999996 0.3985703125 0.0098515625 0.5446015625 0.14592187499999998l5.1839140625 5.1829140625L18.789421875000002 3.1583359374999995c0.3384375 -0.3153515625 0.89134375 -0.146078125 0.9952187499999999 0.30469531250000004 0.044828124999999996 0.19449999999999998 -0.0098515625 0.3985703125 -0.14592187499999998 0.5446015625Z" stroke-width="0.0781"></path>
+                </svg>
+              </div>
+            </td>
+            <td class="pl-3 pr-6 py-5 whitespace-nowrap text-sm font-medium">
+              <div class="flex justify-end">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#000000" id="Dots-Three-Circle-Light--Streamline-Phosphor" height="20" width="20">
+                  <path d="M10 0.2C2.4559531249999997 0.1996640625 -2.259 8.366117187499999 1.512734375 14.8996171875c3.7717265625 6.5335078125 13.20178125 6.5339296875 16.97409375 0.000765625C19.3471015625 13.4105 19.8 11.72040625 19.8 10 19.7936484375 4.5902421874999995 15.4097578125 0.20635156250000003 10 0.2Zm0 18.4470546875c-6.6565078125 0.0003046875 -10.816765625 -7.2053984375 -7.488765625 -12.97025C5.839234375 -0.088046875 14.1598671875 -0.088421875 17.488375 5.6761328125c0.7590625 1.3146015624999998 1.1586796874999998 2.805859375 1.1586796874999998 4.3238671875C18.641765624999998 14.7734375 14.7734375 18.6417578125 10 18.6470546875ZM10.96078125 10c0 0.739609375 -0.8006484375 1.2018671875 -1.441171875 0.8320624999999999 -0.6405234375000001 -0.3698046875 -0.6405234375000001 -1.2943203125 0 -1.6641249999999999 0.1460546875 -0.08432812499999999 0.311734375 -0.12871875 0.480390625 -0.12871875 0.530625 0 0.96078125 0.43015625 0.96078125 0.96078125Zm-4.2274453125 0c0 0.739609375 -0.8006562500000001 1.2018671875 -1.4411796875 0.8320624999999999 -0.6405234375000001 -0.3698046875 -0.6405234375000001 -1.2943203125 0 -1.6641249999999999 0.1460546875 -0.08432812499999999 0.3117421875 -0.12871875 0.480390625 -0.12871875 0.530625 0 0.9607890625 0.43015625 0.9607890625 0.96078125Zm8.4548984375 0c0 0.739609375 -0.8006484375 1.2018671875 -1.441171875 0.8320624999999999 -0.6405234375000001 -0.3698046875 -0.6405234375000001 -1.2943203125 0 -1.6641249999999999 0.1460546875 -0.08432812499999999 0.311734375 -0.12871875 0.480390625 -0.12871875 0.530625 0 0.96078125 0.43015625 0.96078125 0.96078125Z" stroke-width="0.0781"></path>
+                </svg>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Popup Modal -->
+<div id="edit-popup" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 id="popup-title" class="text-lg font-semibold text-gray-900">Edit Field</h3>
+          <button id="close-popup" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <form id="edit-form">
+          <div class="mb-4">
+            <label for="field-value" class="block text-sm font-medium text-gray-700 mb-2">
+              <span id="field-label">Value</span>
+            </label>
+            <textarea
+              id="field-value"
+              name="value"
+              rows="4"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter value..."></textarea>
+          </div>
+
+          <div class="flex justify-end space-x-3">
+            <button
+              type="button"
+              id="cancel-edit"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              id="save-edit"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const popup = document.getElementById('edit-popup');
+        const popupTitle = document.getElementById('popup-title');
+        const fieldLabel = document.getElementById('field-label');
+        const fieldValueTextarea = document.getElementById('field-value');
+        const editForm = document.getElementById('edit-form');
+        const closePopupBtn = document.getElementById('close-popup');
+        const cancelEditBtn = document.getElementById('cancel-edit');
+
+        let currentField = null;
+        let currentPageName = null;
+
+        // Field labels mapping
+        const fieldLabels = {
+            'focus_keyword': 'Focus Keyword',
+            'title_tag': 'Title Tag',
+            'meta_description': 'Meta Description'
+        };
+
+        // Open popup when pencil icon is clicked
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.editable-setting-field-pencil')) {
+                const fieldContainer = e.target.closest('.editable-setting-field');
+                const fieldType = fieldContainer.dataset.field;
+                const currentValue = fieldContainer.dataset.currentValue || '';
+                const pageName = fieldContainer.dataset.pageName;
+
+                currentField = fieldType;
+                currentPageName = pageName;
+
+                // Update popup content
+                popupTitle.textContent = `Edit ${fieldLabels[fieldType]} for ${pageName}`;
+                fieldLabel.textContent = fieldLabels[fieldType];
+                fieldValueTextarea.value = currentValue;
+
+                // Show popup
+                popup.classList.remove('hidden');
+                fieldValueTextarea.focus();
+            }
+        });
+
+        // Close popup functions
+        function closePopup() {
+            popup.classList.add('hidden');
+            currentField = null;
+            currentPageName = null;
+            fieldValueTextarea.value = '';
+        }
+
+        closePopupBtn.addEventListener('click', closePopup);
+        cancelEditBtn.addEventListener('click', closePopup);
+
+        // Close popup when clicking outside
+        popup.addEventListener('click', function(e) {
+            if (e.target === popup) {
+                closePopup();
+            }
+        });
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                closePopup();
+            }
+        });
+
+        // Handle form submission
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const newValue = fieldValueTextarea.value.trim();
+
+            // Prepare data for AJAX request
+            const formData = new FormData();
+            formData.append('page_name', currentPageName);
+            formData.append('field', currentField);
+            formData.append('value', newValue);
+            formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            // Show loading state
+            const saveBtn = document.getElementById('save-edit');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+
+            // Make AJAX request
+            fetch('<%= manage_settings_website_seo_update_seo_field_path %>', {
+                method: 'PATCH',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the display value in the table
+                        const fieldContainer = document.querySelector(`[data-field="${currentField}"][data-page-name="${currentPageName}"]`);
+                        const valueSpan = fieldContainer.querySelector('.field-value');
+
+                        if (newValue) {
+                            valueSpan.textContent = newValue;
+                            fieldContainer.dataset.currentValue = newValue;
+                        } else {
+                            valueSpan.textContent = `No ${fieldLabels[currentField].toLowerCase()} set`;
+                            fieldContainer.dataset.currentValue = '';
+                        }
+
+                        // Close popup
+                        closePopup();
+
+                        // Show success message (optional)
+                        showNotification('Field updated successfully!', 'success');
+                    } else {
+                        showNotification(data.message || 'Error updating field', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error updating field', 'error');
+                })
+                .finally(() => {
+                    // Reset button state
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                });
+        });
+
+        // Simple notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-md shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                    type === 'error' ? 'bg-red-500 text-white' :
+                        'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    });
+</script>

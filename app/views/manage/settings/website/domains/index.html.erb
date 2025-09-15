@@ -1,0 +1,69 @@
+<%= render 'manage/settings/settings_header', page_name: "Domain Settings", subpage_name: nil, subpage_path: nil, page_description: nil %>
+
+<div>
+
+  <div class="space-y-5">
+
+    <div class="bg-gray-50 rounded-lg">
+      <div class="py-4 px-6 border-b">
+        <h2 class="nata-sans text-lg font-semibold">What domain do you want to connect to <%= link_to @website.name, manage_website_website_path, class: 'underline' %>?</h2>
+        <p class="nata-sans text-sm font-normal">Enter the web address you want your site. It can be a domain you want to buy or one you already own.</p>
+      </div>
+      <div class="py-4 px-6">
+        <div class="flex">
+          <div class="w-full">
+            <% unless current_user.user_setup.domain_name.nil? %>
+              <p class="nata-sans text-base font-normal">Your website is already linked to the domain <%= current_user.user_setup.domain_name %></p>
+            <% else %>
+              <p class="nata-sans text-base font-normal">Your site isn’t published yet. When you publish, this will be your domain.</p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg">
+      <div class="py-4 px-6 border-b">
+        <h2 class="nata-sans text-lg font-semibold">Frequently asked questions</h2>
+      </div>
+      <div class="py-4 px-6">
+        <div class="grid grid-cols-2 gap-8">
+          <div>
+            <h5 class="nata-sans text-base font-semibold">Can i use a domain i already have?</h5>
+            <p class="nata-sans text-sm font-normal">Yes. Once you’ve upgraded with a Premium plan, you can connect a domain you bought somewhere else by updating your domain settings. We’ll walk you through it.</p>
+          </div>
+          <div>
+            <h5 class="nata-sans text-base font-semibold">What type of domain can I connect?</h5>
+            <p class="nata-sans text-sm font-normal">You can use any domain (e.g., mydomain.com) or subdomain (e.g., shop.mydomain.com) with any ending you want. If you buy a domain from us, you can use it for any site you own.</p>
+          </div>
+          <div>
+            <h5 class="nata-sans text-base font-semibold">Why do I need a Premium plan to connect a domain?</h5>
+            <p class="nata-sans text-sm font-normal">Connecting a custom domain is a Premium feature. Choose the right plan for you and enjoy Premium benefits including an ad-free site, a personalized SEO Setup Checklist and more.</p>
+          </div>
+          <div>
+            <h5 class="nata-sans text-base font-semibold">Can I connect my email address too?</h5>
+            <p class="nata-sans text-sm font-normal">Yes. If you have an email address at your domain, it will continue working as usual when your domain is fully connected. Don’t have an email account yet? Get a business email to complete your professional online presence.</p>
+          </div>
+          <div>
+            <h5 class="nata-sans text-base font-semibold">Can I connect a subdomain to my site?</h5>
+            <p class="nata-sans text-sm font-normal">Yes, as long as the main domain is in the same Wix account. For example, you can connect blog.mydomain.com to your site if you already have mydomain.com in your account.</p>
+          </div>
+          <div>
+            <h5 class="nata-sans text-base font-semibold">How do I move a domain between sites in my account?</h5>
+            <p class="nata-sans text-sm font-normal">If you already have a custom domain in your account, you can assign it to any of your Premium sites. You can do that from this page or from the Domains page in your account.</p>
+          </div>
+          <div>
+            <h5 class="nata-sans text-base font-semibold">Can I connect a domain by pointing?</h5>
+            <p class="nata-sans text-sm font-normal">Yes. Enter the domain you want to connect at the top of the page and we’ll guide you step-by-step. While we recommend connecting by nameservers, you can choose to see instructions for connecting using the pointing method instead.</p>
+          </div>
+          <div>
+            <h5 class="nata-sans text-base font-semibold">How long until my site works once I’ve connected a domain?</h5>
+            <p class="nata-sans text-sm font-normal">Updating domains can take up to 48 hours. Once this is complete, visitors everywhere will be able to see your site, and any email services attached to the domain will work as usual. Your site will be fully connected and secured with an SSL certificate.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
