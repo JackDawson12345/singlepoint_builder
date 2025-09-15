@@ -180,3 +180,10 @@
 .settings-page-row:hover .editable-setting-field-pencil{
     opacity: 1;
 }
+
+.w-75{
+    width: 300px;
+}
+.right--6{
+    right: -24px;
+}

@@ -168,6 +168,8 @@ Rails.application.routes.draw do
     match "/set-website-theme/:theme_id", to: "setup#set_website_theme", as: "set_website_theme", via: [:get, :post]
 
     get "/account-settings", to: "account_settings#index", as: "account_settings"
+    patch "/account-settings/update", to: "account_settings#update", as: "account_settings_update"
+    patch '/account_settings/update_password', to: 'account_settings#update_password'
 
     # Settings
     namespace :settings do

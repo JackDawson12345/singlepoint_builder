@@ -9,6 +9,7 @@ class User < ApplicationRecord
 
   has_one :website, dependent: :destroy
   has_one_attached :logo
+  has_one_attached :profile_image  # Add this line
 
   has_many :notifications, dependent: :destroy
 
@@ -18,6 +19,9 @@ class User < ApplicationRecord
   # Callback to create UserSetup after user is created
   after_create :create_default_user_setup
 
+  # Add validation for profile image
+  validate :acceptable_profile_image
+
   def unread_notifications_count
     notifications.unread.count
   end
@@ -25,6 +29,7 @@ class User < ApplicationRecord
   def get_name_from_email
     email.split('@')[0]
   end
+
 
   def get_role
     if role == 0
@@ -62,10 +67,32 @@ class User < ApplicationRecord
     user_setup.package_type == 'e-commerce'
   end
 
+  # Add these helper methods for name handling
+  def full_name
+    "#{first_name} #{last_name}".strip if first_name.present? || last_name.present?
+  end
+
+  def display_name
+    full_name.present? ? full_name : get_name_from_email.humanize
+  end
+
   private
 
   def create_default_user_setup
     UserSetup.create!(user: self)
   end
 
+  # Add profile image validation
+  def acceptable_profile_image
+    return unless profile_image.attached?
+
+    unless profile_image.blob.byte_size <= 5.megabyte
+      errors.add(:profile_image, "is too big (should be at most 5MB)")
+    end
+
+    acceptable_types = ["image/jpeg", "image/jpg", "image/png", "image/gif"]
+    unless acceptable_types.include?(profile_image.blob.content_type)
+      errors.add(:profile_image, "must be a JPEG, JPG, PNG, or GIF")
+    end
+  end
 end

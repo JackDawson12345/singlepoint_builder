@@ -9,15 +9,108 @@
 
 <div class="space-y-5">
   <div class="flex gap-4">
-    <div class="w-3/5 bg-gray-50 rounded-lg">
+    <div class="w-7/10 bg-gray-50 rounded-lg">
       <div class="py-4 px-6 border-b">
         <h2 class="nata-sans text-lg font-semibold">Account Info</h2>
       </div>
-      <div class="py-4 px-6 grid grid-cols-2 gap-4">
+      <div class="py-4 px-6 ">
+        <!-- app/views/manage/account_settings/index.html.erb -->
+        <%= form_with url: manage_account_settings_update_path, method: :patch, local: false, class: "w-full w-full flex flex-col gap-4", id: "site-name-form", html: { multipart: true } do |form| %>
 
+          <div class="flex gap-4">
+            <div class="w-8/10 flex flex-col gap-4">
+              <div>
+                <%= form.label :first_name, class: 'nata-sans' %>
+                <%= form.text_field :first_name,
+                                    value: current_user.first_name,
+                                    placeholder: "First Name",
+                                    class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                    onblur: "submitForm()" %>
+              </div>
+              <div>
+                <%= form.label :last_name, class: 'nata-sans' %>
+                <%= form.text_field :last_name,
+                                    value: current_user.last_name,
+                                    placeholder: "Last Name",
+                                    class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                    onblur: "submitForm()" %>
+              </div>
+            </div>
+
+            <!-- Profile Image Section -->
+            <div class="w-2/10 flex flex-col relative h-25">
+              <%= form.label :profile_image, "Profile Image", class: 'nata-sans mb-2' %>
+
+              <!-- Current Image Display -->
+              <div class="profile-image-container mb-3 relative">
+                <% if current_user.profile_image.attached? %>
+                  <div class="current-image-wrapper">
+                    <%= image_tag current_user.profile_image,
+                                  class: "w-25 h-25 rounded-full object-cover border-2 border-gray-300 mx-auto",
+                                  id: "current-profile-image",
+                                  alt: "Current profile picture" %>
+                  </div>
+                <% else %>
+                  <div class="no-image-placeholder w-25 h-25 rounded-full bg-gray-300 flex items-center justify-center mx-auto border-2 border-gray-300">
+              <span class="text-gray-600 font-semibold text-lg">
+                <%= current_user.email.first(2).upcase %>
+              </span>
+                  </div>
+                <% end %>
+                <!-- Custom Upload Button -->
+                <label for="profile-image-input" class="absolute bottom-0 right-5 cursor-pointer bg-white rounded-full p-2 shadow-lg" style="width: fit-content;">
+                  <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Camera-Light--Streamline-Phosphor" height="16" width="16">
+                    <path d="M14.14901875 2.92705625h-2.212875l-1.092225 -1.63948125c-0.085675 -0.12841875 -0.22993125 -0.20545 -0.3843125 -0.205225H5.54039375c-0.15438125 -0.000225 -0.2986375 0.07680625 -0.3843125 0.205225L4.0630875 2.92705625H1.85098125C0.917075 2.92705625 0.16 3.6841375 0.16 4.6180375v8.60863125c0 0.9339 0.757075 1.69098125 1.69098125 1.69098125h12.2980375c0.93390625 0 1.69098125 -0.75708125 1.69098125 -1.69098125V4.6180375c0 -0.9339 -0.757075 -1.69098125 -1.69098125 -1.69098125Zm0.76863125 10.2996125c0 0.4245 -0.34413125 0.768625 -0.76863125 0.768625H1.85098125c-0.4245 0 -0.76863125 -0.344125 -0.76863125 -0.768625V4.6180375c0 -0.4245125 0.34411875 -0.76864375 0.76863125 -0.768625h2.45960625c0.15438125 0.000225 0.2986375 -0.07680625 0.3843125 -0.205225l1.09221875 -1.63948125h4.42499375l1.0929875 1.63948125c0.08568125 0.128425 0.22993125 0.20545625 0.3843125 0.205225h2.45960625c0.4245 0 0.76863125 0.344125 0.76863125 0.768625ZM8 5.38666875c-2.48509375 0 -4.03828125 2.69019375 -2.79573125 4.84235 1.24254375 2.15215625 4.34891875 2.15215625 5.5914625 0 0.2833375 -0.49075625 0.43250625 -1.04744375 0.43250625 -1.61411875 0 -1.78290625 -1.44533125 -3.22823125 -3.2282375 -3.22823125Zm0 5.5341125c-1.77506875 0 -2.8844875 -1.92156875 -1.99695 -3.45881875 0.88753125 -1.53725625 3.10636875 -1.53725625 3.9939 0 0.2023875 0.3505375 0.30893125 0.748175 0.30893125 1.1529375 0 1.27350625 -1.032375 2.30588125 -2.30588125 2.30588125Z" stroke-width="0.0625"></path>
+                  </svg>
+                </label>
+                <!-- Image Preview (hidden by default) -->
+                <div class="image-preview-container hidden" id="imagePreviewContainer">
+                  <img id="imagePreview" class="w-25 h-25 rounded-full object-cover border-2 border-blue-500 mx-auto" alt="Preview">
+                </div>
+              </div>
+
+              <!-- File Input -->
+              <%= form.file_field :profile_image,
+                                  accept: "image/*",
+                                  class: "hidden",
+                                  id: "profile-image-input",
+                                  onchange: "handleImagePreview(this); submitForm();" %>
+
+              <!-- Remove Image Option (if image exists) -->
+              <% if current_user.profile_image.attached? %>
+                <div class="mt-2">
+                  <%= form.check_box :remove_profile_image,
+                                     { class: "mr-1 hidden", onchange: "handleRemoveImage(this); submitForm();" },
+                                     "1", "" %>
+                  <%= form.label :remove_profile_image, "Remove Image", class: "nata-sans text-blue-500 text-xs cursor-pointer", style: "position: absolute; margin: auto;  left: calc(50% - 43.5px);" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <div class="flex gap-4 pt-4 border-t mt-4">
+            <div class="w-1/2">
+              <%= form.label :site_url_prefix, 'Site URL Prefix', class: 'nata-sans' %>
+              <%= form.text_field :site_url_prefix,
+                                  value: current_user.site_url_prefix,
+                                  placeholder: "Site Url Prefix",
+                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                  onblur: "submitForm()" %>
+            </div>
+            <div class="w-1/2">
+              <%= form.label :account_language, class: 'nata-sans' %>
+              <%= form.text_field :account_language,
+                                  value: current_user.account_language,
+                                  placeholder: "Account Language",
+                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                  onblur: "submitForm()" %>
+            </div>
+          </div>
+
+        <% end %>
       </div>
     </div>
-    <div class="w-2/5 bg-gray-50 rounded-lg">
+    <div class="w-3/10 bg-gray-50 rounded-lg">
       <div class="py-4 px-6 border-b">
         <h2 class="nata-sans text-lg font-semibold">Account Security</h2>
       </div>
@@ -31,17 +124,59 @@
     <div class="py-4 px-6 border-b">
       <h2 class="nata-sans text-lg font-semibold">Login Info</h2>
     </div>
-    <div class="py-4 px-6 grid grid-cols-2 gap-4">
-
+    <div class="py-4 px-6">
+      <div class="flex flex-col gap-2 border-b pb-4 mb-2">
+        <label for="account_email" class="nata-sans">Account Email</label>
+        <div class="flex gap-4">
+          <div class="w-4/5">
+            <div class="py-2 px-3 border bg-white rounded nata-sans">
+              <%= @user.email %>
+            </div>
+          </div>
+          <div class="w-1/5 flex justify-end items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Check-Light--Streamline-Phosphor" height="14" width="14">
+              <path d="M15.710975 3.20610625 5.4553125 13.46176875c-0.1876875 0.18745625 -0.49174375 0.18745625 -0.6794375 0L0.289025 8.9749125c-0.25228125 -0.27075 -0.11685625 -0.71306875 0.24375625 -0.796175 0.15560625 -0.0358625 0.31885625 0.00788125 0.43568125 0.1167375l4.14713125 4.14633125L15.0315375 2.52666875c0.27075 -0.25228125 0.713075 -0.1168625 0.796175 0.24375625 0.0358625 0.1556 -0.00788125 0.31885625 -0.1167375 0.43568125Z" stroke-width="0.0625"></path>
+            </svg>
+            <p class=" nata-sans text-sm">Confirmed</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="account_email" class="nata-sans">Password</label>
+        <div class="flex gap-4">
+          <div class="w-4/5">
+            <div class="py-2 px-3 border bg-white rounded nata-sans">
+              ***************
+            </div>
+          </div>
+          <div class="w-1/5 flex justify-end items-center">
+            <button id="edit-password-btn" class="border py-2 px-4 rounded-full nata-sans text-sm text-blue-500">Edit Password</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="w-full bg-gray-50 rounded-lg">
     <div class="py-4 px-6 border-b">
       <h2 class="nata-sans text-lg font-semibold">2-Step Verification</h2>
+      <p>Protect your SinglePoint account  by adding an extra layer of security when you log in with an email and password.</p>
     </div>
-    <div class="py-4 px-6 grid grid-cols-2 gap-4">
-
+    <div class="py-4 px-6 flex gap-4">
+      <div class="flex items-center gap-4 w-4/5">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Qr-Code-Light--Streamline-Phosphor" height="24" width="24">
+            <path d="M5.81209375 0.16h-4.3758125C0.7314125 0.16 0.16 0.7314125 0.16 1.43628125v4.3758125c0 0.70489375 0.5713875 1.2763125 1.27628125 1.27628125h4.3758125c0.70484375 -0.00003125 1.27628125 -0.57143125 1.27628125 -1.27628125v-4.3758125c0 -0.70486875 -0.5714125 -1.27628125 -1.27628125 -1.27628125Zm0.182325 5.65209375c0 0.10069375 -0.08163125 0.182325 -0.182325 0.182325h-4.3758125c-0.1007 0 -0.182325 -0.08163125 -0.182325 -0.182325v-4.3758125c0 -0.1007 0.081625 -0.18233125 0.182325 -0.182325h4.3758125c0.10069375 0 0.182325 0.08163125 0.182325 0.182325Zm-0.182325 3.0995375h-4.3758125C0.7313875 8.9116 0.16 9.48301875 0.16 10.18790625v4.3758125c0 0.704875 0.5714125 1.27628125 1.27628125 1.27628125h4.3758125c0.70486875 0 1.27628125 -0.57140625 1.27628125 -1.27628125v-4.3758125c0 -0.70484375 -0.5714375 -1.27624375 -1.27628125 -1.276275Zm0.182325 5.6520875c0 0.10069375 -0.08163125 0.182325 -0.182325 0.18233125h-4.3758125c-0.1007 0 -0.182325 -0.08163125 -0.182325 -0.18233125v-4.3758125c0 -0.10069375 0.081625 -0.182325 0.182325 -0.182325h4.3758125c0.10069375 0 0.182325 0.08163125 0.182325 0.182325ZM14.56371875 0.16h-4.3758125c-0.70489375 -0.00003125 -1.27628125 0.5713875 -1.27628125 1.27628125v4.3758125c0 0.70489375 0.5713875 1.2763125 1.27628125 1.27628125h4.3758125c0.70485 -0.00003125 1.27628125 -0.57143125 1.27628125 -1.27628125v-4.3758125c0 -0.70486875 -0.5714125 -1.27628125 -1.27628125 -1.27628125Zm0.182325 5.65209375c0 0.10069375 -0.081625 0.182325 -0.182325 0.182325h-4.3758125c-0.10069375 0 -0.182325 -0.08163125 -0.182325 -0.182325v-4.3758125c0 -0.1007 0.081625 -0.18233125 0.182325 -0.182325h4.3758125c0.10069375 0 0.182325 0.08163125 0.182325 0.182325ZM8.911625 12.3758125v-2.91720625c0 -0.4210625 0.45581875 -0.68423125 0.82046875 -0.47369375 0.1692375 0.09770625 0.2734875 0.278275 0.2734875 0.47369375v2.91720625c0 0.4210625 -0.4558125 0.68423125 -0.8204625 0.4737 -0.1692375 -0.0977125 -0.27349375 -0.27828125 -0.27349375 -0.4737Zm6.928375 -1.4586c0 0.3020875 -0.2448875 0.546975 -0.546975 0.546975h-2.3702375v3.8288375c0 0.302075 -0.24489375 0.5469625 -0.546975 0.546975h-2.91720625c-0.4210625 -0.00001875 -0.68423125 -0.45584375 -0.4736875 -0.8204875 0.0977125 -0.16921875 0.278275 -0.2734625 0.4736875 -0.2734625h2.37023125v-5.28744375c0 -0.4210625 0.4558125 -0.684225 0.8204625 -0.47369375 0.1692375 0.09770625 0.2734875 0.278275 0.2734875 0.47369375v0.911625h2.3702375c0.302075 0.00001875 0.546975 0.2449 0.546975 0.54698125Zm0 2.91720625v1.45860625c0 0.4210625 -0.4558125 0.684225 -0.82046875 0.47369375 -0.16923125 -0.09770625 -0.2734875 -0.27828125 -0.2734875 -0.47369375v-1.45860625c0 -0.4210625 0.45581875 -0.684225 0.82046875 -0.47369375 0.16923125 0.09770625 0.2734875 0.27828125 0.2734875 0.47369375Z" stroke-width="0.0625"></path>
+          </svg>
+        </div>
+        <div>
+          <h5 class="nata-sans font-bold">Verify logins with an authenticator app</h5>
+          <p class="nata-sans text-sm">Made sure you have an authenticator app installed on your mobile device before you start.</p>
+        </div>
+      </div>
+      <div class="w-1/5 flex justify-end">
+        <button class="border py-2 px-4 rounded-full nata-sans text-sm text-blue-500">Enable</button>
+      </div>
     </div>
   </div>
 
@@ -49,8 +184,38 @@
     <div class="py-4 px-6 border-b">
       <h2 class="nata-sans text-lg font-semibold">Social Logins</h2>
     </div>
-    <div class="py-4 px-6 grid grid-cols-2 gap-4">
-
+    <div class="py-4 px-6 grid">
+      <div class="border-b p-4 flex gap-2">
+        <div class="w-4/5 flex gap-5 items-center ">
+          <div>
+            <%= image_tag 'google-logo.webp', class: 'w-15 h-15' %>
+          </div>
+          <div>
+            <h6 class="nata-sans text-base font-bold">Google Account</h6>
+            <p class="nata-sans text-sm">Disabled</p>
+          </div>
+        </div>
+        <div class="w-1/5 flex items-center justify-end">
+          <button class="border py-2 px-4 rounded-full nata-sans text-sm text-blue-500">Enable</button>
+        </div>
+      </div>
+      <div class="border-b p-4 flex gap-2">
+        <div class="w-4/5 flex gap-5 items-center ">
+          <div>
+            <%= image_tag 'facebook-logo.webp', class: 'w-15 h-15' %>
+          </div>
+          <div>
+            <h6 class="nata-sans text-base font-bold">Facebook Account</h6>
+            <p class="nata-sans text-sm">Disabled</p>
+          </div>
+        </div>
+        <div class="w-1/5 flex items-center justify-end">
+          <button class="border py-2 px-4 rounded-full nata-sans text-sm text-blue-500">Enable</button>
+        </div>
+      </div>
+      <div class="pt-4">
+        <p class="nata-sans text-xs">* If you disable social logins, you will still be able to log in using your Wix email and password.</p>
+      </div>
     </div>
   </div>
 
@@ -106,3 +271,357 @@
   </div>
 
 </div>
+
+<!-- Password Edit Modal -->
+<div id="password-edit-popup" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 id="password-popup-title" class="text-lg font-semibold text-gray-900">Change Password</h3>
+          <button id="close-password-popup" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <form id="password-edit-form">
+          <div class="mb-4">
+            <label for="current-password" class="block text-sm font-medium text-gray-700 mb-2">
+              Current Password
+            </label>
+            <input
+              type="password"
+              id="current-password"
+              name="current_password"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter current password..."
+              required>
+          </div>
+
+          <div class="mb-4">
+            <label for="new-password" class="block text-sm font-medium text-gray-700 mb-2">
+              New Password
+            </label>
+            <input
+              type="password"
+              id="new-password"
+              name="new_password"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter new password..."
+              required>
+            <p class="text-xs text-gray-500 mt-1">Password must be at least 8 characters long</p>
+          </div>
+
+          <div class="mb-6">
+            <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-2">
+              Confirm New Password
+            </label>
+            <input
+              type="password"
+              id="confirm-password"
+              name="confirm_password"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Confirm new password..."
+              required>
+            <div id="password-match-error" class="text-red-500 text-xs mt-1 hidden">
+              Passwords do not match
+            </div>
+          </div>
+
+          <div class="flex justify-end space-x-3">
+            <button
+              type="button"
+              id="cancel-password-edit"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              id="save-password"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Update Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    // app/assets/javascripts/manage/account_settings.js
+    // Or add to your existing JavaScript file
+
+    function handleImagePreview(input) {
+        const file = input.files[0];
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const preview = document.getElementById('imagePreview');
+        const currentImageWrapper = document.querySelector('.current-image-wrapper');
+        const noImagePlaceholder = document.querySelector('.no-image-placeholder');
+        const removeCheckbox = document.querySelector('input[name="remove_profile_image"]');
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+
+                // Hide current image or placeholder when showing preview
+                if (currentImageWrapper) {
+                    currentImageWrapper.classList.add('hidden');
+                }
+                if (noImagePlaceholder) {
+                    noImagePlaceholder.classList.add('hidden');
+                }
+
+                // Uncheck remove image if user selects new image
+                if (removeCheckbox) {
+                    removeCheckbox.checked = false;
+                }
+            };
+
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.classList.add('hidden');
+            if (currentImageWrapper) {
+                currentImageWrapper.classList.remove('hidden');
+            }
+            if (noImagePlaceholder) {
+                noImagePlaceholder.classList.remove('hidden');
+            }
+        }
+    }
+
+    function handleRemoveImage(checkbox) {
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const currentImageWrapper = document.querySelector('.current-image-wrapper');
+        const noImagePlaceholder = document.querySelector('.no-image-placeholder');
+        const fileInput = document.getElementById('profile-image-input');
+
+        if (checkbox.checked) {
+            // Hide preview and current image
+            previewContainer.classList.add('hidden');
+            if (currentImageWrapper) {
+                currentImageWrapper.classList.add('hidden');
+            }
+
+            // Show placeholder for removed image
+            if (noImagePlaceholder) {
+                noImagePlaceholder.classList.remove('hidden');
+            }
+
+            // Clear file input
+            fileInput.value = '';
+        } else {
+            // Show current image if it exists
+            if (currentImageWrapper) {
+                currentImageWrapper.classList.remove('hidden');
+            }
+            if (noImagePlaceholder) {
+                noImagePlaceholder.classList.add('hidden');
+            }
+        }
+    }
+
+    function submitForm() {
+        const form = document.getElementById('site-name-form');
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'PATCH',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Optionally show a success message
+                    console.log('Account updated successfully');
+
+                    // You could add a temporary success indicator here
+                    showSuccessMessage();
+                } else {
+                    // Handle errors
+                    console.error('Update failed:', data.errors);
+                    showErrorMessage(data.errors);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorMessage(['An error occurred while updating your account.']);
+            });
+    }
+
+    // Optional: Add success/error message functions
+    function showSuccessMessage() {
+        // Create a temporary success message
+        const message = document.createElement('div');
+        message.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+        message.textContent = 'Account updated successfully!';
+        document.body.appendChild(message);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            document.body.removeChild(message);
+        }, 3000);
+    }
+
+    function showErrorMessage(errors) {
+        // Create a temporary error message
+        const message = document.createElement('div');
+        message.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+        message.textContent = errors.join(', ');
+        document.body.appendChild(message);
+
+        // Remove after 5 seconds
+        setTimeout(() => {
+            document.body.removeChild(message);
+        }, 5000);
+    }
+
+    // Password Modal JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordPopup = document.getElementById('password-edit-popup');
+        const closePasswordPopupBtn = document.getElementById('close-password-popup');
+        const cancelPasswordEditBtn = document.getElementById('cancel-password-edit');
+        const passwordEditForm = document.getElementById('password-edit-form');
+        const newPasswordInput = document.getElementById('new-password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const passwordMatchError = document.getElementById('password-match-error');
+        const editPasswordBtn = document.getElementById('edit-password-btn');
+
+        // Open password popup when Edit Password button is clicked
+        editPasswordBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            passwordPopup.classList.remove('hidden');
+            document.getElementById('current-password').focus();
+        });
+
+        // Close password popup functions
+        function closePasswordPopup() {
+            passwordPopup.classList.add('hidden');
+            passwordEditForm.reset();
+            passwordMatchError.classList.add('hidden');
+        }
+
+        closePasswordPopupBtn.addEventListener('click', closePasswordPopup);
+        cancelPasswordEditBtn.addEventListener('click', closePasswordPopup);
+
+        // Close popup when clicking outside
+        passwordPopup.addEventListener('click', function(e) {
+            if (e.target === passwordPopup) {
+                closePasswordPopup();
+            }
+        });
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !passwordPopup.classList.contains('hidden')) {
+                closePasswordPopup();
+            }
+        });
+
+        // Password matching validation
+        function validatePasswordMatch() {
+            if (confirmPasswordInput.value && newPasswordInput.value !== confirmPasswordInput.value) {
+                passwordMatchError.classList.remove('hidden');
+                return false;
+            } else {
+                passwordMatchError.classList.add('hidden');
+                return true;
+            }
+        }
+
+        confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+        newPasswordInput.addEventListener('input', function() {
+            if (confirmPasswordInput.value) {
+                validatePasswordMatch();
+            }
+        });
+
+        // Handle form submission
+        passwordEditForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Validate password match
+            if (!validatePasswordMatch()) {
+                return;
+            }
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Basic validation
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showPasswordError('All fields are required');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showPasswordError('New password must be at least 8 characters long');
+                return;
+            }
+
+            // Prepare data for AJAX request
+            const formData = new FormData();
+            formData.append('current_password', currentPassword);
+            formData.append('new_password', newPassword);
+            formData.append('confirm_password', confirmPassword);
+            formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            // Show loading state
+            const saveBtn = document.getElementById('save-password');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Updating...';
+            saveBtn.disabled = true;
+
+            // Make AJAX request - you'll need to create this route
+            fetch('/manage/account_settings/update_password', {
+                method: 'PATCH',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closePasswordPopup();
+                        showSuccessMessage('Password updated successfully!');
+                    } else {
+                        showPasswordError(data.message || 'Error updating password');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showPasswordError('Error updating password');
+                })
+                .finally(() => {
+                    // Reset button state
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                });
+        });
+
+        function showPasswordError(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-md shadow-lg z-50 bg-red-500 text-white';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Any initialization code can go here
+        console.log('Account settings form loaded');
+    });
+</script>
