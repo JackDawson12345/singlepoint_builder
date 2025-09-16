@@ -75,3 +75,8 @@ gem 'csv'
 
 gem 'rotp'
 gem 'rqrcode'
+
+gem 'omniauth'
+gem 'omniauth-google-oauth2'
+gem 'omniauth-facebook'
+gem 'omniauth-rails_csrf_protection'

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_15_154715) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_16_133147) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -167,6 +167,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_15_154715) do
     t.json "settings"
   end
 
+  create_table "user_connections", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "provider", null: false
+    t.string "uid", null: false
+    t.string "name"
+    t.string "email"
+    t.string "image"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider", "uid"], name: "index_user_connections_on_provider_and_uid", unique: true
+    t.index ["user_id"], name: "index_user_connections_on_user_id"
+  end
+
   create_table "user_setups", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "domain_name"
@@ -245,6 +258,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_15_154715) do
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id"
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id"
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id"
+  add_foreign_key "user_connections", "users"
   add_foreign_key "user_setups", "themes"
   add_foreign_key "user_setups", "users"
   add_foreign_key "websites", "themes"

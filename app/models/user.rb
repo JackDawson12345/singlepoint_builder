@@ -1,7 +1,8 @@
 class User < ApplicationRecord
-  # Include default devise modules (no 2FA module needed)
+  # Include default devise modules with omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable, :validatable,
+         :omniauthable, omniauth_providers: [:google_oauth2, :facebook]
 
   encrypts :first_address_line, :second_address_line, :town,
            :county, :state_province, :postcode, :country
@@ -15,6 +16,9 @@ class User < ApplicationRecord
   # Association
   has_one :user_setup, dependent: :destroy
 
+  # OAuth connections
+  has_many :user_connections, dependent: :destroy
+
   # Add backup codes for 2FA
   serialize :otp_backup_codes, coder: JSON, type: Array
 
@@ -23,6 +27,49 @@ class User < ApplicationRecord
 
   # Add validation for profile image
   validate :acceptable_profile_image
+
+  # OAuth class method
+  def self.from_omniauth(auth)
+    # First, try to find existing connection
+    connection = UserConnection.find_by(provider: auth.provider, uid: auth.uid)
+
+    if connection
+      return connection.user
+    end
+
+    # If no connection exists, try to find user by email
+    user = User.find_by(email: auth.info.email)
+
+    # If user doesn't exist, create new one
+    unless user
+      user = User.create!(
+        email: auth.info.email,
+        password: Devise.friendly_token[0, 20],
+        first_name: auth.info.first_name || auth.info.name&.split&.first || auth.info.email.split('@').first.humanize,
+        last_name: auth.info.last_name || auth.info.name&.split&.last
+      )
+    end
+
+    # Create the connection
+    user.user_connections.create!(
+      provider: auth.provider,
+      uid: auth.uid,
+      name: auth.info.name,
+      email: auth.info.email,
+      image: auth.info.image
+    )
+
+    user
+  end
+
+  # OAuth helper methods
+  def connected_to?(provider)
+    user_connections.exists?(provider: provider)
+  end
+
+  def connection_for(provider)
+    user_connections.find_by(provider: provider)
+  end
 
   def unread_notifications_count
     notifications.unread.count

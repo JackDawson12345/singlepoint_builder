@@ -114,8 +114,19 @@
       <div class="py-4 px-6 border-b">
         <h2 class="nata-sans text-lg font-semibold">Account Security</h2>
       </div>
-      <div class="py-4 px-6 grid grid-cols-2 gap-4">
-
+      <div class="py-4 px-6 space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="nata-sans text-sm">Connected Accounts</span>
+          <span class="nata-sans text-sm font-semibold"><%= current_user.user_connections.count %></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="nata-sans text-sm">Two-Factor Auth</span>
+          <% if current_user.otp_required_for_login %>
+            <span class="nata-sans text-sm font-semibold text-green-600">Enabled</span>
+          <% else %>
+            <span class="nata-sans text-sm font-semibold text-red-600">Disabled</span>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>
@@ -189,41 +200,88 @@
     </div>
   </div>
 
+  <!-- Updated Social Logins Section -->
   <div class="w-full bg-gray-50 rounded-lg">
     <div class="py-4 px-6 border-b">
       <h2 class="nata-sans text-lg font-semibold">Social Logins</h2>
     </div>
     <div class="py-4 px-6 grid">
+      <!-- Google Account -->
       <div class="border-b p-4 flex gap-2">
-        <div class="w-4/5 flex gap-5 items-center ">
+        <div class="w-4/5 flex gap-5 items-center">
           <div>
             <%= image_tag 'google-logo.webp', class: 'w-15 h-15' %>
           </div>
           <div>
             <h6 class="nata-sans text-base font-bold">Google Account</h6>
-            <p class="nata-sans text-sm">Disabled</p>
+            <% if current_user.connected_to?('google_oauth2') %>
+              <p class="nata-sans text-sm text-green-600">
+                Connected: <%= current_user.connection_for('google_oauth2')&.email %>
+              </p>
+            <% else %>
+              <p class="nata-sans text-sm text-gray-500">Not connected</p>
+            <% end %>
           </div>
         </div>
         <div class="w-1/5 flex items-center justify-end">
-          <button class="border py-2 px-4 rounded-full nata-sans text-sm text-blue-500">Enable</button>
+          <% if current_user.connected_to?('google_oauth2') %>
+            <%= link_to "Disconnect",
+                        account_connection_path(current_user.connection_for('google_oauth2')),
+                        method: :delete,
+                        class: "border py-2 px-4 rounded-full nata-sans text-sm text-red-500 hover:bg-red-50",
+                        data: {
+                          confirm: "Are you sure you want to disconnect your Google account?",
+                          turbo_method: :delete
+                        } %>
+          <% else %>
+            <%= button_to "Connect",
+                          user_google_oauth2_omniauth_authorize_path,
+                          method: :post,
+                          class: "border py-2 px-4 rounded-full nata-sans text-sm text-blue-500 hover:bg-blue-50",
+                          data: { turbo: false } %>
+          <% end %>
         </div>
       </div>
+
+      <!-- Facebook Account -->
       <div class="border-b p-4 flex gap-2">
-        <div class="w-4/5 flex gap-5 items-center ">
+        <div class="w-4/5 flex gap-5 items-center">
           <div>
             <%= image_tag 'facebook-logo.webp', class: 'w-15 h-15' %>
           </div>
           <div>
             <h6 class="nata-sans text-base font-bold">Facebook Account</h6>
-            <p class="nata-sans text-sm">Disabled</p>
+            <% if current_user.connected_to?('facebook') %>
+              <p class="nata-sans text-sm text-green-600">
+                Connected: <%= current_user.connection_for('facebook')&.email %>
+              </p>
+            <% else %>
+              <p class="nata-sans text-sm text-gray-500">Not connected</p>
+            <% end %>
           </div>
         </div>
         <div class="w-1/5 flex items-center justify-end">
-          <button class="border py-2 px-4 rounded-full nata-sans text-sm text-blue-500">Enable</button>
+          <% if current_user.connected_to?('facebook') %>
+            <%= link_to "Disconnect",
+                        account_connection_path(current_user.connection_for('facebook')),
+                        method: :delete,
+                        class: "border py-2 px-4 rounded-full nata-sans text-sm text-red-500 hover:bg-red-50",
+                        data: {
+                          confirm: "Are you sure you want to disconnect your Facebook account?",
+                          turbo_method: :delete
+                        } %>
+          <% else %>
+            <%= button_to "Connect",
+                          user_facebook_omniauth_authorize_path,
+                          method: :post,
+                          class: "border py-2 px-4 rounded-full nata-sans text-sm text-blue-500 hover:bg-blue-50",
+                          data: { turbo: false } %>
+          <% end %>
         </div>
       </div>
+
       <div class="pt-4">
-        <p class="nata-sans text-xs">* If you disable social logins, you will still be able to log in using your Wix email and password.</p>
+        <p class="nata-sans text-xs">* If you disable social logins, you will still be able to log in using your email and password.</p>
       </div>
     </div>
   </div>
@@ -359,6 +417,7 @@
   </div>
 </div>
 
+<!-- 2FA Setup Modal -->
 <div id="two-fa-setup-popup" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
   <div class="flex items-center justify-center min-h-screen p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-lg w-full">
@@ -456,10 +515,9 @@
     </div>
   </div>
 </div>
-<script>
-    // app/assets/javascripts/manage/account_settings.js
-    // Or add to your existing JavaScript file
 
+<script>
+    // Enhanced JavaScript with OAuth functionality
     const twoFaPopup = document.getElementById('two-fa-setup-popup');
     const enableTwoFaBtn = document.getElementById('enable-2fa-btn');
     const closeTwoFaPopupBtn = document.getElementById('close-2fa-popup');
@@ -471,7 +529,42 @@
     const verifyForm = document.getElementById('verify-2fa-form');
     const finishSetupBtn = document.getElementById('finish-2fa-setup');
 
-    // Open 2FA setup popup
+    // Document ready function
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle flash messages for OAuth connections
+        const flashNotice = document.querySelector('.flash-notice');
+        const flashAlert = document.querySelector('.flash-alert');
+
+        if (flashNotice) {
+            showNotification(flashNotice.textContent, 'success');
+            flashNotice.remove();
+        }
+
+        if (flashAlert) {
+            showNotification(flashAlert.textContent, 'error');
+            flashAlert.remove();
+        }
+
+        // Handle OAuth button loading states
+        const oauthButtons = document.querySelectorAll('form[action*="omniauth"] button');
+        oauthButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                this.disabled = true;
+                this.textContent = 'Connecting...';
+
+                // Re-enable after 5 seconds in case of failure
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.textContent = 'Connect';
+                }, 5000);
+            });
+        });
+
+        // Password modal functionality
+        initializePasswordModal();
+    });
+
+    // 2FA Functions
     if (enableTwoFaBtn) {
         enableTwoFaBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -480,19 +573,15 @@
     }
 
     function open2FASetup() {
-        // Reset to step 1
         step1.classList.remove('hidden');
         step2.classList.add('hidden');
         step3.classList.add('hidden');
-
-        // Load QR code
         loadQRCode();
-
         twoFaPopup.classList.remove('hidden');
     }
 
     function loadQRCode() {
-        fetch('<%= generate_2fa_secret_manage_account_settings_path %>', {
+        fetch('/manage/account_settings/generate_2fa_secret', {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -505,16 +594,16 @@
                     document.getElementById('qr-code-container').innerHTML = data.qr_code;
                     document.getElementById('manual-secret').textContent = data.secret;
                 } else {
-                    show2FAError('Failed to generate QR code: ' + (data.error || 'Unknown error'));
+                    showNotification('Failed to generate QR code: ' + (data.error || 'Unknown error'), 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                show2FAError('Error loading setup data');
+                showNotification('Error loading setup data', 'error');
             });
     }
 
-    // Navigation between steps
+    // 2FA Navigation
     proceedToVerifyBtn.addEventListener('click', function() {
         step1.classList.add('hidden');
         step2.classList.remove('hidden');
@@ -527,7 +616,7 @@
         document.getElementById('verification-error').classList.add('hidden');
     });
 
-    // Handle verification
+    // 2FA Verification
     verifyForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -546,7 +635,7 @@
         formData.append('otp_attempt', code);
         formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
 
-        fetch('<%= enable_2fa_manage_account_settings_path %>', {
+        fetch('/manage/account_settings/enable_2fa', {
             method: 'POST',
             body: formData,
             headers: {
@@ -556,7 +645,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Show backup codes
                     displayBackupCodes(data.backup_codes);
                     step2.classList.add('hidden');
                     step3.classList.remove('hidden');
@@ -577,21 +665,14 @@
     function displayBackupCodes(codes) {
         const container = document.getElementById('backup-codes-container');
         const codesList = codes.map(code => `<div class="font-mono text-sm py-1">${code}</div>`).join('');
-        container.innerHTML = `
-            <div class="grid grid-cols-2 gap-2">
-                ${codesList}
-            </div>
-        `;
+        container.innerHTML = `<div class="grid grid-cols-2 gap-2">${codesList}</div>`;
     }
 
-    // Finish setup
     finishSetupBtn.addEventListener('click', function() {
         close2FAPopup();
-        // Update the UI to show 2FA is enabled
-        location.reload(); // Simple way to refresh the page state
+        location.reload();
     });
 
-    // Close popup functions
     function close2FAPopup() {
         twoFaPopup.classList.add('hidden');
         document.getElementById('verification-code').value = '';
@@ -600,14 +681,12 @@
 
     closeTwoFaPopupBtn.addEventListener('click', close2FAPopup);
 
-    // Close popup when clicking outside
     twoFaPopup.addEventListener('click', function(e) {
         if (e.target === twoFaPopup) {
             close2FAPopup();
         }
     });
 
-    // Auto-format verification code input
     document.getElementById('verification-code').addEventListener('input', function(e) {
         e.target.value = e.target.value.replace(/\D/g, '');
         if (e.target.value.length === 6) {
@@ -615,28 +694,127 @@
         }
     });
 
-    function show2FAError(message) {
-        showNotification(message, 'error');
-    }
-
     function show2FAVerificationError(message) {
         const errorDiv = document.getElementById('verification-error');
         errorDiv.textContent = message;
         errorDiv.classList.remove('hidden');
     }
 
-    function showNotification(message, type = 'success') {
-        const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-md shadow-lg z-50 ${bgColor} text-white`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
+    // Password Modal Functions
+    function initializePasswordModal() {
+        const passwordPopup = document.getElementById('password-edit-popup');
+        const closePasswordPopupBtn = document.getElementById('close-password-popup');
+        const cancelPasswordEditBtn = document.getElementById('cancel-password-edit');
+        const passwordEditForm = document.getElementById('password-edit-form');
+        const newPasswordInput = document.getElementById('new-password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const passwordMatchError = document.getElementById('password-match-error');
+        const editPasswordBtn = document.getElementById('edit-password-btn');
 
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+        editPasswordBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            passwordPopup.classList.remove('hidden');
+            document.getElementById('current-password').focus();
+        });
+
+        function closePasswordPopup() {
+            passwordPopup.classList.add('hidden');
+            passwordEditForm.reset();
+            passwordMatchError.classList.add('hidden');
+        }
+
+        closePasswordPopupBtn.addEventListener('click', closePasswordPopup);
+        cancelPasswordEditBtn.addEventListener('click', closePasswordPopup);
+
+        passwordPopup.addEventListener('click', function(e) {
+            if (e.target === passwordPopup) {
+                closePasswordPopup();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !passwordPopup.classList.contains('hidden')) {
+                closePasswordPopup();
+            }
+        });
+
+        function validatePasswordMatch() {
+            if (confirmPasswordInput.value && newPasswordInput.value !== confirmPasswordInput.value) {
+                passwordMatchError.classList.remove('hidden');
+                return false;
+            } else {
+                passwordMatchError.classList.add('hidden');
+                return true;
+            }
+        }
+
+        confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+        newPasswordInput.addEventListener('input', function() {
+            if (confirmPasswordInput.value) {
+                validatePasswordMatch();
+            }
+        });
+
+        passwordEditForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!validatePasswordMatch()) {
+                return;
+            }
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showNotification('All fields are required', 'error');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showNotification('New password must be at least 8 characters long', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('current_password', currentPassword);
+            formData.append('new_password', newPassword);
+            formData.append('confirm_password', confirmPassword);
+            formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            const saveBtn = document.getElementById('save-password');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Updating...';
+            saveBtn.disabled = true;
+
+            fetch('/manage/account_settings/update_password', {
+                method: 'PATCH',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closePasswordPopup();
+                        showNotification('Password updated successfully!', 'success');
+                    } else {
+                        showNotification(data.message || 'Error updating password', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error updating password', 'error');
+                })
+                .finally(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                });
+        });
     }
 
+    // Image handling functions
     function handleImagePreview(input) {
         const file = input.files[0];
         const previewContainer = document.getElementById('imagePreviewContainer');
@@ -652,7 +830,6 @@
                 preview.src = e.target.result;
                 previewContainer.classList.remove('hidden');
 
-                // Hide current image or placeholder when showing preview
                 if (currentImageWrapper) {
                     currentImageWrapper.classList.add('hidden');
                 }
@@ -660,7 +837,6 @@
                     noImagePlaceholder.classList.add('hidden');
                 }
 
-                // Uncheck remove image if user selects new image
                 if (removeCheckbox) {
                     removeCheckbox.checked = false;
                 }
@@ -685,21 +861,17 @@
         const fileInput = document.getElementById('profile-image-input');
 
         if (checkbox.checked) {
-            // Hide preview and current image
             previewContainer.classList.add('hidden');
             if (currentImageWrapper) {
                 currentImageWrapper.classList.add('hidden');
             }
 
-            // Show placeholder for removed image
             if (noImagePlaceholder) {
                 noImagePlaceholder.classList.remove('hidden');
             }
 
-            // Clear file input
             fileInput.value = '';
         } else {
-            // Show current image if it exists
             if (currentImageWrapper) {
                 currentImageWrapper.classList.remove('hidden');
             }
@@ -709,6 +881,7 @@
         }
     }
 
+    // Form submission function
     function submitForm() {
         const form = document.getElementById('site-name-form');
         const formData = new FormData(form);
@@ -724,187 +897,40 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    // Optionally show a success message
                     console.log('Account updated successfully');
-
-                    // You could add a temporary success indicator here
-                    showSuccessMessage();
+                    showNotification('Account updated successfully!', 'success');
                 } else {
-                    // Handle errors
                     console.error('Update failed:', data.errors);
-                    showErrorMessage(data.errors);
+                    showNotification(data.errors.join(', '), 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showErrorMessage(['An error occurred while updating your account.']);
+                showNotification('An error occurred while updating your account.', 'error');
             });
     }
 
-    // Optional: Add success/error message functions
-    function showSuccessMessage() {
-        // Create a temporary success message
-        const message = document.createElement('div');
-        message.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
-        message.textContent = 'Account updated successfully!';
-        document.body.appendChild(message);
+    // Enhanced notification function
+    function showNotification(message, type = 'success') {
+        const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-md shadow-lg z-50 ${bgColor} text-white nata-sans`;
+        notification.innerHTML = `
+            <div class="flex items-center justify-between">
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+        document.body.appendChild(notification);
 
-        // Remove after 3 seconds
         setTimeout(() => {
-            document.body.removeChild(message);
-        }, 3000);
-    }
-
-    function showErrorMessage(errors) {
-        // Create a temporary error message
-        const message = document.createElement('div');
-        message.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
-        message.textContent = errors.join(', ');
-        document.body.appendChild(message);
-
-        // Remove after 5 seconds
-        setTimeout(() => {
-            document.body.removeChild(message);
+            if (notification.parentNode) {
+                notification.remove();
+            }
         }, 5000);
     }
-
-    // Password Modal JavaScript
-    document.addEventListener('DOMContentLoaded', function() {
-        const passwordPopup = document.getElementById('password-edit-popup');
-        const closePasswordPopupBtn = document.getElementById('close-password-popup');
-        const cancelPasswordEditBtn = document.getElementById('cancel-password-edit');
-        const passwordEditForm = document.getElementById('password-edit-form');
-        const newPasswordInput = document.getElementById('new-password');
-        const confirmPasswordInput = document.getElementById('confirm-password');
-        const passwordMatchError = document.getElementById('password-match-error');
-        const editPasswordBtn = document.getElementById('edit-password-btn');
-
-        // Open password popup when Edit Password button is clicked
-        editPasswordBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            passwordPopup.classList.remove('hidden');
-            document.getElementById('current-password').focus();
-        });
-
-        // Close password popup functions
-        function closePasswordPopup() {
-            passwordPopup.classList.add('hidden');
-            passwordEditForm.reset();
-            passwordMatchError.classList.add('hidden');
-        }
-
-        closePasswordPopupBtn.addEventListener('click', closePasswordPopup);
-        cancelPasswordEditBtn.addEventListener('click', closePasswordPopup);
-
-        // Close popup when clicking outside
-        passwordPopup.addEventListener('click', function(e) {
-            if (e.target === passwordPopup) {
-                closePasswordPopup();
-            }
-        });
-
-        // Close popup with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !passwordPopup.classList.contains('hidden')) {
-                closePasswordPopup();
-            }
-        });
-
-        // Password matching validation
-        function validatePasswordMatch() {
-            if (confirmPasswordInput.value && newPasswordInput.value !== confirmPasswordInput.value) {
-                passwordMatchError.classList.remove('hidden');
-                return false;
-            } else {
-                passwordMatchError.classList.add('hidden');
-                return true;
-            }
-        }
-
-        confirmPasswordInput.addEventListener('input', validatePasswordMatch);
-        newPasswordInput.addEventListener('input', function() {
-            if (confirmPasswordInput.value) {
-                validatePasswordMatch();
-            }
-        });
-
-        // Handle form submission
-        passwordEditForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Validate password match
-            if (!validatePasswordMatch()) {
-                return;
-            }
-
-            const currentPassword = document.getElementById('current-password').value;
-            const newPassword = newPasswordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
-
-            // Basic validation
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                showPasswordError('All fields are required');
-                return;
-            }
-
-            if (newPassword.length < 8) {
-                showPasswordError('New password must be at least 8 characters long');
-                return;
-            }
-
-            // Prepare data for AJAX request
-            const formData = new FormData();
-            formData.append('current_password', currentPassword);
-            formData.append('new_password', newPassword);
-            formData.append('confirm_password', confirmPassword);
-            formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-
-            // Show loading state
-            const saveBtn = document.getElementById('save-password');
-            const originalText = saveBtn.textContent;
-            saveBtn.textContent = 'Updating...';
-            saveBtn.disabled = true;
-
-            // Make AJAX request - you'll need to create this route
-            fetch('/manage/account_settings/update_password', {
-                method: 'PATCH',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        closePasswordPopup();
-                        showSuccessMessage('Password updated successfully!');
-                    } else {
-                        showPasswordError(data.message || 'Error updating password');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showPasswordError('Error updating password');
-                })
-                .finally(() => {
-                    // Reset button state
-                    saveBtn.textContent = originalText;
-                    saveBtn.disabled = false;
-                });
-        });
-
-        function showPasswordError(message) {
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-md shadow-lg z-50 bg-red-500 text-white';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Any initialization code can go here
-        console.log('Account settings form loaded');
-    });
 </script>

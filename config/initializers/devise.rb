@@ -312,4 +312,10 @@ Devise.setup do |config|
   # config.sign_in_after_change_password = true
 
 
+  # Add OAuth configuration
+  config.omniauth :google_oauth2,
+                  Rails.application.credentials.google[:client_id],
+                  Rails.application.credentials.google[:client_secret]
+
+
 end

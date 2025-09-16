@@ -82,5 +82,4 @@ class Manage::AccountSettingsController < Manage::BaseController
     qr_code = RQRCode::QRCode.new(current_user.otp_provisioning_uri(label, issuer: issuer))
     qr_code.as_svg(module_size: 4)
   end
-
 end
