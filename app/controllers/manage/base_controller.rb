@@ -4,6 +4,7 @@ class Manage::BaseController < ApplicationController
   before_action :ensure_manage!
   before_action :has_website
 
+
   layout 'manage'
 
 

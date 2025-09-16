@@ -3,6 +3,7 @@ class FrontendController < ApplicationController
   skip_before_action :verify_authenticity_token, if: -> { is_custom_domain? }, raise: false
   layout 'frontend'
 
+
   def home
     # If this is a custom domain request, handle it as a public website
     if is_custom_domain? && current_website

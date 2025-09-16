@@ -1,6 +1,5 @@
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  # Include default devise modules (no 2FA module needed)
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
@@ -9,12 +8,15 @@ class User < ApplicationRecord
 
   has_one :website, dependent: :destroy
   has_one_attached :logo
-  has_one_attached :profile_image  # Add this line
+  has_one_attached :profile_image
 
   has_many :notifications, dependent: :destroy
 
   # Association
   has_one :user_setup, dependent: :destroy
+
+  # Add backup codes for 2FA
+  serialize :otp_backup_codes, coder: JSON, type: Array
 
   # Callback to create UserSetup after user is created
   after_create :create_default_user_setup
@@ -29,7 +31,6 @@ class User < ApplicationRecord
   def get_name_from_email
     email.split('@')[0]
   end
-
 
   def get_role
     if role == 0
@@ -74,6 +75,57 @@ class User < ApplicationRecord
 
   def display_name
     full_name.present? ? full_name : get_name_from_email.humanize
+  end
+
+  # 2FA methods using ROTP
+  def otp_secret
+    return otp_secret_key if otp_secret_key.present?
+
+    # Generate new secret if none exists
+    secret = ROTP::Base32.random
+    update!(otp_secret_key: secret)
+    secret
+  end
+
+  # With this:
+  def otp_provisioning_uri(label, issuer:)
+    totp = ROTP::TOTP.new(otp_secret)
+    Rails.logger.info "ROTP TOTP methods: #{totp.method(:provisioning_uri).parameters}"
+    totp.provisioning_uri(label)
+  end
+
+  def validate_and_consume_otp!(token)
+    totp = ROTP::TOTP.new(otp_secret)
+    last_consumed = consumed_timestep || 0
+
+    # Verify the token and ensure it hasn't been used before
+    if totp.verify(token, drift_behind: 60, drift_ahead: 60, after: Time.at(last_consumed))
+      # Update the last consumed timestep to prevent replay attacks
+      self.consumed_timestep = Time.current.to_i
+      save!
+      return true
+    end
+
+    false
+  end
+
+  def invalidate_otp_backup_code!(code)
+    return false unless otp_backup_codes&.include?(code)
+
+    otp_backup_codes.delete(code)
+    save!
+    true
+  end
+
+  # Generate backup codes
+  def generate_two_factor_backup_codes!
+    codes = []
+    10.times do
+      codes << SecureRandom.hex(6)
+    end
+    self.otp_backup_codes = codes
+    save!
+    codes
   end
 
   private

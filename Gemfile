@@ -72,3 +72,6 @@ gem "sidekiq", "~> 8.0"
 gem 'platform-api'
 
 gem 'csv'
+
+gem 'rotp'
+gem 'rqrcode'

@@ -13,9 +13,16 @@ class PublicWebsitesController < ApplicationController
 
     # Handle main domain vs custom domain logic
     if is_main_domain?
-      # Redirect to manage interface for main domain
-      Rails.logger.info "Redirecting to manage interface (main domain detected)"
-      redirect_to '/manage/setup' and return
+      # If accessing root path and no specific page requested, show frontend
+      if request.path == '/' && params[:page_slug].blank?
+        Rails.logger.info "Serving frontend home page for main domain"
+        render template: 'frontend/home', layout: 'frontend'
+        return
+      else
+        # For any other paths on main domain, redirect to manage
+        Rails.logger.info "Redirecting to manage interface (main domain detected)"
+        redirect_to '/manage/setup' and return
+      end
     end
 
     # If no website found for this domain, show 404

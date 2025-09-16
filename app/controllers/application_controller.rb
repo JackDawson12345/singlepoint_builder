@@ -4,6 +4,19 @@ class ApplicationController < ActionController::Base
   # Add multi-tenant domain detection before all actions
   before_action :find_current_website, if: -> { Rails.env.production? }
 
+  protected
+
+  def after_sign_in_path_for(resource)
+    if resource.role == 0
+      '/admin'
+    elsif resource.role == 1
+      '/manage'
+    else
+      root_path # fallback for other roles or nil
+    end
+  end
+
+
   private
 
   # Multi-tenant domain detection

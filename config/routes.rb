@@ -4,7 +4,15 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Devise routes
-  devise_for :users
+  devise_for :users, controllers: {
+    sessions: 'users/sessions',
+    registrations: 'users/registrations',
+    passwords: 'users/passwords'
+  }
+  # Wrap the custom 2FA route in devise_scope
+  devise_scope :user do
+    get 'users/two_factor', to: 'users/sessions#two_factor', as: :two_factor
+  end
 
   # Admin routes - MUST come before wildcard routes
   namespace :admin do
@@ -167,9 +175,13 @@ Rails.application.routes.draw do
     post "/setup/retry-domain-purchase", to: "setup#retry_domain_purchase", as: "setup_retry_domain_purchase"
     match "/set-website-theme/:theme_id", to: "setup#set_website_theme", as: "set_website_theme", via: [:get, :post]
 
-    get "/account-settings", to: "account_settings#index", as: "account_settings"
-    patch "/account-settings/update", to: "account_settings#update", as: "account_settings_update"
-    patch '/account_settings/update_password', to: 'account_settings#update_password'
+    resource :account_settings, only: [:show, :update] do
+      member do
+        post :generate_2fa_secret
+        post :enable_2fa
+        patch :update_password
+      end
+    end
 
     # Settings
     namespace :settings do
@@ -250,6 +262,7 @@ Rails.application.routes.draw do
     !req.path.start_with?('/rails/active_storage')
   }
 
-  # Main domain root route - LAST
+  # Main domain root route - LAST - This will handle localhost in development
+  # and production domains appropriately
   root "frontend#home"
 end
