@@ -97,16 +97,15 @@ class LoginActivityTracker
       Rails.logger.info "Fetching location data for IP: #{ip_address}"
       result = Geocoder.search(ip_address).first
 
-      if result && (result.city.present? || result.country.present?)
-        city = result.city.presence || 'Unknown'
-        region = result.region.presence
-        country_code = result.country.presence
-        country_name = convert_country_code_to_name(country_code)
+      if result
+        city = result.city
+        region = result.region
+        country = result.country
 
         location_data = {
-          location: format_location(city, region, country_name),
-          city: city,
-          country: country_name
+          location: [city, region, country].compact.join(', '),
+          city: city || 'Unknown',
+          country: country || 'Unknown'
         }
 
         # Cache for 30 days
@@ -115,7 +114,7 @@ class LoginActivityTracker
         Rails.logger.info "Successfully geocoded IP #{ip_address}: #{location_data[:location]}"
         return location_data
       else
-        Rails.logger.warn "No location data found for IP: #{ip_address}"
+        Rails.logger.warn "No geocoding result returned for IP: #{ip_address}"
         return default_location_data
       end
 
@@ -125,55 +124,7 @@ class LoginActivityTracker
     end
   end
 
-  def self.format_location(city, region, country)
-    parts = []
-    parts << city if city.present? && city != 'Unknown'
-    parts << region if region.present? && region != city
-    parts << country if country.present? && country != 'Unknown'
 
-    parts.any? ? parts.join(', ') : 'Unknown'
-  end
-
-  def self.convert_country_code_to_name(country_code)
-    return 'Unknown' if country_code.blank?
-
-    # Common country codes mapping
-    country_codes = {
-      'GB' => 'United Kingdom',
-      'US' => 'United States',
-      'CA' => 'Canada',
-      'AU' => 'Australia',
-      'DE' => 'Germany',
-      'FR' => 'France',
-      'IT' => 'Italy',
-      'ES' => 'Spain',
-      'NL' => 'Netherlands',
-      'BE' => 'Belgium',
-      'CH' => 'Switzerland',
-      'AT' => 'Austria',
-      'SE' => 'Sweden',
-      'NO' => 'Norway',
-      'DK' => 'Denmark',
-      'FI' => 'Finland',
-      'IE' => 'Ireland',
-      'PT' => 'Portugal',
-      'PL' => 'Poland',
-      'CZ' => 'Czech Republic',
-      'HU' => 'Hungary',
-      'GR' => 'Greece',
-      'JP' => 'Japan',
-      'KR' => 'South Korea',
-      'CN' => 'China',
-      'IN' => 'India',
-      'BR' => 'Brazil',
-      'MX' => 'Mexico',
-      'RU' => 'Russia',
-      'TR' => 'Turkey'
-      # Add more as needed
-    }
-
-    country_codes[country_code.upcase] || country_code.upcase
-  end
 
   def self.local_ip?(ip_address)
     return true if ip_address.blank?
