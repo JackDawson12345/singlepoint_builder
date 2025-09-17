@@ -1,0 +1,145 @@
+<div class="mb-5">
+  <div class="flex gap-3">
+    <%= link_to 'Account Settings', manage_account_settings_path, class: 'nata-sans font-normal text-sm' %>
+    <svg style="transform: rotate(270deg)" class="w-5 h-5 ml-1 transform transition-transform duration-200 text-gray-300" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+    <p class="nata-sans font-normal text-sm">Email Preferences</p>
+
+  </div>
+  <div class="flex items-center gap-3">
+    <%= link_to manage_account_settings_path do %>
+      <svg style="transform: rotate(90deg)" class="w-5 h-5 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    <% end %>
+
+    <div>
+      <h1 class="nata-sans page-title">Email Preferences</h1>
+      <p class="nata-sans">Toggle on or off to choose which emails you receive.</p>
+    </div>
+  </div>
+</div>
+
+<%# Email Preferences Form %>
+<div class="space-y-5">
+  <%= form_with model: current_user, url: update_email_preferences_manage_account_settings_path, local: false, class: "email-preferences-form" do |f| %>
+    <div class="bg-gray-50 rounded-lg px-6">
+
+      <div class="py-4 px-6 border-b flex items-center">
+        <div class="w-4/5">
+          <h2 class="nata-sans text-lg font-semibold">Special Offers</h2>
+          <p class="nata-sans text-sm font-normal">Get updates on promotions, sales and discounts.</p>
+        </div>
+        <div class="w-1/5 flex justify-end">
+          <%= render 'shared/toggle_switch', preference: 'special_offers' %>
+        </div>
+      </div>
+
+      <div class="py-4 px-6 border-b flex items-center">
+        <div class="w-4/5">
+          <h2 class="nata-sans text-lg font-semibold">Contests and Events</h2>
+          <p class="nata-sans text-sm font-normal">Find out when we're having a contest or event near you.</p>
+        </div>
+        <div class="w-1/5 flex justify-end">
+          <%= render 'shared/toggle_switch', preference: 'contests_and_events' %>
+        </div>
+      </div>
+
+      <div class="py-4 px-6 border-b flex items-center">
+        <div class="w-4/5">
+          <h2 class="nata-sans text-lg font-semibold">New Features and Releases</h2>
+          <p class="nata-sans text-sm font-normal">Be the first to know about the latest features and releases, and share your feedback.</p>
+        </div>
+        <div class="w-1/5 flex justify-end">
+          <%= render 'shared/toggle_switch', preference: 'new_features_and_releases' %>
+        </div>
+      </div>
+
+      <div class="py-4 px-6 flex items-center">
+        <div class="w-4/5">
+          <h2 class="nata-sans text-lg font-semibold">Tips and Inspiration</h2>
+          <p class="nata-sans text-sm font-normal">Discover how you can grow your site, online presence and business.</p>
+        </div>
+        <div class="w-1/5 flex justify-end">
+          <%= render 'shared/toggle_switch', preference: 'tips_and_inspiration' %>
+        </div>
+      </div>
+
+    </div>
+  <% end %>
+
+  <p class="nata-sans text-xs">*You'll still receive important emails regarding your account like billing, security and support.</p>
+
+  <div id="preferences-status" class="hidden">
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded nata-sans text-sm">
+      Email preferences updated successfully!
+    </div>
+  </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle toggle changes
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('preference-toggle')) {
+                submitPreferences();
+            }
+        });
+
+        function submitPreferences() {
+            const form = document.querySelector('.email-preferences-form');
+            const formData = new FormData(form);
+
+            // Convert FormData to JSON
+            const preferences = {};
+            const toggles = document.querySelectorAll('.preference-toggle');
+
+            toggles.forEach(toggle => {
+                const preference = toggle.dataset.preference;
+                preferences[preference] = toggle.checked;
+            });
+
+            // Add Rails authenticity token
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch(form.action, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': token,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    email_preferences: preferences
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccessMessage();
+                    } else {
+                        showErrorMessage();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showErrorMessage();
+                });
+        }
+
+        function showSuccessMessage() {
+            const statusDiv = document.getElementById('preferences-status');
+            statusDiv.classList.remove('hidden');
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 3000);
+        }
+
+        function showErrorMessage() {
+            // You can customize this error message display
+            alert('There was an error updating your preferences. Please try again.');
+        }
+    });
+</script>

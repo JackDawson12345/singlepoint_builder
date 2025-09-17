@@ -245,6 +245,40 @@ module Manage::Editor::WebsiteEditorHelper
 
     updated_content
   end
+
+  def scope_css_to_selector(css, scope_selector)
+    return '' if css.blank?
+
+    # Clean up the CSS and split into manageable chunks
+    cleaned_css = css.gsub(/\/\*.*?\*\//m, '').strip
+
+    # Split by closing braces to get individual rules
+    rules = cleaned_css.split(/(?<=\})\s*/)
+
+    scoped_rules = rules.map do |rule|
+      rule = rule.strip
+      next if rule.empty?
+
+      # Handle different types of CSS rules
+      case rule
+      when /^@media/
+        # Media queries - scope the content inside
+        scope_media_query(rule, scope_selector)
+      when /^@keyframes/, /^@font-face/, /^@import/, /^@charset/
+        # These should remain unscoped
+        rule
+      when /^:root\s*\{/
+        # CSS custom properties should remain unscoped at root level
+        rule
+      else
+        # Regular CSS rules - scope the selectors
+        scope_regular_rule(rule, scope_selector)
+      end
+    end
+
+    scoped_rules.compact.join("\n")
+  end
+
   private
 
   def get_component_field_values(component, user_id, theme_page_id, component_page_id)
@@ -301,7 +335,7 @@ module Manage::Editor::WebsiteEditorHelper
       nav_template = raw_template
     end
 
-    current_user.website.pages["theme_pages"].map do |page_name, page_data|
+    current_user.website.pages["theme_pages"].sort_by { |name, data| data['position'].to_i }.map do |page_name, page_data|
       pageName = page_name.to_s
       pageSlug = page_data['slug'].to_s
 
@@ -347,7 +381,7 @@ module Manage::Editor::WebsiteEditorHelper
     end
 
     unless current_user.website.services.blank?
-      current_user.website.services.map do |service|
+      current_user.website.services.map.with_index do |service, index|
 
         # Use service attributes instead of undefined page variables
         service_name = service['name'].to_s  # or whatever attribute holds the service name
@@ -359,6 +393,7 @@ module Manage::Editor::WebsiteEditorHelper
         item_html.gsub!('{{service_title}}', service_name)
         item_html.gsub!('{{service_excerpt}}', service['excerpt'].to_s) # or service.description
         item_html.gsub!('{{service_image}}', service['featured_image'].to_s) # or whatever holds the image
+        item_html.gsub!('{{service_number}}', '0' + (index + 1).to_s) # or whatever holds the image
 
         service_page = current_user.website.pages["theme_pages"]["services"]
         # Build the service link
@@ -477,6 +512,63 @@ module Manage::Editor::WebsiteEditorHelper
     end
 
     raw_template
+  end
+
+  def scope_regular_rule(rule, scope_selector)
+    # Match selector(s) and declaration block
+    if rule.match(/^([^{]+)\s*\{([^}]*)\}(.*)$/m)
+      selectors = $1.strip
+      declarations = $2.strip
+      remainder = $3.strip
+
+      return rule if declarations.empty?
+
+      # Split multiple selectors and scope each one
+      selector_list = selectors.split(',').map(&:strip)
+
+      scoped_selectors = selector_list.map do |selector|
+        scope_single_selector(selector, scope_selector)
+      end
+
+      result = "#{scoped_selectors.join(', ')} { #{declarations} }"
+      result += remainder if remainder.present?
+      result
+    else
+      rule
+    end
+  end
+
+  def scope_single_selector(selector, scope_selector)
+    # Handle pseudo-selectors and special cases
+    case selector
+    when /^\s*html\b/, /^\s*body\b/
+      # Replace html/body with the scope selector
+      selector.gsub(/^\s*(html|body)\b/, scope_selector)
+    when /^\s*\*/
+      # Universal selector - scope it
+      selector.gsub(/^\s*\*/, "#{scope_selector} *")
+    when /^:/
+      # Pseudo-classes that should apply to the scope itself
+      "#{scope_selector}#{selector}"
+    else
+      # Regular selectors - prepend scope
+      "#{scope_selector} #{selector}"
+    end
+  end
+
+  def scope_media_query(rule, scope_selector)
+    # Extract media query and its contents
+    if rule.match(/^(@media[^{]+)\{(.+)\}$/m)
+      media_declaration = $1
+      media_content = $2
+
+      # Recursively scope the content inside the media query
+      scoped_content = scope_css_to_selector(media_content, scope_selector)
+
+      "#{media_declaration} {\n#{scoped_content}\n}"
+    else
+      rule
+    end
   end
 
 end

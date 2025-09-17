@@ -7,12 +7,15 @@ Rails.application.routes.draw do
   devise_for :users, controllers: {
     sessions: 'users/sessions',
     registrations: 'users/registrations',
-    passwords: 'users/passwords'
+    passwords: 'users/passwords',
+    omniauth_callbacks: 'users/omniauth_callbacks'
   }
   # Wrap the custom 2FA route in devise_scope
   devise_scope :user do
     get 'users/two_factor', to: 'users/sessions#two_factor', as: :two_factor
   end
+
+  resources :account_connections, only: [:destroy]
 
   # Admin routes - MUST come before wildcard routes
   namespace :admin do
@@ -64,6 +67,8 @@ Rails.application.routes.draw do
     # Theme pages routes
     get "/themes/:id/pages/new", to: 'themes#add_page', as: 'add_page'
     post "/themes/:id/pages", to: 'themes#create_pages', as: 'create_pages'
+    get "/themes/:id/css", to: 'themes#theme_css', as: 'theme_css'
+    post "/themes/:id/css/save", to: 'themes#theme_css_save', as: 'theme_css_save'
 
     get "/themes/:id/page/:theme_page_id", to: 'theme_pages#index', as: 'theme_page'
     get "/themes/:id/page/:theme_page_id/preview", to: 'theme_pages#preview', as: 'theme_page_preview'
@@ -175,12 +180,21 @@ Rails.application.routes.draw do
     post "/setup/retry-domain-purchase", to: "setup#retry_domain_purchase", as: "setup_retry_domain_purchase"
     match "/set-website-theme/:theme_id", to: "setup#set_website_theme", as: "set_website_theme", via: [:get, :post]
 
-    resource :account_settings, only: [:show, :update] do
+    resource :account_settings, only: [:show, :update], path: 'account-settings' do
       member do
         post :generate_2fa_secret
         post :enable_2fa
         patch :update_password
       end
+
+      patch '/update_email', to: 'account_settings#update_email', as: 'update_email'
+
+
+      get '/email-preferences', to: 'account_settings#email_preferences', as: 'email_preferences'
+      patch '/email_preferences/update', to: 'account_settings#update_email_preferences', as: 'update_email_preferences'
+
+      get '/privacy-preferences', to: 'account_settings#privacy_preferences', as: 'privacy_preferences'
+
     end
 
     # Settings

@@ -140,7 +140,7 @@
         <label for="account_email" class="nata-sans">Account Email</label>
         <div class="flex gap-4">
           <div class="w-4/5">
-            <div class="py-2 px-3 border bg-white rounded nata-sans">
+            <div id="email-display" class="py-2 px-3 border bg-white rounded nata-sans cursor-pointer hover:bg-gray-50 transition-colors">
               <%= @user.email %>
             </div>
           </div>
@@ -148,7 +148,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Check-Light--Streamline-Phosphor" height="14" width="14">
               <path d="M15.710975 3.20610625 5.4553125 13.46176875c-0.1876875 0.18745625 -0.49174375 0.18745625 -0.6794375 0L0.289025 8.9749125c-0.25228125 -0.27075 -0.11685625 -0.71306875 0.24375625 -0.796175 0.15560625 -0.0358625 0.31885625 0.00788125 0.43568125 0.1167375l4.14713125 4.14633125L15.0315375 2.52666875c0.27075 -0.25228125 0.713075 -0.1168625 0.796175 0.24375625 0.0358625 0.1556 -0.00788125 0.31885625 -0.1167375 0.43568125Z" stroke-width="0.0625"></path>
             </svg>
-            <p class=" nata-sans text-sm">Confirmed</p>
+            <p class="nata-sans text-sm">Confirmed</p>
           </div>
         </div>
       </div>
@@ -295,7 +295,7 @@
         <p class="nata-sans">Choose which type of emails you'd like to receive from us.</p>
       </div>
       <div class="flex justify-end w-1/5">
-        <button class="border py-2 px-4 rounded-full nata-sans text-sm text-blue-500">Manage Preferences</button>
+        <%= link_to 'Manage Preferences', email_preferences_manage_account_settings_path, class: 'border py-2 px-4 rounded-full nata-sans text-sm text-blue-500' %>
       </div>
     </div>
   </div>
@@ -318,7 +318,7 @@
         <p class="nata-sans">View and manage cookie and privacy preferences for your account. <span class="text-blue-500">Read More</span></p>
       </div>
       <div class="flex justify-end w-1/5">
-        <button class="border py-2 px-4 rounded-full nata-sans text-sm text-blue-500">Manage Preferences</button>
+        <%= link_to 'Manage Preferences', privacy_preferences_manage_account_settings_path, class: 'border py-2 px-4 rounded-full nata-sans text-sm text-blue-500' %>
       </div>
     </div>
   </div>
@@ -337,6 +337,83 @@
     </div>
   </div>
 
+</div>
+
+<div id="email-edit-popup" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 id="email-popup-title" class="text-lg font-semibold text-gray-900">Change Email Address</h3>
+          <button id="close-email-popup" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <form id="email-edit-form">
+          <div class="mb-4">
+            <label for="current-password-email" class="block text-sm font-medium text-gray-700 mb-2">
+              Current Password
+            </label>
+            <input
+              type="password"
+              id="current-password-email"
+              name="current_password"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter your current password..."
+              required>
+          </div>
+
+          <div class="mb-4">
+            <label for="new-email" class="block text-sm font-medium text-gray-700 mb-2">
+              New Email Address
+            </label>
+            <input
+              type="email"
+              id="new-email"
+              name="new_email"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter new email address..."
+              required>
+            <p class="text-xs text-gray-500 mt-1">You'll need to verify this email address</p>
+          </div>
+
+          <div class="mb-6">
+            <label for="confirm-email" class="block text-sm font-medium text-gray-700 mb-2">
+              Confirm New Email Address
+            </label>
+            <input
+              type="email"
+              id="confirm-email"
+              name="confirm_email"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Confirm new email address..."
+              required>
+            <div id="email-match-error" class="text-red-500 text-xs mt-1 hidden">
+              Email addresses do not match
+            </div>
+          </div>
+
+          <div class="flex justify-end space-x-3">
+            <button
+              type="button"
+              id="cancel-email-edit"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              id="save-email"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Update Email
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Password Edit Modal -->
@@ -581,7 +658,7 @@
     }
 
     function loadQRCode() {
-        fetch('/manage/account_settings/generate_2fa_secret', {
+        fetch('/manage/account-settings/generate_2fa_secret', {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -635,7 +712,7 @@
         formData.append('otp_attempt', code);
         formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
 
-        fetch('/manage/account_settings/enable_2fa', {
+        fetch('/manage/account-settings/enable_2fa', {
             method: 'POST',
             body: formData,
             headers: {
@@ -698,6 +775,132 @@
         const errorDiv = document.getElementById('verification-error');
         errorDiv.textContent = message;
         errorDiv.classList.remove('hidden');
+    }
+
+    // Email Modal Functions
+    function initializeEmailModal() {
+        const emailPopup = document.getElementById('email-edit-popup');
+        const emailDisplay = document.getElementById('email-display');
+        const closeEmailPopupBtn = document.getElementById('close-email-popup');
+        const cancelEmailEditBtn = document.getElementById('cancel-email-edit');
+        const emailEditForm = document.getElementById('email-edit-form');
+        const newEmailInput = document.getElementById('new-email');
+        const confirmEmailInput = document.getElementById('confirm-email');
+        const emailMatchError = document.getElementById('email-match-error');
+
+        // Open email popup when clicking on email display
+        emailDisplay.addEventListener('click', function(e) {
+            e.preventDefault();
+            emailPopup.classList.remove('hidden');
+            document.getElementById('current-password-email').focus();
+        });
+
+        function closeEmailPopup() {
+            emailPopup.classList.add('hidden');
+            emailEditForm.reset();
+            emailMatchError.classList.add('hidden');
+        }
+
+        closeEmailPopupBtn.addEventListener('click', closeEmailPopup);
+        cancelEmailEditBtn.addEventListener('click', closeEmailPopup);
+
+        // Close popup when clicking outside
+        emailPopup.addEventListener('click', function(e) {
+            if (e.target === emailPopup) {
+                closeEmailPopup();
+            }
+        });
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !emailPopup.classList.contains('hidden')) {
+                closeEmailPopup();
+            }
+        });
+
+        function validateEmailMatch() {
+            if (confirmEmailInput.value && newEmailInput.value !== confirmEmailInput.value) {
+                emailMatchError.classList.remove('hidden');
+                return false;
+            } else {
+                emailMatchError.classList.add('hidden');
+                return true;
+            }
+        }
+
+        // Validate email match on input
+        confirmEmailInput.addEventListener('input', validateEmailMatch);
+        newEmailInput.addEventListener('input', function() {
+            if (confirmEmailInput.value) {
+                validateEmailMatch();
+            }
+        });
+
+        // Handle form submission
+        emailEditForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!validateEmailMatch()) {
+                return;
+            }
+
+            const currentPassword = document.getElementById('current-password-email').value;
+            const newEmail = newEmailInput.value;
+            const confirmEmail = confirmEmailInput.value;
+
+            if (!currentPassword || !newEmail || !confirmEmail) {
+                showNotification('All fields are required', 'error');
+                return;
+            }
+
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(newEmail)) {
+                showNotification('Please enter a valid email address', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('current_password', currentPassword);
+            formData.append('new_email', newEmail);
+            formData.append('confirm_email', confirmEmail);
+            formData.append('authenticity_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            const saveBtn = document.getElementById('save-email');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Updating...';
+            saveBtn.disabled = true;
+
+            fetch('/manage/account-settings/update_email', {
+                method: 'PATCH',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeEmailPopup();
+                        showNotification('Email address updated successfully!', 'success');
+                        // Update the display email immediately
+                        if (data.new_email) {
+                            const emailDisplay = document.getElementById('email-display');
+                            emailDisplay.textContent = data.new_email;
+                        }
+                    } else {
+                        showNotification(data.message || 'Error updating email address', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error updating email address', 'error');
+                })
+                .finally(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                });
+        });
     }
 
     // Password Modal Functions
@@ -787,7 +990,7 @@
             saveBtn.textContent = 'Updating...';
             saveBtn.disabled = true;
 
-            fetch('/manage/account_settings/update_password', {
+            fetch('/manage/account-settings/update_password', {
                 method: 'PATCH',
                 body: formData,
                 headers: {
@@ -933,4 +1136,8 @@
             }
         }, 5000);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeEmailModal();
+    });
 </script>

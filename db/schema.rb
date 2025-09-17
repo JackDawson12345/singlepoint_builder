@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_16_133147) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_17_114939) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -165,6 +165,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_133147) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.json "settings"
+    t.text "global_css"
   end
 
   create_table "user_connections", force: :cascade do |t|
@@ -226,6 +227,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_133147) do
     t.integer "consumed_timestep"
     t.boolean "otp_required_for_login", default: false
     t.text "otp_backup_codes"
+    t.json "email_preferences", default: {"special_offers" => true, "contests_and_events" => true, "new_features_and_releases" => true, "tips_and_inspiration" => true}
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

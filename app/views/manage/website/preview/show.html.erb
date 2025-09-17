@@ -6,6 +6,9 @@
   %>
 
   <style>
+
+    <%= raw(current_user.website.theme.global_css) %>
+
     <% @page_data["components"].each do |component| %>
       <% foundComponent = Component.find(component["component_id"]) %>
       <% component_css = foundComponent.content['css'] %>

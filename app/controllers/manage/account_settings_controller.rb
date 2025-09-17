@@ -69,14 +69,76 @@ class Manage::AccountSettingsController < Manage::BaseController
     end
   end
 
+  def email_preferences
+
+  end
+
+  def update_email_preferences
+    preferences = params[:email_preferences] || {}
+
+    # Ensure all preferences are stored as booleans
+    processed_preferences = {}
+    %w[special_offers contests_and_events new_features_and_releases tips_and_inspiration].each do |pref|
+      processed_preferences[pref] = preferences[pref] == true || preferences[pref] == 'true'
+    end
+
+    if current_user.update(email_preferences: processed_preferences)
+      render json: { success: true, message: 'Email preferences updated successfully' }
+    else
+      render json: { success: false, errors: current_user.errors.full_messages }
+    end
+  end
+
+  def privacy_preferences
+
+  end
+
+  def update_email
+    unless current_user.valid_password?(params[:current_password])
+      render json: { success: false, message: 'Current password is incorrect' }
+      return
+    end
+
+    if params[:new_email] != params[:confirm_email]
+      render json: { success: false, message: 'Email addresses do not match' }
+      return
+    end
+
+    if User.exists?(email: params[:new_email])
+      render json: { success: false, message: 'This email address is already in use' }
+      return
+    end
+
+    if current_user.update(email: params[:new_email])
+      render json: {
+        success: true,
+        message: 'Email address updated successfully',
+        new_email: current_user.email
+      }
+    else
+      render json: {
+        success: false,
+        message: current_user.errors.full_messages.join(', ')
+      }
+    end
+  rescue StandardError => e
+    render json: { success: false, message: 'An error occurred while updating your email' }
+  end
+
   private
 
   def account_settings_params
     params.permit(:first_name, :last_name, :site_url_prefix, :account_language, :profile_image)
   end
 
+  def email_preferences_params
+    params.require(:email_preferences).permit(:special_offers, :contests_and_events,
+                                              :new_features_and_releases, :tips_and_inspiration)
+  end
+
+
   def build_qr_code
-    issuer = 'YourAppName' # Replace with your actual app name
+    issuer = 'SinglePoint' # Replace with your actual app name
     label = "#{issuer}:#{current_user.email}"
 
     qr_code = RQRCode::QRCode.new(current_user.otp_provisioning_uri(label, issuer: issuer))

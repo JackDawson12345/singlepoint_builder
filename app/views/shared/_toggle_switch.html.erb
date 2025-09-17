@@ -1,0 +1,21 @@
+<label class="relative inline-flex items-center cursor-pointer">
+  <input type="checkbox"
+         name="email_preferences[<%= preference %>]"
+         value="true"
+         class="sr-only peer preference-toggle"
+         data-preference="<%= preference %>"
+         <%= 'checked' if current_user.email_preferences.present? && current_user.email_preferences[preference.to_s] == true %>>
+  <div class="w-11 h-6 bg-gray-200 rounded-full peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:bg-blue-500 relative transition-colors duration-200">
+    <div class="absolute top-0.5 left-0.5 bg-white border border-gray-300 rounded-full h-5 w-5 transition-all duration-200 transform peer-checked:translate-x-full peer-checked:border-white"></div>
+  </div>
+</label>
+
+<style>
+    .preference-toggle:checked + div {
+        background-color: rgba(59,130,246,1) !important;
+    }
+    .preference-toggle:checked + div > div {
+        transform: translateX(100%) !important;
+        border-color: white !important;
+    }
+</style>

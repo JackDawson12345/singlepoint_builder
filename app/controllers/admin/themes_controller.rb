@@ -15,6 +15,23 @@ class Admin::ThemesController < Admin::BaseController
     end
   end
 
+  def theme_css
+    @theme = Theme.find(params[:id])
+
+  end
+
+  def theme_css_save
+    @theme = Theme.find(params[:id])
+    css_conent = params[:css]
+    @theme.global_css = css_conent
+
+    if @theme.save
+      redirect_to admin_theme_css_path(@theme), notice: 'CSS Saved'
+    else
+      redirect_to admin_theme_css_path(@theme), notice: 'CSS Not Saved'
+    end
+  end
+
   def add_page
     @theme = Theme.find(params[:id])
 
