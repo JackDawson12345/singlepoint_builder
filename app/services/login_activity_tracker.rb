@@ -55,7 +55,17 @@ class LoginActivityTracker
 
   def self.detect_operating_system(user_agent)
     # Try to get OS from the useragent gem first
-    return user_agent.os if user_agent.os.present?
+    os_from_gem = user_agent.os
+
+    if os_from_gem.present?
+      # Clean up common OS names
+      return 'macOS' if os_from_gem.match?(/OS X|Mac OS/i)
+      return 'Windows' if os_from_gem.match?(/Windows/i)
+      return 'iOS' if os_from_gem.match?(/iPhone OS|iOS/i)
+      return 'Android' if os_from_gem.match?(/Android/i)
+      return 'Linux' if os_from_gem.match?(/Linux/i)
+      return os_from_gem # Return as-is for other OS types
+    end
 
     # Fallback manual detection
     user_agent_string = user_agent.to_s.downcase
