@@ -1,198 +1,164 @@
-class User < ApplicationRecord
-  # Include default devise modules with omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable,
-         :omniauthable, omniauth_providers: [:google_oauth2, :facebook]
-  has_many :login_activities, dependent: :destroy
+# app/services/login_activity_tracker.rb
+class LoginActivityTracker
+  def self.track(user, request)
+    user_agent = UserAgent.parse(request.user_agent)
 
-  encrypts :first_address_line, :second_address_line, :town,
-           :county, :state_province, :postcode, :country
+    # Get location data from ipapi.com
+    location_data = get_location_data(request.remote_ip)
 
-  has_one :website, dependent: :destroy
-  has_one_attached :logo
-  has_one_attached :profile_image
-
-  has_many :notifications, dependent: :destroy
-
-  # Association
-  has_one :user_setup, dependent: :destroy
-
-  # OAuth connections
-  has_many :user_connections, dependent: :destroy
-
-  # Add backup codes for 2FA
-  serialize :otp_backup_codes, coder: JSON, type: Array
-
-  # Callback to create UserSetup after user is created
-  after_create :create_default_user_setup
-
-  # Add validation for profile image
-  validate :acceptable_profile_image
-
-  # OAuth class method
-  def self.from_omniauth(auth)
-    # First, try to find existing connection
-    connection = UserConnection.find_by(provider: auth.provider, uid: auth.uid)
-
-    if connection
-      return connection.user
-    end
-
-    # If no connection exists, try to find user by email
-    user = User.find_by(email: auth.info.email)
-
-    # If user doesn't exist, create new one
-    unless user
-      user = User.create!(
-        email: auth.info.email,
-        password: Devise.friendly_token[0, 20],
-        first_name: auth.info.first_name || auth.info.name&.split&.first || auth.info.email.split('@').first.humanize,
-        last_name: auth.info.last_name || auth.info.name&.split&.last
-      )
-    end
-
-    # Create the connection
-    user.user_connections.create!(
-      provider: auth.provider,
-      uid: auth.uid,
-      name: auth.info.name,
-      email: auth.info.email,
-      image: auth.info.image
+    login_activity = user.login_activities.create!(
+      ip_address: request.remote_ip,
+      user_agent: request.user_agent,
+      device: detect_device(user_agent),
+      browser: format_browser(user_agent),
+      operating_system: detect_operating_system(user_agent),
+      location: location_data[:location],
+      city: location_data[:city],
+      country: location_data[:country],
+      login_at: Time.current
     )
 
-    user
-  end
+    # Optional: Clean up old login activities (keep last 50)
+    cleanup_old_activities(user)
 
-  # OAuth helper methods
-  def connected_to?(provider)
-    user_connections.exists?(provider: provider)
-  end
-
-  def connection_for(provider)
-    user_connections.find_by(provider: provider)
-  end
-
-  def unread_notifications_count
-    notifications.unread.count
-  end
-
-  def get_name_from_email
-    email.split('@')[0]
-  end
-
-  def get_role
-    if role == 0
-      'Admin'
-    elsif role == 1
-      'Customer'
-    end
-  end
-
-  def account_setup_done
-    if user_setup.nil?
-      'Not Required'
-    else
-      if user_setup.payment_status == 'completed'
-        'Completed'
-      else
-        'Awaiting Payment'
-      end
-    end
-  end
-
-  def domain_name
-    if user_setup.nil?
-      'Not Required'
-    else
-      if user_setup.domain_name.nil?
-        'Awaiting Domain'
-      else
-        user_setup.domain_name
-      end
-    end
-  end
-
-  def is_ecommerce
-    user_setup.package_type == 'e-commerce'
-  end
-
-  # Add these helper methods for name handling
-  def full_name
-    "#{first_name} #{last_name}".strip if first_name.present? || last_name.present?
-  end
-
-  def display_name
-    full_name.present? ? full_name : get_name_from_email.humanize
-  end
-
-  # 2FA methods using ROTP
-  def otp_secret
-    return otp_secret_key if otp_secret_key.present?
-
-    # Generate new secret if none exists
-    secret = ROTP::Base32.random
-    update!(otp_secret_key: secret)
-    secret
-  end
-
-  # With this:
-  def otp_provisioning_uri(label, issuer:)
-    totp = ROTP::TOTP.new(otp_secret)
-    Rails.logger.info "ROTP TOTP methods: #{totp.method(:provisioning_uri).parameters}"
-    totp.provisioning_uri(label)
-  end
-
-  def validate_and_consume_otp!(token)
-    totp = ROTP::TOTP.new(otp_secret)
-    last_consumed = consumed_timestep || 0
-
-    # Verify the token and ensure it hasn't been used before
-    if totp.verify(token, drift_behind: 60, drift_ahead: 60, after: Time.at(last_consumed))
-      # Update the last consumed timestep to prevent replay attacks
-      self.consumed_timestep = Time.current.to_i
-      save!
-      return true
-    end
-
-    false
-  end
-
-  def invalidate_otp_backup_code!(code)
-    return false unless otp_backup_codes&.include?(code)
-
-    otp_backup_codes.delete(code)
-    save!
-    true
-  end
-
-  # Generate backup codes
-  def generate_two_factor_backup_codes!
-    codes = []
-    10.times do
-      codes << SecureRandom.hex(6)
-    end
-    self.otp_backup_codes = codes
-    save!
-    codes
+    login_activity
   end
 
   private
 
-  def create_default_user_setup
-    UserSetup.create!(user: self)
+  def self.detect_device(user_agent)
+    # Check for mobile first
+    return 'Mobile' if user_agent.mobile?
+
+    # Check for tablet by examining the user agent string
+    user_agent_string = user_agent.to_s.downcase
+
+    tablet_indicators = [
+      'ipad', 'tablet', 'kindle', 'silk/', 'playbook', 'bb10',
+      'rimtablet', 'android.*mobile.*safari', 'android(?!.*mobile)'
+    ]
+
+    tablet_indicators.each do |indicator|
+      if user_agent_string.match(/#{indicator}/i)
+        return 'Tablet'
+      end
+    end
+
+    # Special case for Android tablets (Android without "Mobile" in user agent)
+    if user_agent_string.include?('android') && !user_agent_string.include?('mobile')
+      return 'Tablet'
+    end
+
+    # Default to desktop
+    'Desktop'
   end
 
-  # Add profile image validation
-  def acceptable_profile_image
-    return unless profile_image.attached?
+  def self.detect_operating_system(user_agent)
+    # Try to get OS from the useragent gem first
+    return user_agent.os if user_agent.os.present?
 
-    unless profile_image.blob.byte_size <= 5.megabyte
-      errors.add(:profile_image, "is too big (should be at most 5MB)")
-    end
+    # Fallback manual detection
+    user_agent_string = user_agent.to_s.downcase
 
-    acceptable_types = ["image/jpeg", "image/jpg", "image/png", "image/gif"]
-    unless acceptable_types.include?(profile_image.blob.content_type)
-      errors.add(:profile_image, "must be a JPEG, JPG, PNG, or GIF")
+    return 'Windows' if user_agent_string.match?(/windows nt|win32|win64|wow64/)
+    return 'macOS' if user_agent_string.match?(/mac os x|macintosh/)
+    return 'iOS' if user_agent_string.match?(/iphone os|ipad/)
+    return 'Android' if user_agent_string.match?(/android/)
+    return 'Linux' if user_agent_string.match?(/linux|ubuntu|debian|fedora/)
+    return 'Chrome OS' if user_agent_string.match?(/cros/)
+
+    'Unknown'
+  end
+
+  def self.format_browser(user_agent)
+    if user_agent.browser.present? && user_agent.version.present?
+      "#{user_agent.browser} #{user_agent.version}"
+    elsif user_agent.browser.present?
+      user_agent.browser
+    else
+      'Unknown Browser'
     end
+  end
+
+  def self.get_location_data(ip_address)
+    return default_location_data if ip_address.blank? || local_ip?(ip_address)
+
+    begin
+      # Check cache first
+      cache_key = "geocode_#{ip_address}"
+      cached_result = Rails.cache.read(cache_key)
+
+      if cached_result
+        Rails.logger.info "Using cached location data for IP: #{ip_address}"
+        return cached_result
+      end
+
+      # Make API call
+      Rails.logger.info "Fetching location data for IP: #{ip_address}"
+      result = Geocoder.search(ip_address).first
+
+      if result
+        city = result.city
+        region = result.region
+        country = result.country
+
+        location_data = {
+          location: [city, region, country].compact.join(', '),
+          city: city || 'Unknown',
+          country: country || 'Unknown'
+        }
+
+        # Cache for 30 days
+        Rails.cache.write(cache_key, location_data, expires_in: 30.days)
+
+        Rails.logger.info "Successfully geocoded IP #{ip_address}: #{location_data[:location]}"
+        return location_data
+      else
+        Rails.logger.warn "No geocoding result returned for IP: #{ip_address}"
+        return default_location_data
+      end
+
+    rescue => e
+      Rails.logger.error "Geocoding error for IP #{ip_address}: #{e.message}"
+      return default_location_data
+    end
+  end
+
+
+
+  def self.local_ip?(ip_address)
+    return true if ip_address.blank?
+
+    # IPv4 localhost and private ranges
+    return true if ['127.0.0.1', 'localhost'].include?(ip_address)
+    return true if ip_address.match(/^192\.168\./)
+    return true if ip_address.match(/^10\./)
+    return true if ip_address.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)
+
+    # IPv6 localhost and private ranges
+    return true if ['::1', '0:0:0:0:0:0:0:1'].include?(ip_address)
+    return true if ip_address.match(/^fe80:/i)  # Link-local
+    return true if ip_address.match(/^fc00:/i)  # Unique local
+    return true if ip_address.match(/^fd00:/i)  # Unique local
+
+    false
+  end
+
+  def self.default_location_data
+    {
+      location: 'Local Development',
+      city: 'Local',
+      country: 'Development'
+    }
+  end
+
+  def self.cleanup_old_activities(user)
+    return unless user.login_activities.count > 50
+
+    old_activities = user.login_activities
+                         .order(login_at: :desc)
+                         .offset(50)
+
+    LoginActivity.where(id: old_activities.select(:id)).delete_all
   end
 end

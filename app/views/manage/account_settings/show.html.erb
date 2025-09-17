@@ -340,7 +340,7 @@
             </svg>
           </div>
           <div>
-            <p class="text-sm font-medium text-gray-900"><%= latest_login.location_display %></p>
+            <p class="text-sm font-medium text-gray-900"><%= latest_login.user.get_address_from_ip(latest_login.ip_address) %></p>
             <p class="text-xs text-gray-500">IP: <%= latest_login.ip_address %></p>
           </div>
         </div>

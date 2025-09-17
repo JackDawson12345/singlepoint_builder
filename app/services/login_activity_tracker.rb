@@ -10,7 +10,8 @@ class LoginActivityTracker
       ip_address: request.remote_ip,
       user_agent: request.user_agent,
       device: detect_device(user_agent),
-      browser: "#{user_agent.browser} #{user_agent.version}",
+      browser: format_browser(user_agent),
+      operating_system: detect_operating_system(user_agent),
       location: location_data[:location],
       city: location_data[:city],
       country: location_data[:country],
@@ -50,6 +51,33 @@ class LoginActivityTracker
 
     # Default to desktop
     'Desktop'
+  end
+
+  def self.detect_operating_system(user_agent)
+    # Try to get OS from the useragent gem first
+    return user_agent.os if user_agent.os.present?
+
+    # Fallback manual detection
+    user_agent_string = user_agent.to_s.downcase
+
+    return 'Windows' if user_agent_string.match?(/windows nt|win32|win64|wow64/)
+    return 'macOS' if user_agent_string.match?(/mac os x|macintosh/)
+    return 'iOS' if user_agent_string.match?(/iphone os|ipad/)
+    return 'Android' if user_agent_string.match?(/android/)
+    return 'Linux' if user_agent_string.match?(/linux|ubuntu|debian|fedora/)
+    return 'Chrome OS' if user_agent_string.match?(/cros/)
+
+    'Unknown'
+  end
+
+  def self.format_browser(user_agent)
+    if user_agent.browser.present? && user_agent.version.present?
+      "#{user_agent.browser} #{user_agent.version}"
+    elsif user_agent.browser.present?
+      user_agent.browser
+    else
+      'Unknown Browser'
+    end
   end
 
   def self.get_location_data(ip_address)
@@ -167,9 +195,9 @@ class LoginActivityTracker
 
   def self.default_location_data
     {
-      location: 'Local/Unknown',
-      city: 'Unknown',
-      country: 'Unknown'
+      location: 'Local Development',
+      city: 'Local',
+      country: 'Development'
     }
   end
 
