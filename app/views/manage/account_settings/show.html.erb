@@ -305,7 +305,73 @@
       <h2 class="nata-sans text-lg font-semibold">Login Activity</h2>
     </div>
     <div class="py-4 px-6 flex gap-4">
+      <% if current_user.login_activities.any? %>
+        <% latest_login = current_user.login_activities.recent.first %>
 
+        <!-- Device Info -->
+        <div class="flex items-center gap-2">
+          <div class="p-2 bg-blue-100 rounded-full">
+            <% case latest_login.device.downcase %>
+            <% when 'mobile' %>
+              <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zM6 4a1 1 0 011-1h6a1 1 0 011 1v10a1 1 0 01-1 1H7a1 1 0 01-1-1V4z" clip-rule="evenodd"/>
+              </svg>
+            <% when 'tablet' %>
+              <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zM5 4a1 1 0 011-1h8a1 1 0 011 1v10a1 1 0 01-1 1H6a1 1 0 01-1-1V4z" clip-rule="evenodd"/>
+              </svg>
+            <% else %>
+              <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clip-rule="evenodd"/>
+              </svg>
+            <% end %>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900"><%= latest_login.device %></p>
+            <p class="text-xs text-gray-500"><%= latest_login.browser %></p>
+          </div>
+        </div>
+
+        <!-- Location Info -->
+        <div class="flex items-center gap-2">
+          <div class="p-2 bg-green-100 rounded-full">
+            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900"><%= latest_login.location_display %></p>
+            <p class="text-xs text-gray-500">IP: <%= latest_login.ip_address %></p>
+          </div>
+        </div>
+
+        <!-- Date/Time Info -->
+        <div class="flex items-center gap-2">
+          <div class="p-2 bg-purple-100 rounded-full">
+            <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-900">Last Login</p>
+            <p class="text-xs text-gray-500">
+              <%= time_ago_in_words(latest_login.login_at) %> ago
+            </p>
+            <p class="text-xs text-gray-400">
+              <%= latest_login.login_at.strftime("%b %d, %Y at %I:%M %p") %>
+            </p>
+          </div>
+        </div>
+
+      <% else %>
+        <!-- No login activity yet -->
+        <div class="flex items-center gap-2 text-gray-500">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-sm">No login activity recorded yet</span>
+        </div>
+      <% end %>
     </div>
   </div>
 

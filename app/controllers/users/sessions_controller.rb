@@ -1,6 +1,7 @@
 # app/controllers/users/sessions_controller.rb
 class Users::SessionsController < Devise::SessionsController
   prepend_before_action :authenticate_with_two_factor, if: :two_factor_enabled?, only: [:create]
+  after_action :track_login_activity, only: [:create]
 
   layout 'frontend'
 
@@ -73,5 +74,11 @@ class Users::SessionsController < Devise::SessionsController
 
   def user_params
     params.require(:user).permit(:email, :password, :otp_attempt, :remember_me)
+  end
+
+  def track_login_activity
+    return unless user_signed_in?
+
+    LoginActivityTracker.track(current_user, request)
   end
 end

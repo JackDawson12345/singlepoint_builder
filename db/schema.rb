@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_17_114939) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_17_135032) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,6 +52,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_17_114939) do
     t.json "template_patterns"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "login_activities", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "ip_address"
+    t.text "user_agent"
+    t.string "location"
+    t.string "device"
+    t.string "browser"
+    t.datetime "login_at"
+    t.string "city"
+    t.string "country"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_login_activities_on_user_id"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -254,6 +269,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_17_114939) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "login_activities", "users"
   add_foreign_key "notifications", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id"
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id"

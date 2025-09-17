@@ -3,6 +3,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
          :omniauthable, omniauth_providers: [:google_oauth2, :facebook]
+  has_many :login_activities, dependent: :destroy
 
   encrypts :first_address_line, :second_address_line, :town,
            :county, :state_province, :postcode, :country
