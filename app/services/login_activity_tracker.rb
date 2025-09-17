@@ -56,8 +56,8 @@ class LoginActivityTracker
     return default_location_data if ip_address.blank? || local_ip?(ip_address)
 
     begin
-      # Check cache first (ipapi.com has 1000 requests/month limit)
-      cache_key = "ipapi_#{ip_address}"
+      # Check cache first
+      cache_key = "geocode_#{ip_address}"
       cached_result = Rails.cache.read(cache_key)
 
       if cached_result
@@ -65,18 +65,23 @@ class LoginActivityTracker
         return cached_result
       end
 
-      # Make API call to ipapi.com
-      Rails.logger.info "Fetching location data from ipapi.com for IP: #{ip_address}"
+      # Make API call
+      Rails.logger.info "Fetching location data for IP: #{ip_address}"
       result = Geocoder.search(ip_address).first
 
-      if result && result.city.present?
+      if result && (result.city.present? || result.country.present?)
+        city = result.city.presence || 'Unknown'
+        region = result.region.presence
+        country_code = result.country.presence
+        country_name = convert_country_code_to_name(country_code)
+
         location_data = {
-          location: format_location(result),
-          city: result.city || 'Unknown',
-          country: result.country || 'Unknown'
+          location: format_location(city, region, country_name),
+          city: city,
+          country: country_name
         }
 
-        # Cache for 30 days (since IP locations don't change often)
+        # Cache for 30 days
         Rails.cache.write(cache_key, location_data, expires_in: 30.days)
 
         Rails.logger.info "Successfully geocoded IP #{ip_address}: #{location_data[:location]}"
@@ -86,22 +91,60 @@ class LoginActivityTracker
         return default_location_data
       end
 
-    rescue Geocoder::OverQueryLimitError => e
-      Rails.logger.error "ipapi.com quota exceeded: #{e.message}"
-      return default_location_data
     rescue => e
       Rails.logger.error "Geocoding error for IP #{ip_address}: #{e.message}"
       return default_location_data
     end
   end
 
-  def self.format_location(result)
+  def self.format_location(city, region, country)
     parts = []
-    parts << result.city if result.city.present?
-    parts << result.state if result.state.present? && result.state != result.city
-    parts << result.country if result.country.present?
+    parts << city if city.present? && city != 'Unknown'
+    parts << region if region.present? && region != city
+    parts << country if country.present? && country != 'Unknown'
 
     parts.any? ? parts.join(', ') : 'Unknown'
+  end
+
+  def self.convert_country_code_to_name(country_code)
+    return 'Unknown' if country_code.blank?
+
+    # Common country codes mapping
+    country_codes = {
+      'GB' => 'United Kingdom',
+      'US' => 'United States',
+      'CA' => 'Canada',
+      'AU' => 'Australia',
+      'DE' => 'Germany',
+      'FR' => 'France',
+      'IT' => 'Italy',
+      'ES' => 'Spain',
+      'NL' => 'Netherlands',
+      'BE' => 'Belgium',
+      'CH' => 'Switzerland',
+      'AT' => 'Austria',
+      'SE' => 'Sweden',
+      'NO' => 'Norway',
+      'DK' => 'Denmark',
+      'FI' => 'Finland',
+      'IE' => 'Ireland',
+      'PT' => 'Portugal',
+      'PL' => 'Poland',
+      'CZ' => 'Czech Republic',
+      'HU' => 'Hungary',
+      'GR' => 'Greece',
+      'JP' => 'Japan',
+      'KR' => 'South Korea',
+      'CN' => 'China',
+      'IN' => 'India',
+      'BR' => 'Brazil',
+      'MX' => 'Mexico',
+      'RU' => 'Russia',
+      'TR' => 'Turkey'
+      # Add more as needed
+    }
+
+    country_codes[country_code.upcase] || country_code.upcase
   end
 
   def self.local_ip?(ip_address)
