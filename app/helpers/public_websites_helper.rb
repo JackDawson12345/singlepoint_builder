@@ -19,7 +19,7 @@ module PublicWebsitesHelper
 
     if updated_content.include?('{{nav_items}}')
       unless component.template_patterns == ""
-        nav_items_html = render_navbar_items(component, user)
+        nav_items_html = render_show_navbar_items(component, user)
         updated_content = updated_content.gsub!('{{nav_items}}', nav_items_html)
       end
     end
@@ -155,7 +155,7 @@ module PublicWebsitesHelper
   end
 
 
-  def render_navbar_items(component, user)
+  def render_show_navbar_items(component, user)
     # Handle both Hash and JSON string formats
     if component.template_patterns.is_a?(Hash)
       nav_template = component.template_patterns["nav_items"]
