@@ -99,6 +99,20 @@ module PublicWebsitesHelper
     updated_content
   end
 
+  def render_theme_css(user_id)
+    user = User.find(user_id)
+    theme = user.website.theme
+    global_css = user.website.theme.global_css
+
+    if global_css.include?('{{primary_colour}}')
+      global_css = global_css.gsub('{{primary_colour}}', user.website.settings['Colour Scheme']['primary_colour'])
+    end
+    if global_css.include?('{{secondary_colour}}')
+      global_css = global_css.gsub('{{secondary_colour}}', user.website.settings['Colour Scheme']['secondary_colour'])
+    end
+
+  end
+
   def render_show_css(component, user_id)
     componentCSS = component.content['css']
     updated_css_content = componentCSS
