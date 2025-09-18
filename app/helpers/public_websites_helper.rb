@@ -19,7 +19,7 @@ module PublicWebsitesHelper
 
     if updated_content.include?('{{nav_items}}')
       unless component.template_patterns == ""
-        nav_items_html = render_show_navbar_items(component, user_id)
+        nav_items_html = render_navbar_items(component, user_id)
         updated_content = updated_content.gsub!('{{nav_items}}', nav_items_html)
       end
     end
