@@ -19,7 +19,7 @@ module PublicWebsitesHelper
 
     if updated_content.include?('{{nav_items}}')
       unless component.template_patterns == ""
-        nav_items_html = render_navbar_items(component, user_id)
+        nav_items_html = render_navbar_items(component, user)
         updated_content = updated_content.gsub!('{{nav_items}}', nav_items_html)
       end
     end
@@ -141,7 +141,7 @@ module PublicWebsitesHelper
   end
 
 
-  def render_navbar_items(component)
+  def render_navbar_items(component, user)
     # Handle both Hash and JSON string formats
     if component.template_patterns.is_a?(Hash)
       nav_template = component.template_patterns["nav_items"]
@@ -165,7 +165,7 @@ module PublicWebsitesHelper
     # Return empty string if no template found
     return "" unless nav_template
 
-    current_user.website.pages["theme_pages"].sort_by { |name, data| data['position'].to_i }.map do |page_name, page_data|
+    user.website.pages["theme_pages"].sort_by { |name, data| data['position'].to_i }.map do |page_name, page_data|
       page_name_str = page_name.to_s
       page_slug = page_data['slug'].to_s
 
