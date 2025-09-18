@@ -324,42 +324,42 @@ module PublicWebsitesHelper
     raw_template
   end
 
-  def render_global_changes(user_id, component, updated_content)
+  def render_global_changes(user, component, updated_content)
     if updated_content.include?('{{global_logo}}')
-      if current_user.logo.attached?
-        logo_url = current_user.logo.attached? ? url_for(current_user.logo) : ''
+      if user.logo.attached?
+        logo_url = user.logo.attached? ? url_for(user.logo) : ''
         updated_content = updated_content.gsub('{{global_logo}}', logo_url)
       else
         updated_content = updated_content.gsub('{{global_logo}}', component.editable_fields['global_logo'])
       end
     end
     if updated_content.include?('{{global_phone}}')
-      if current_user['business_info']['phone'].nil?
+      if user['business_info']['phone'].nil?
         updated_content = updated_content.gsub('{{global_phone}}', component.editable_fields['global_phone'])
       else
-        updated_content = updated_content.gsub('{{global_phone}}', current_user['business_info']['phone'])
+        updated_content = updated_content.gsub('{{global_phone}}', user['business_info']['phone'])
       end
     end
     if updated_content.include?('{{global_email}}')
-      if current_user['business_info']['email'].nil?
+      if user['business_info']['email'].nil?
         updated_content = updated_content.gsub('{{global_email}}', component.editable_fields['global_email'])
       else
-        updated_content = updated_content.gsub('{{global_email}}', current_user['business_info']['email'])
+        updated_content = updated_content.gsub('{{global_email}}', user['business_info']['email'])
       end
     end
     if updated_content.include?('{{global_address}}')
-      if current_user['business_info']['location']['location_name'].nil?
+      if user['business_info']['location']['location_name'].nil?
         updated_content = updated_content.gsub('{{global_address}}', component.editable_fields['global_address'])
       else
-        updated_content = updated_content.gsub('{{global_address}}', current_user['business_info']['location']['location_name'])
+        updated_content = updated_content.gsub('{{global_address}}', user['business_info']['location']['location_name'])
       end
     end
 
     if updated_content.include?('{{social_medias}}')
-      if current_user['business_info']['social_media'].nil?
+      if user['business_info']['social_media'].nil?
         updated_content = updated_content.gsub('{{global_address}}', component.editable_fields['global_address'])
       else
-        social_media_html = render_social_media_items(component)
+        social_media_html = render_social_media_items(component, user)
         updated_content = updated_content.gsub!('{{social_medias}}', social_media_html)
       end
     end
@@ -367,7 +367,7 @@ module PublicWebsitesHelper
     updated_content
   end
 
-  def render_social_media_items(component)
+  def render_social_media_items(component, user)
     if component.template_patterns.is_a?(Hash)
       social_template = component.template_patterns["social_medias"]
     elsif component.template_patterns.is_a?(String)
@@ -390,7 +390,7 @@ module PublicWebsitesHelper
     # Return empty string if no template found
     return "" unless social_template
 
-    current_user['business_info']['social_media'].map do |name, data|
+    user['business_info']['social_media'].map do |name, data|
 
       # Create a copy of the template for this iteration
       item_html = social_template.dup
