@@ -6,6 +6,8 @@ module PublicWebsitesHelper
 
     user = User.find(user_id)
 
+    updated_content = render_global_changes(user, component, updated_content)
+
     unless component.editable_fields == ""
       # Get customisations if user_id and theme_page_id are provided
       field_values = get_show_component_field_values(component, user_id, theme_page_id, component_page_id)
@@ -138,37 +140,51 @@ module PublicWebsitesHelper
     field_values
   end
 
-  def render_show_navbar_items(component, user_id)
-    raw_template = component.template_patterns
 
-    # Extract the HTML template from the malformed JSON manually
-    # Look for the pattern between the first \" after "nav_items": and the last \"
-    if match = raw_template.match(/"nav_items":\s*"(.+)"\s*}/)
-      # Unescape the basic escapes but keep the template placeholders
-      nav_template = match[1].gsub('\\"', '"')
+  def render_navbar_items(component)
+    # Handle both Hash and JSON string formats
+    if component.template_patterns.is_a?(Hash)
+      nav_template = component.template_patterns["nav_items"]
+    elsif component.template_patterns.is_a?(String)
+      # Parse JSON string and extract nav_items
+      begin
+        parsed_patterns = JSON.parse(component.template_patterns)
+        nav_template = parsed_patterns["nav_items"]
+      rescue JSON::ParserError
+        # Fallback to regex if JSON parsing fails
+        if match = component.template_patterns.match(/"nav_items":\s*"(.+)"\s*}/)
+          nav_template = match[1].gsub('\\"', '"')
+        else
+          nav_template = nil
+        end
+      end
     else
-      # Fallback to the whole string if pattern doesn't match
-      nav_template = raw_template
+      nav_template = nil
     end
 
-    user = User.find(user_id)
+    # Return empty string if no template found
+    return "" unless nav_template
 
-    user.website.pages["theme_pages"].map do |page_name, page_data|
-      pageName = page_name.to_s
-      pageSlug = page_data['slug'].to_s
+    current_user.website.pages["theme_pages"].sort_by { |name, data| data['position'].to_i }.map do |page_name, page_data|
+      page_name_str = page_name.to_s
+      page_slug = page_data['slug'].to_s
 
+      # Create a copy of the template for this iteration
       item_html = nav_template.dup
 
-      # Replace nav_item with page_type
-      item_html.gsub!('{{nav_item}}', pageName)
+      # Replace nav_item placeholder
+      item_html.gsub!('{{nav_item}}', page_name_str)
 
-      if pageSlug == '/'
+      # Build the link based on controller
+      if page_slug == '/'
         link = '/'
       else
-        link = '/' + pageSlug
+        link = '/' + page_slug
       end
 
+      # Replace nav_item_link placeholder
       item_html.gsub!('{{nav_item_link}}', link)
+
       item_html
     end.join("\n")
   end
@@ -306,5 +322,84 @@ module PublicWebsitesHelper
     end
 
     raw_template
+  end
+
+  def render_global_changes(user_id, component, updated_content)
+    if updated_content.include?('{{global_logo}}')
+      if current_user.logo.attached?
+        logo_url = current_user.logo.attached? ? url_for(current_user.logo) : ''
+        updated_content = updated_content.gsub('{{global_logo}}', logo_url)
+      else
+        updated_content = updated_content.gsub('{{global_logo}}', component.editable_fields['global_logo'])
+      end
+    end
+    if updated_content.include?('{{global_phone}}')
+      if current_user['business_info']['phone'].nil?
+        updated_content = updated_content.gsub('{{global_phone}}', component.editable_fields['global_phone'])
+      else
+        updated_content = updated_content.gsub('{{global_phone}}', current_user['business_info']['phone'])
+      end
+    end
+    if updated_content.include?('{{global_email}}')
+      if current_user['business_info']['email'].nil?
+        updated_content = updated_content.gsub('{{global_email}}', component.editable_fields['global_email'])
+      else
+        updated_content = updated_content.gsub('{{global_email}}', current_user['business_info']['email'])
+      end
+    end
+    if updated_content.include?('{{global_address}}')
+      if current_user['business_info']['location']['location_name'].nil?
+        updated_content = updated_content.gsub('{{global_address}}', component.editable_fields['global_address'])
+      else
+        updated_content = updated_content.gsub('{{global_address}}', current_user['business_info']['location']['location_name'])
+      end
+    end
+
+    if updated_content.include?('{{social_medias}}')
+      if current_user['business_info']['social_media'].nil?
+        updated_content = updated_content.gsub('{{global_address}}', component.editable_fields['global_address'])
+      else
+        social_media_html = render_social_media_items(component)
+        updated_content = updated_content.gsub!('{{social_medias}}', social_media_html)
+      end
+    end
+
+    updated_content
+  end
+
+  def render_social_media_items(component)
+    if component.template_patterns.is_a?(Hash)
+      social_template = component.template_patterns["social_medias"]
+    elsif component.template_patterns.is_a?(String)
+      # Parse JSON string and extract social_medias
+      begin
+        parsed_patterns = JSON.parse(component.template_patterns)
+        social_template = parsed_patterns["social_medias"]
+      rescue JSON::ParserError
+        # Fallback to regex if JSON parsing fails
+        if match = component.template_patterns.match(/"social_medias":\s*"(.+)"\s*}/)
+          social_template = match[1].gsub('\\"', '"')
+        else
+          social_template = nil
+        end
+      end
+    else
+      social_template = nil
+    end
+
+    # Return empty string if no template found
+    return "" unless social_template
+
+    current_user['business_info']['social_media'].map do |name, data|
+
+      # Create a copy of the template for this iteration
+      item_html = social_template.dup
+
+      # Replace nav_item placeholder
+      item_html.gsub!('{{social_icon}}', '<i class="' + data['icon'] + '"></i>')
+      item_html.gsub!('{{social_link}}', data['link'])
+
+      item_html
+    end.join("\n")
   end
 end
