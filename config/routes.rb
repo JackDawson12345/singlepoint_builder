@@ -229,6 +229,7 @@ Rails.application.routes.draw do
         patch '/business-info/update-business-info', to: 'business_info#update_business_info', as: 'update_business_info'
         patch '/business-info/update-business-location', to: 'business_info#update_business_location', as: 'update_business_location'
         patch '/business-info/update-business-contact', to: 'business_info#update_business_contact', as: 'update_business_contact'
+        patch '/business-info/update-social-media', to: 'business_info#update_social_media', as: 'update_social_media'
       end
       get "/", to: "home#index", as: "settings"
     end

@@ -7,7 +7,7 @@
 
   <style>
 
-    <%= raw(current_user.website.theme.global_css) %>
+    <%= raw(render_preview_theme_css(current_user.id)) %>
 
     <% @page_data["components"].each do |component| %>
       <% foundComponent = Component.find(component["component_id"]) %>

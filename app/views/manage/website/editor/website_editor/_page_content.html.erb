@@ -10,7 +10,7 @@
   <div data-theme-page-id="<%= @page_data['theme_page_id'] %>" data-user-id="<%= current_user.id %>">
 
     <style>
-      <%= raw(scope_css_to_selector(current_user.website.theme.global_css, '.page-content-section')) %>
+      <%= raw(scope_css_to_selector(render_editor_theme_css(current_user.id), '.page-content-section')) %>
 
       <% @page_data["components"].each do |component| %>
       <% foundComponent = Component.find(component["component_id"]) %>

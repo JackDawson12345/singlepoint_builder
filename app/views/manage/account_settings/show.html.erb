@@ -115,23 +115,59 @@
         <h2 class="nata-sans text-lg font-semibold">Account Security</h2>
       </div>
       <div class="py-4 px-6 space-y-3">
-        <div class="flex justify-between items-center">
-          <span class="nata-sans text-sm">Connected Accounts</span>
-          <span class="nata-sans text-sm font-semibold"><%= current_user.user_connections.count %></span>
+
+        <div class="flex gap-2">
+          <div class="mt-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="fill-blue-500" id="Check-Circle-Light--Streamline-Phosphor" height="20" width="20">
+              <path d="M11.40040625 5.82939375c0.17983125 0.18005625 0.17983125 0.47174375 0 0.6518l-4.3043125 4.3043125c-0.18005625 0.17983125 -0.47174375 0.17983125 -0.65179375 0l-1.84470625 -1.84470625c-0.242025 -0.259725 -0.11213125 -0.68405625 0.2338125 -0.76379375 0.14928125 -0.03440625 0.30590625 0.00755625 0.41798125 0.112l1.51880625 1.5180375 3.97841875 -3.97765c0.18005625 -0.179825 0.47174375 -0.179825 0.65179375 0ZM15.84 8c0 6.0352375 -6.53333125 9.80725625 -11.76 6.7896375 -5.22666875 -3.01761875 -5.22666875 -10.5616625 0 -13.579275C5.27193125 0.5222 6.623675 0.1599375 8 0.16c4.32780625 0.00508125 7.83491875 3.51219375 7.84 7.84Zm-0.92235625 0c0 -5.32520625 -5.7647 -8.6534625 -10.37646875 -5.99085625 -4.6117625 2.6626 -4.6117625 9.3191125 0 11.9817125 1.05170625 0.60720625 2.24441875 0.92684375 3.458825 0.9267875C11.81875 14.91340625 14.9134125 11.81875 14.91764375 8Z" stroke-width="0.0625"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="nata-sans m-0 text-base font-semibold">Confirm email</p>
+            <p class="nata-sans m-0 text-sm">Your email is confirmed</p>
+            <a href="#change-email" class="nata-sans m-0 text-sm text-blue-500 cursor-pointer">Change</a>
+          </div>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="nata-sans text-sm">Two-Factor Auth</span>
-          <% if current_user.otp_required_for_login %>
-            <span class="nata-sans text-sm font-semibold text-green-600">Enabled</span>
-          <% else %>
-            <span class="nata-sans text-sm font-semibold text-red-600">Disabled</span>
-          <% end %>
+        <div class="flex gap-2">
+          <div class="mt-1.5">
+            <% if current_user.otp_required_for_login %>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="fill-blue-500" id="Check-Circle-Light--Streamline-Phosphor" height="20" width="20">
+                <path d="M11.40040625 5.82939375c0.17983125 0.18005625 0.17983125 0.47174375 0 0.6518l-4.3043125 4.3043125c-0.18005625 0.17983125 -0.47174375 0.17983125 -0.65179375 0l-1.84470625 -1.84470625c-0.242025 -0.259725 -0.11213125 -0.68405625 0.2338125 -0.76379375 0.14928125 -0.03440625 0.30590625 0.00755625 0.41798125 0.112l1.51880625 1.5180375 3.97841875 -3.97765c0.18005625 -0.179825 0.47174375 -0.179825 0.65179375 0ZM15.84 8c0 6.0352375 -6.53333125 9.80725625 -11.76 6.7896375 -5.22666875 -3.01761875 -5.22666875 -10.5616625 0 -13.579275C5.27193125 0.5222 6.623675 0.1599375 8 0.16c4.32780625 0.00508125 7.83491875 3.51219375 7.84 7.84Zm-0.92235625 0c0 -5.32520625 -5.7647 -8.6534625 -10.37646875 -5.99085625 -4.6117625 2.6626 -4.6117625 9.3191125 0 11.9817125 1.05170625 0.60720625 2.24441875 0.92684375 3.458825 0.9267875C11.81875 14.91340625 14.9134125 11.81875 14.91764375 8Z" stroke-width="0.0625"></path>
+              </svg>
+            <% else %>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Check-Circle-Light--Streamline-Phosphor" height="20" width="20">
+                <path d="M11.40040625 5.82939375c0.17983125 0.18005625 0.17983125 0.47174375 0 0.6518l-4.3043125 4.3043125c-0.18005625 0.17983125 -0.47174375 0.17983125 -0.65179375 0l-1.84470625 -1.84470625c-0.242025 -0.259725 -0.11213125 -0.68405625 0.2338125 -0.76379375 0.14928125 -0.03440625 0.30590625 0.00755625 0.41798125 0.112l1.51880625 1.5180375 3.97841875 -3.97765c0.18005625 -0.179825 0.47174375 -0.179825 0.65179375 0ZM15.84 8c0 6.0352375 -6.53333125 9.80725625 -11.76 6.7896375 -5.22666875 -3.01761875 -5.22666875 -10.5616625 0 -13.579275C5.27193125 0.5222 6.623675 0.1599375 8 0.16c4.32780625 0.00508125 7.83491875 3.51219375 7.84 7.84Zm-0.92235625 0c0 -5.32520625 -5.7647 -8.6534625 -10.37646875 -5.99085625 -4.6117625 2.6626 -4.6117625 9.3191125 0 11.9817125 1.05170625 0.60720625 2.24441875 0.92684375 3.458825 0.9267875C11.81875 14.91340625 14.9134125 11.81875 14.91764375 8Z" stroke-width="0.0625"></path>
+              </svg>
+            <% end %>
+          </div>
+          <div>
+            <p class="nata-sans m-0 text-base font-semibold">2-step verification</p>
+            <p class="nata-sans m-0 text-sm">Protect your Wix account with an extra layer of security.</p>
+            <% if current_user.otp_required_for_login %>
+              <p class="nata-sans m-0 text-sm text-blue-500">Enabled</p>
+            <% else %>
+              <a href="#enable-2fa-link" class="nata-sans m-0 text-sm text-blue-500 cursor-pointer">Enable</a>
+            <% end %>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <div class="mt-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="fill-blue-500" id="Check-Circle-Light--Streamline-Phosphor" height="20" width="20">
+              <path d="M11.40040625 5.82939375c0.17983125 0.18005625 0.17983125 0.47174375 0 0.6518l-4.3043125 4.3043125c-0.18005625 0.17983125 -0.47174375 0.17983125 -0.65179375 0l-1.84470625 -1.84470625c-0.242025 -0.259725 -0.11213125 -0.68405625 0.2338125 -0.76379375 0.14928125 -0.03440625 0.30590625 0.00755625 0.41798125 0.112l1.51880625 1.5180375 3.97841875 -3.97765c0.18005625 -0.179825 0.47174375 -0.179825 0.65179375 0ZM15.84 8c0 6.0352375 -6.53333125 9.80725625 -11.76 6.7896375 -5.22666875 -3.01761875 -5.22666875 -10.5616625 0 -13.579275C5.27193125 0.5222 6.623675 0.1599375 8 0.16c4.32780625 0.00508125 7.83491875 3.51219375 7.84 7.84Zm-0.92235625 0c0 -5.32520625 -5.7647 -8.6534625 -10.37646875 -5.99085625 -4.6117625 2.6626 -4.6117625 9.3191125 0 11.9817125 1.05170625 0.60720625 2.24441875 0.92684375 3.458825 0.9267875C11.81875 14.91340625 14.9134125 11.81875 14.91764375 8Z" stroke-width="0.0625"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="nata-sans m-0 text-base font-semibold">Recent login</p>
+            <% recent_login = current_user.login_activities.order(login_at: :desc).first %>
+            <p class="nata-sans m-0 text-sm"><%= recent_login.operating_system %> , <%= recent_login.browser_display %><br><%= recent_login.login_at.strftime("%a %e, %Y, %I:%M%p") %> <br><%= recent_login.location %></p>
+            <a href="#login-activity-table" class="nata-sans m-0 text-sm text-blue-500">See Recent Logins</a>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="w-full bg-gray-50 rounded-lg">
+  <div class="w-full bg-gray-50 rounded-lg" id="change-email">
     <div class="py-4 px-6 border-b">
       <h2 class="nata-sans text-lg font-semibold">Login Info</h2>
     </div>
@@ -168,7 +204,7 @@
     </div>
   </div>
 
-  <div class="w-full bg-gray-50 rounded-lg">
+  <div class="w-full bg-gray-50 rounded-lg" id="enable-2fa-link">
     <div class="py-4 px-6 border-b">
       <h2 class="nata-sans text-lg font-semibold">2-Step Verification</h2>
       <p>Protect your SinglePoint account  by adding an extra layer of security when you log in with an email and password.</p>
@@ -300,78 +336,96 @@
     </div>
   </div>
 
-  <div class="w-full bg-gray-50 rounded-lg">
+  <div class="bg-gray-50 rounded-lg">
     <div class="py-4 px-6 border-b">
       <h2 class="nata-sans text-lg font-semibold">Login Activity</h2>
+      <p class="nata-sans text-sm font-normal">Check when and where you’ve logged in to your account.</p>
     </div>
-    <div class="py-4 px-6 flex gap-4">
-      <% if current_user.login_activities.any? %>
-        <% latest_login = current_user.login_activities.recent.first %>
+    <div class="">
+      <div class="">
+        <table id="login-activity-table" class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-blue-100 border-blue-300 border-t border-b">
+          <tr class="">
+            <th class="pl-6 pr-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+              Device
+            </th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+              <div class="inline-flex gap-2 items-center">
+                Location
+              </div>
+            </th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+              <div class="inline-flex gap-2 items-center">
+                Date
+              </div>
+            </th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+              <div class="inline-flex gap-2 items-center">
+                Browser
+              </div>
+            </th>
+            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+              <div class="inline-flex gap-2 items-center">
 
-        <!-- Device Info -->
-        <div class="flex items-center gap-2">
-          <div class="p-2 bg-blue-100 rounded-full">
-            <% case latest_login.device.downcase %>
-            <% when 'mobile' %>
-              <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zM6 4a1 1 0 011-1h6a1 1 0 011 1v10a1 1 0 01-1 1H7a1 1 0 01-1-1V4z" clip-rule="evenodd"/>
-              </svg>
-            <% when 'tablet' %>
-              <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zM5 4a1 1 0 011-1h8a1 1 0 011 1v10a1 1 0 01-1 1H6a1 1 0 01-1-1V4z" clip-rule="evenodd"/>
-              </svg>
-            <% else %>
-              <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clip-rule="evenodd"/>
-              </svg>
+              </div>
+            </th>
+          </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% current_user.login_activities.order(login_at: :desc).each_with_index do |login_activity, index| %>
+              <tr class="hover:bg-blue-50 bg-gray-50 login-page-row">
+              <td class="pr-3 pl-6 py-5 whitespace-nowrap text-sm font-medium text-gray-900 uppercase">
+                <div class="flex gap-2">
+                  <% if login_activity.device == 'Desktop' %>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Desktop-Tower-Light--Streamline-Phosphor" height="24" width="24">
+                      <path d="M13.375 4.5a0.375 0.375 0 0 1 -0.375 0.375h-2a0.375 0.375 0 0 1 0 -0.75h2a0.375 0.375 0 0 1 0.375 0.375Zm-0.375 1.625h-2a0.375 0.375 0 0 0 0 0.75h2a0.375 0.375 0 0 0 0 -0.75Zm2.375 -3.125v10a0.875 0.875 0 0 1 -0.875 0.875h-5a0.875 0.875 0 0 1 -0.875 -0.875v-1.125H5.875v1.25h1.125a0.375 0.375 0 0 1 0 0.75H4a0.375 0.375 0 0 1 0 -0.75h1.125v-1.25H2a1.375 1.375 0 0 1 -1.375 -1.375V6a1.375 1.375 0 0 1 1.375 -1.375h6.625V3a0.875 0.875 0 0 1 0.875 -0.875h5a0.875 0.875 0 0 1 0.875 0.875ZM8.625 11.125V5.375H2a0.625 0.625 0 0 0 -0.625 0.625v4.5a0.625 0.625 0 0 0 0.625 0.625Zm6 -8.125a0.125 0.125 0 0 0 -0.125 -0.125h-5a0.125 0.125 0 0 0 -0.125 0.125v10a0.125 0.125 0 0 0 0.125 0.125h5a0.125 0.125 0 0 0 0.125 -0.125Zm-2.625 7.625a0.625 0.625 0 1 0 0.625 0.625 0.625 0.625 0 0 0 -0.625 -0.625Z" stroke-width="0.0625"></path>
+                    </svg>
+                  <% elsif login_activity.device == 'Desktop' %>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Device-Tablet-Camera-Light--Streamline-Phosphor" height="24" width="24">
+                      <path d="M12.9192125 0.16H3.08078125c-0.9339 0 -1.690975 0.757075 -1.690975 1.69098125v12.2980375c0 0.93390625 0.757075 1.69098125 1.690975 1.69098125h9.83843125c0.93390625 0 1.69098125 -0.757075 1.69098125 -1.69098125V1.85098125c0 -0.93390625 -0.757075 -1.69098125 -1.69098125 -1.69098125Zm0.76863125 13.98901875c0 0.4245 -0.344125 0.768625 -0.76863125 0.768625H3.08078125c-0.4245 0 -0.768625 -0.344125 -0.768625 -0.768625V1.85098125c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h9.83843125c0.42450625 0 0.76863125 0.34413125 0.76863125 0.76863125ZM8.768625 3.3882375c0 0.5916875 -0.64051875 0.96149375 -1.1529375 0.66565 -0.51241875 -0.29584375 -0.51241875 -1.03545625 0 -1.3313 0.11684375 -0.0674625 0.2493875 -0.10298125 0.3843125 -0.10298125 0.4245 0 0.768625 0.344125 0.768625 0.76863125Z" stroke-width="0.0625"></path>
+                    </svg>
+                  <% elsif login_activity.device == 'Desktop' %>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Device-Mobile-Speaker-Light--Streamline-Phosphor" height="24" width="24">
+                      <path d="M11 1.125H5a1.375 1.375 0 0 0 -1.375 1.375v11a1.375 1.375 0 0 0 1.375 1.375h6a1.375 1.375 0 0 0 1.375 -1.375V2.5a1.375 1.375 0 0 0 -1.375 -1.375Zm0.625 12.375a0.625 0.625 0 0 1 -0.625 0.625H5a0.625 0.625 0 0 1 -0.625 -0.625V2.5a0.625 0.625 0 0 1 0.625 -0.625h6a0.625 0.625 0 0 1 0.625 0.625ZM10.375 3.5a0.375 0.375 0 0 1 -0.375 0.375H6a0.375 0.375 0 0 1 0 -0.75h4a0.375 0.375 0 0 1 0.375 0.375Z" stroke-width="0.0625"></path>
+                    </svg>
+                  <% end %>
+                  <p class="nata-sans font-bold"><%= login_activity.operating_system %></p>
+                </div>
+              </td>
+              <td class="px-3 py-5 whitespace-nowrap text-sm text-gray-500">
+                <p class="nata-sans"><%= login_activity.location %></p>
+              </td>
+              <td class="px-3 whitespace-nowrap text-sm text-gray-500">
+                <% if index == 0 %>
+                  <p class="nata-sans font-bold">Current Session</p>
+                <% else %>
+                  <p class="nata-sans"><%= login_activity.login_at.strftime("%a %e, %Y, %I:%M%p") %></p>
+                <% end %>
+
+              </td>
+              <td class="px-3 text-sm text-gray-500">
+                <%= login_activity.browser_display %>
+              </td>
+              <td class="pl-3 pr-6 text-sm text-gray-500 w-3/10">
+                <% unless index == 0 %>
+                  <div class="flex justify-end w-full login-page-not-you">
+                    <div class="small-button h-8 w-8 border rounded-full flex items-center justify-center">
+                      <svg style="transform: rotate(270deg)" class="w-4 h-4 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </div>
+                    <div class="large-button hidden h-8 border rounded-full px-3 flex items-center justify-center bg-blue-500">
+                      <p class="nata-sans font-bold text-white text-sm">Not You?</p>
+                    </div>
+                  </div>
+                <% end %>
+
+              </td>
+            </tr>
             <% end %>
-          </div>
-          <div>
-            <p class="text-sm font-medium text-gray-900"><%= latest_login.device %></p>
-            <p class="text-xs text-gray-500"><%= latest_login.browser %></p>
-          </div>
-        </div>
-
-        <!-- Location Info -->
-        <div class="flex items-center gap-2">
-          <div class="p-2 bg-green-100 rounded-full">
-            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-sm font-medium text-gray-900"><%= latest_login.user.get_address_from_ip(latest_login.ip_address) %></p>
-            <p class="text-xs text-gray-500">IP: <%= latest_login.ip_address %></p>
-          </div>
-        </div>
-
-        <!-- Date/Time Info -->
-        <div class="flex items-center gap-2">
-          <div class="p-2 bg-purple-100 rounded-full">
-            <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-sm font-medium text-gray-900">Last Login</p>
-            <p class="text-xs text-gray-500">
-              <%= time_ago_in_words(latest_login.login_at) %> ago
-            </p>
-            <p class="text-xs text-gray-400">
-              <%= latest_login.login_at.strftime("%b %d, %Y at %I:%M %p") %>
-            </p>
-          </div>
-        </div>
-
-      <% else %>
-        <!-- No login activity yet -->
-        <div class="flex items-center gap-2 text-gray-500">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-          </svg>
-          <span class="text-sm">No login activity recorded yet</span>
-        </div>
-      <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -477,6 +531,45 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Security Alert Modal -->
+<div id="security-alert-popup" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 nata-sans">Don't recognize the device?</h3>
+          <button id="close-security-popup" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="mb-6">
+          <p class="nata-sans text-gray-700 mb-4">
+            If this isn't you, change your account password. This will log out all devices. This can take up to 15 minutes.
+          </p>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+          <button
+            type="button"
+            id="cancel-security-alert"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 nata-sans">
+            Cancel
+          </button>
+          <button
+            type="button"
+            id="change-password-from-security"
+            class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 nata-sans">
+            Change Account Password
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1206,4 +1299,90 @@
     document.addEventListener('DOMContentLoaded', function() {
         initializeEmailModal();
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const securityPopup = document.getElementById('security-alert-popup');
+        const closeSecurityPopupBtn = document.getElementById('close-security-popup');
+        const cancelSecurityAlertBtn = document.getElementById('cancel-security-alert');
+        const changePasswordFromSecurityBtn = document.getElementById('change-password-from-security');
+        const passwordPopup = document.getElementById('password-edit-popup');
+
+        // Add click handlers to all "Not You?" buttons
+        const notYouButtons = document.querySelectorAll('.login-page-not-you .large-button');
+
+        notYouButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openSecurityAlert();
+            });
+        });
+
+        function openSecurityAlert() {
+            securityPopup.classList.remove('hidden');
+        }
+
+        function closeSecurityAlert() {
+            securityPopup.classList.add('hidden');
+        }
+
+        // Close popup handlers
+        closeSecurityPopupBtn.addEventListener('click', closeSecurityAlert);
+        cancelSecurityAlertBtn.addEventListener('click', closeSecurityAlert);
+
+        // Close popup when clicking outside
+        securityPopup.addEventListener('click', function(e) {
+            if (e.target === securityPopup) {
+                closeSecurityAlert();
+            }
+        });
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !securityPopup.classList.contains('hidden')) {
+                closeSecurityAlert();
+            }
+        });
+
+        // Handle "Change Account Password" button click
+        changePasswordFromSecurityBtn.addEventListener('click', function() {
+            // Close security popup
+            closeSecurityAlert();
+
+            // Open password change popup
+            if (passwordPopup) {
+                passwordPopup.classList.remove('hidden');
+                // Focus on current password field
+                const currentPasswordField = document.getElementById('current-password');
+                if (currentPasswordField) {
+                    currentPasswordField.focus();
+                }
+            }
+        });
+
+        // Enhanced hover functionality for "Not You?" buttons
+        const loginRows = document.querySelectorAll('.login-page-not-you');
+
+        loginRows.forEach(row => {
+            const smallButton = row.querySelector('.small-button');
+            const largeButton = row.querySelector('.large-button');
+            let hoverTimeout;
+
+            if (smallButton && largeButton) {
+                row.addEventListener('mouseenter', function() {
+                    clearTimeout(hoverTimeout);
+                    smallButton.classList.add('hidden');
+                    largeButton.classList.remove('hidden');
+                });
+
+                row.addEventListener('mouseleave', function() {
+                    hoverTimeout = setTimeout(() => {
+                        smallButton.classList.remove('hidden');
+                        largeButton.classList.add('hidden');
+                    }, 100); // Small delay to prevent flickering
+                });
+            }
+        });
+    });
+
 </script>

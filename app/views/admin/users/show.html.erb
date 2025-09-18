@@ -1,14 +1,14 @@
-<!-- app/views/admin/users/new.html.erb -->
+<!-- app/views/admin/users/show.html.erb -->
 <div class="min-h-screen">
   <div class="">
-    <% content_for :title, "New User" %>
+    <% content_for :title, "Show User" %>
 
     <!-- Header Section -->
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="nata-sans page-title">Show User</h1>
-          <p class="nata-sans font-normal text-base">Build and configure a new reusable component for your application.</p>
+          <p class="nata-sans font-normal text-base">View user details and payment information.</p>
         </div>
 
         <!-- Breadcrumb -->
@@ -28,10 +28,13 @@
       </div>
     </div>
 
-    <!-- Form Section -->
-    <div class="bg-white overflow-hidden">
-      <div class="">
-        <div class="">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <!-- User Details Section -->
+      <div class="bg-white rounded-lg shadow-sm border">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="nata-sans text-lg font-semibold text-gray-900">User Details</h2>
+        </div>
+        <div class="p-6">
           <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-b border-gray-100">
               <div class="md:col-span-1">
@@ -94,15 +97,164 @@
             </div>
           </div>
         </div>
-        <div class="pt-4 flex gap-3">
-          <%= link_to 'Edit User', admin_edit_user_path(@user), class: "nata-sans flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200 font-medium text-center" %>
-          <%= link_to 'Change Password', admin_edit_password_path(@user), class: "nata-sans flex-1 bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200 font-medium text-center" %>
-          <%= link_to 'Setup User', admin_user_setup_path(@user), class: "nata-sans flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200 font-medium text-center" %>
-          <%= link_to 'Back to Users', admin_users_path, class: "nata-sans flex-1 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200 font-medium text-center" %>
+      </div>
+
+      <!-- Invoice/Payment Section -->
+      <div class="bg-white rounded-lg shadow-sm border">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="nata-sans text-lg font-semibold text-gray-900">Payment Information</h2>
+        </div>
+        <div class="p-6">
+          <% if @payment_intent.present? %>
+            <div class="space-y-4">
+              <!-- Payment Status -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-b border-gray-100">
+                <div class="md:col-span-1">
+                  <span class="nata-sans text-sm font-medium text-gray-600">Payment Status:</span>
+                </div>
+                <div class="md:col-span-2">
+                  <% case @payment_intent.status %>
+                  <% when 'succeeded' %>
+                    <span class="nata-sans inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                      </svg>
+                      Succeeded
+                    </span>
+                  <% when 'requires_payment_method' %>
+                    <span class="nata-sans inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending Payment</span>
+                  <% when 'canceled' %>
+                    <span class="nata-sans inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Canceled</span>
+                  <% else %>
+                    <span class="nata-sans inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"><%= @payment_intent.status.humanize %></span>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Payment ID -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-b border-gray-100">
+                <div class="md:col-span-1">
+                  <span class="nata-sans text-sm font-medium text-gray-600">Payment ID:</span>
+                </div>
+                <div class="md:col-span-2">
+                  <span class="nata-sans text-sm font-mono text-gray-900"><%= @payment_intent.id %></span>
+                </div>
+              </div>
+
+              <!-- Amount -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-b border-gray-100">
+                <div class="md:col-span-1">
+                  <span class="nata-sans text-sm font-medium text-gray-600">Amount:</span>
+                </div>
+                <div class="md:col-span-2">
+                  <span class="nata-sans text-sm font-semibold text-gray-900">
+                    £<%= number_with_delimiter((@payment_intent.amount / 100.0), delimiter: ',') %>
+                    <span class="text-gray-500 font-normal uppercase"><%= @payment_intent.currency %></span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Payment Date -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-b border-gray-100">
+                <div class="md:col-span-1">
+                  <span class="nata-sans text-sm font-medium text-gray-600">Payment Date:</span>
+                </div>
+                <div class="md:col-span-2">
+                  <span class="nata-sans text-sm text-gray-900">
+                    <%= Time.at(@payment_intent.created).strftime("%B %d, %Y at %I:%M %p") %>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Package Details from Metadata -->
+              <% if @payment_intent.metadata.present? %>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-b border-gray-100">
+                  <div class="md:col-span-1">
+                    <span class="nata-sans text-sm font-medium text-gray-600">Package Type:</span>
+                  </div>
+                  <div class="md:col-span-2">
+                    <span class="nata-sans text-sm text-gray-900">
+                      <%= @payment_intent.metadata['package_type']&.humanize || '-' %>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-b border-gray-100">
+                  <div class="md:col-span-1">
+                    <span class="nata-sans text-sm font-medium text-gray-600">Payment Type:</span>
+                  </div>
+                  <div class="md:col-span-2">
+                    <% payment_type = @payment_intent.metadata['payment_type'] %>
+                    <% if @payment_intent.metadata['is_deposit'] == 'true' %>
+                      <span class="nata-sans inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Deposit Payment</span>
+                    <% else %>
+                      <span class="nata-sans inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"><%= payment_type %></span>
+                    <% end %>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-b border-gray-100">
+                  <div class="md:col-span-1">
+                    <span class="nata-sans text-sm font-medium text-gray-600">Support Option:</span>
+                  </div>
+                  <div class="md:col-span-2">
+                    <span class="nata-sans text-sm text-gray-900">
+                      <%= @payment_intent.metadata['support_option'] || '-' %>
+                    </span>
+                  </div>
+                </div>
+
+                <% if @payment_intent.metadata['base_price_pounds'].present? %>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-b border-gray-100">
+                    <div class="md:col-span-1">
+                      <span class="nata-sans text-sm font-medium text-gray-600">Base Price:</span>
+                    </div>
+                    <div class="md:col-span-2">
+                      <span class="nata-sans text-sm text-gray-900">
+                        £<%= number_with_delimiter(@payment_intent.metadata['base_price_pounds'].to_f, delimiter: ',') %>
+                      </span>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+
+              <!-- Payment Methods -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 py-3">
+                <div class="md:col-span-1">
+                  <span class="nata-sans text-sm font-medium text-gray-600">Payment Methods:</span>
+                </div>
+                <div class="md:col-span-2">
+                  <div class="flex flex-wrap gap-1">
+                    <% @payment_intent.payment_method_types.each do |method| %>
+                      <span class="nata-sans inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                        <%= method.humanize %>
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <div class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <h3 class="nata-sans mt-2 text-sm font-medium text-gray-900">No Payment Information</h3>
+              <p class="nata-sans mt-1 text-sm text-gray-500">This user doesn't have any payment records.</p>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>
 
-
+    <!-- Action Buttons -->
+    <div class="mt-8 bg-white rounded-lg shadow-sm border p-6">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <%= link_to 'Edit User', admin_edit_user_path(@user), class: "nata-sans flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 font-medium text-center" %>
+        <%= link_to 'Change Password', admin_edit_password_path(@user), class: "nata-sans flex-1 bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200 font-medium text-center" %>
+        <%= link_to 'Setup User', admin_user_setup_path(@user), class: "nata-sans flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200 font-medium text-center" %>
+        <%= link_to 'Back to Users', admin_users_path, class: "nata-sans flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200 font-medium text-center" %>
+      </div>
+    </div>
   </div>
 </div>

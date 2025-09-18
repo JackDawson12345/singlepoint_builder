@@ -4,6 +4,8 @@ module Manage::Editor::WebsiteEditorHelper
     componentHTML = component.content['html']
     updated_content = componentHTML
 
+    updated_content = render_global_changes(current_user, component, updated_content)
+
     unless component.editable_fields == ""
       # Get customisations if user_id and theme_page_id are provided
       field_values = get_component_field_values(component, user_id, theme_page_id, component_page_id)
@@ -131,6 +133,20 @@ module Manage::Editor::WebsiteEditorHelper
     updated_css_content
   end
 
+  def render_editor_theme_css(user_id)
+    user = User.find(user_id)
+    theme = user.website.theme
+    global_css = user.website.theme.global_css
+
+    if global_css.include?('{{primary_colour}}')
+      global_css = global_css.gsub('{{primary_colour}}', user.website.settings['Colour Scheme']['primary_colour'])
+    end
+    if global_css.include?('{{secondary_colour}}')
+      global_css = global_css.gsub('{{secondary_colour}}', user.website.settings['Colour Scheme']['secondary_colour'])
+    end
+
+  end
+
   def render_preview_css(component, user_id)
     componentCSS = component.content['css']
     updated_css_content = componentCSS
@@ -151,9 +167,25 @@ module Manage::Editor::WebsiteEditorHelper
     updated_css_content
   end
 
+  def render_preview_theme_css(user_id)
+    user = User.find(user_id)
+    theme = user.website.theme
+    global_css = user.website.theme.global_css
+
+    if global_css.include?('{{primary_colour}}')
+      global_css = global_css.gsub('{{primary_colour}}', user.website.settings['Colour Scheme']['primary_colour'])
+    end
+    if global_css.include?('{{secondary_colour}}')
+      global_css = global_css.gsub('{{secondary_colour}}', user.website.settings['Colour Scheme']['secondary_colour'])
+    end
+
+  end
+
   def render_preview_content(component, user_id = nil, theme_page_id = nil, component_page_id)
     componentHTML = component.content['html']
     updated_content = componentHTML
+
+    updated_content = render_global_changes(current_user, component, updated_content)
 
     unless component.editable_fields == ""
       # Get customisations if user_id and theme_page_id are provided
@@ -323,42 +355,49 @@ module Manage::Editor::WebsiteEditorHelper
   end
 
   def render_navbar_items(component)
-    raw_template = component.template_patterns
-
-    # Extract the HTML template from the malformed JSON manually
-    # Look for the pattern between the first \" after "nav_items": and the last \"
-    if match = raw_template.match(/"nav_items":\s*"(.+)"\s*}/)
-      # Unescape the basic escapes but keep the template placeholders
-      nav_template = match[1].gsub('\\"', '"')
-    else
-      # Fallback to the whole string if pattern doesn't match
-      nav_template = raw_template
-    end
-
-    current_user.website.pages["theme_pages"].sort_by { |name, data| data['position'].to_i }.map do |page_name, page_data|
-      pageName = page_name.to_s
-      pageSlug = page_data['slug'].to_s
-
-      item_html = nav_template.dup
-
-      # Replace nav_item with page_type
-      item_html.gsub!('{{nav_item}}', pageName)
-
-      if controller_name == "preview"
-        if pageSlug == '/'
-          link = '/manage/website/preview/'
+    # Handle both Hash and JSON string formats
+    if component.template_patterns.is_a?(Hash)
+      nav_template = component.template_patterns["nav_items"]
+    elsif component.template_patterns.is_a?(String)
+      # Parse JSON string and extract nav_items
+      begin
+        parsed_patterns = JSON.parse(component.template_patterns)
+        nav_template = parsed_patterns["nav_items"]
+      rescue JSON::ParserError
+        # Fallback to regex if JSON parsing fails
+        if match = component.template_patterns.match(/"nav_items":\s*"(.+)"\s*}/)
+          nav_template = match[1].gsub('\\"', '"')
         else
-          link = '/manage/website/preview/' + pageSlug
-        end
-      elsif controller_name == "website_editor"
-        if pageSlug == '/'
-          link = '/manage/website/editor/'
-        else
-          link = '/manage/website/editor/' + pageSlug
+          nav_template = nil
         end
       end
+    else
+      nav_template = nil
+    end
 
+    # Return empty string if no template found
+    return "" unless nav_template
+
+    current_user.website.pages["theme_pages"].sort_by { |name, data| data['position'].to_i }.map do |page_name, page_data|
+      page_name_str = page_name.to_s
+      page_slug = page_data['slug'].to_s
+
+      # Create a copy of the template for this iteration
+      item_html = nav_template.dup
+
+      # Replace nav_item placeholder
+      item_html.gsub!('{{nav_item}}', page_name_str)
+
+      # Build the link based on controller
+      if controller_name == "preview"
+        link = page_slug == '/' ? '/manage/website/preview/' : '/manage/website/preview/' + page_slug
+      elsif controller_name == "website_editor"
+        link = page_slug == '/' ? '/manage/website/editor/' : '/manage/website/editor/' + page_slug
+      end
+
+      # Replace nav_item_link placeholder
       item_html.gsub!('{{nav_item_link}}', link)
+
       item_html
     end.join("\n")
   end
@@ -569,6 +608,85 @@ module Manage::Editor::WebsiteEditorHelper
     else
       rule
     end
+  end
+
+  def render_global_changes(user_id, component, updated_content)
+    if updated_content.include?('{{global_logo}}')
+      if current_user.logo.attached?
+        logo_url = current_user.logo.attached? ? url_for(current_user.logo) : ''
+        updated_content = updated_content.gsub('{{global_logo}}', logo_url)
+      else
+        updated_content = updated_content.gsub('{{global_logo}}', component.editable_fields['global_logo'])
+      end
+    end
+    if updated_content.include?('{{global_phone}}')
+      if current_user['business_info']['phone'].nil?
+        updated_content = updated_content.gsub('{{global_phone}}', component.editable_fields['global_phone'])
+      else
+        updated_content = updated_content.gsub('{{global_phone}}', current_user['business_info']['phone'])
+      end
+    end
+    if updated_content.include?('{{global_email}}')
+      if current_user['business_info']['email'].nil?
+        updated_content = updated_content.gsub('{{global_email}}', component.editable_fields['global_email'])
+      else
+        updated_content = updated_content.gsub('{{global_email}}', current_user['business_info']['email'])
+      end
+    end
+    if updated_content.include?('{{global_address}}')
+      if current_user['business_info']['location']['location_name'].nil?
+        updated_content = updated_content.gsub('{{global_address}}', component.editable_fields['global_address'])
+      else
+        updated_content = updated_content.gsub('{{global_address}}', current_user['business_info']['location']['location_name'])
+      end
+    end
+
+    if updated_content.include?('{{social_medias}}')
+      if current_user['business_info']['social_media'].nil?
+        updated_content = updated_content.gsub('{{global_address}}', component.editable_fields['global_address'])
+      else
+        social_media_html = render_social_media_items(component)
+        updated_content = updated_content.gsub!('{{social_medias}}', social_media_html)
+      end
+    end
+
+    updated_content
+  end
+
+  def render_social_media_items(component)
+    if component.template_patterns.is_a?(Hash)
+      social_template = component.template_patterns["social_medias"]
+    elsif component.template_patterns.is_a?(String)
+      # Parse JSON string and extract social_medias
+      begin
+        parsed_patterns = JSON.parse(component.template_patterns)
+        social_template = parsed_patterns["social_medias"]
+      rescue JSON::ParserError
+        # Fallback to regex if JSON parsing fails
+        if match = component.template_patterns.match(/"social_medias":\s*"(.+)"\s*}/)
+          social_template = match[1].gsub('\\"', '"')
+        else
+          social_template = nil
+        end
+      end
+    else
+      social_template = nil
+    end
+
+    # Return empty string if no template found
+    return "" unless social_template
+
+    current_user['business_info']['social_media'].map do |name, data|
+
+      # Create a copy of the template for this iteration
+      item_html = social_template.dup
+
+      # Replace nav_item placeholder
+      item_html.gsub!('{{social_icon}}', '<i class="' + data['icon'] + '"></i>')
+      item_html.gsub!('{{social_link}}', data['link'])
+
+      item_html
+    end.join("\n")
   end
 
 end

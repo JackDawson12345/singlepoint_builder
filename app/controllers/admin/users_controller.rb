@@ -6,6 +6,9 @@ class Admin::UsersController < Admin::BaseController
   end
 
   def show
+    user = User.find(params[:id])
+    @payment_intent = get_stripe_details(user)
+
   end
 
   def new
@@ -103,6 +106,10 @@ class Admin::UsersController < Admin::BaseController
 
   def user_setup_params
     params.require(:user).permit(:domain_name, :package_type, :support_option, :payment_status)
+  end
+
+  def get_stripe_details(user)
+    @payment_intent = Stripe::PaymentIntent.retrieve(user.user_setup.stripe_payment_intent_id)
   end
 
 end

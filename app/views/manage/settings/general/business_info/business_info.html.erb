@@ -1,246 +1,526 @@
-<div>
-  <%= render 'manage/settings/settings_header', page_name: "Business Info", subpage_name: nil, subpage_path: nil, page_description: nil %>
+<%= render 'manage/settings/settings_header', page_name: "Business Info", subpage_name: nil, subpage_path: nil, page_description: nil %>
 
-  <div class="space-y-5">
+<div class="space-y-5">
 
-    <div class="bg-gray-50 rounded-lg">
-      <div class="py-4 px-6 border-b">
-        <h2 class="nata-sans text-lg font-semibold">Profile</h2>
-        <p class="nata-sans text-sm font-normal">Your profile is what people will see on search results, invoices, chat and more.</p>
-      </div>
-      <div class="py-4 px-6">
-        <%= form_with url: manage_settings_general_update_business_info_path, method: :patch, local: false, class: "w-full flex flex-col gap-5", id: "business-info-form" do |form| %>
-          <div class="flex gap-5">
-            <div class="w-1/2">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :name, class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :name,
-                                  placeholder: "Site name",
-                                  value: current_user.business_info['name'],
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitForm()" %>
+  <div class="bg-gray-50 rounded-lg">
+    <div class="py-4 px-6 border-b">
+      <h2 class="nata-sans text-lg font-semibold">Profile</h2>
+      <p class="nata-sans text-sm font-normal">Your profile is what people will see on search results, invoices, chat and more.</p>
+    </div>
+    <div class="py-4 px-6">
+      <%= form_with url: manage_settings_general_update_business_info_path, method: :patch, local: false, class: "w-full flex flex-col gap-5", id: "business-info-form" do |form| %>
+        <div class="flex gap-5">
+          <div class="w-1/2">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :name, class: 'h-5 nata-sans lh-5'%>
             </div>
-            <div class="w-1/2">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :category, 'Which category best matches your business', class: 'h-5 nata-sans lh-5'%>
-                <%= render 'shared/help_prompt', help_text: "Your business type will help us suggest features and tools to fit your needs." %>
-              </div>
-              <%= form.select :category,
-                              options_for_select(business_info_categories.map { |type| [type, type] }, current_user.business_info&.dig('category')),
-                              { prompt: 'Select category' },
-                              { class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                onchange: "submitForm()" } %>
-            </div>
-          </div>
-          <div class="flex gap-5">
-            <div class="w-1/2">
-              <p>Logo</p>
-              <div class="flex gap-3">
-                <div class="w-4/10">
-                  <div class="bg-blue-50 p-2">
-                    <div class="border border-dashed border-blue-300 h-30 flex items-center justify-center">
-                      <% if current_user.logo.attached? %>
-                        <%= image_tag current_user.logo, alt: "Business Logo", class: "w-25 h-25 object-contain" %>
-                      <% else %>
-                        <svg class="fill-blue-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Plus--Streamline-Phosphor" height="30" width="30">
-                          <path d="M15.84 8c0 0.3608125 -0.29251875 0.65331875 -0.65333125 0.65333125H8.65333125v6.5333375c0 0.50293125 -0.54444375 0.81726875 -0.98 0.5658 -0.2021375 -0.11670625 -0.3266625 -0.3323875 -0.3266625 -0.5658V8.65333125H0.81333125c-0.50293125 0 -0.81726875 -0.54444375 -0.5658 -0.98 0.1167125 -0.20215 0.33238125 -0.326675 0.5658 -0.3266625h6.5333375V0.81333125c0 -0.50293125 0.54444375 -0.81726875 0.98 -0.5658 0.2021375 0.11670625 0.3266625 0.3323875 0.3266625 0.5658v6.5333375h6.5333375c0.3608125 0.0000125 0.65333125 0.29251875 0.65333125 0.65333125Z" stroke-width="0.0625"></path>
-                        </svg>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
-                <div class="w-6/10 space-y-4">
-                  <p class="nata-sans text-sm">For best results, use a high resolution, square image (1:1) 100 x 100 px min.</p>
-                  <button type="button" onclick="triggerFileUpload()" class="border rounded-full py-2 px-5 nata-sans text-sm text-blue-500 font-semibold">Upload Images</button>
-                  <%= form.file_field :logo,
-                                      id: "logo_input",
-                                      accept: "image/*",
-                                      class: "hidden",
-                                      onchange: "submitFormWithFile();" %>
-                </div>
-              </div>
-            </div>
-            <div class="w-1/2">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :short_description, 'Short Description (150 chars)', class: 'h-5 nata-sans lh-5'%>
-                <%= render 'shared/help_prompt', help_text: "Describe your site or business in a sentence or two, it will help visitors coming from search results to better understand what you do." %>
-              </div>
-              <%= form.textarea :short_description,
-                                placeholder: "Brief description of your site",
-                                value: current_user.business_info['short_description'],
-                                rows: 5,
+            <%= form.text_field :name,
+                                placeholder: "Site name",
+                                value: current_user.business_info['name'],
                                 class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
                                 onblur: "submitForm()" %>
+          </div>
+          <div class="w-1/2">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :category, 'Which category best matches your business', class: 'h-5 nata-sans lh-5'%>
+              <%= render 'shared/help_prompt', help_text: "Your business type will help us suggest features and tools to fit your needs." %>
+            </div>
+            <%= form.select :category,
+                            options_for_select(business_info_categories.map { |type| [type, type] }, current_user.business_info&.dig('category')),
+                            { prompt: 'Select category' },
+                            { class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                              onchange: "submitForm()" } %>
+          </div>
+        </div>
+        <div class="flex gap-5">
+          <div class="w-1/2">
+            <p>Logo</p>
+            <div class="flex gap-3">
+              <div class="w-4/10">
+                <div class="bg-blue-50 p-2">
+                  <div class="border border-dashed border-blue-300 h-30 flex items-center justify-center">
+                    <% if current_user.logo.attached? %>
+                      <%= image_tag current_user.logo, alt: "Business Logo", class: "w-25 h-25 object-contain" %>
+                    <% else %>
+                      <svg class="fill-blue-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" id="Plus--Streamline-Phosphor" height="30" width="30">
+                        <path d="M15.84 8c0 0.3608125 -0.29251875 0.65331875 -0.65333125 0.65333125H8.65333125v6.5333375c0 0.50293125 -0.54444375 0.81726875 -0.98 0.5658 -0.2021375 -0.11670625 -0.3266625 -0.3323875 -0.3266625 -0.5658V8.65333125H0.81333125c-0.50293125 0 -0.81726875 -0.54444375 -0.5658 -0.98 0.1167125 -0.20215 0.33238125 -0.326675 0.5658 -0.3266625h6.5333375V0.81333125c0 -0.50293125 0.54444375 -0.81726875 0.98 -0.5658 0.2021375 0.11670625 0.3266625 0.3323875 0.3266625 0.5658v6.5333375h6.5333375c0.3608125 0.0000125 0.65333125 0.29251875 0.65333125 0.65333125Z" stroke-width="0.0625"></path>
+                      </svg>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              <div class="w-6/10 space-y-4">
+                <p class="nata-sans text-sm">For best results, use a high resolution, square image (1:1) 100 x 100 px min.</p>
+                <button type="button" onclick="triggerFileUpload()" class="border rounded-full py-2 px-5 nata-sans text-sm text-blue-500 font-semibold">Upload Images</button>
+                <%= form.file_field :logo,
+                                    id: "logo_input",
+                                    accept: "image/*",
+                                    class: "hidden",
+                                    onchange: "submitFormWithFile();" %>
+              </div>
             </div>
           </div>
-        <% end %>
-      </div>
+          <div class="w-1/2">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :short_description, 'Short Description (150 chars)', class: 'h-5 nata-sans lh-5'%>
+              <%= render 'shared/help_prompt', help_text: "Describe your site or business in a sentence or two, it will help visitors coming from search results to better understand what you do." %>
+            </div>
+            <%= form.textarea :short_description,
+                              placeholder: "Brief description of your site",
+                              value: current_user.business_info['short_description'],
+                              rows: 5,
+                              class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                              onblur: "submitForm()" %>
+          </div>
+        </div>
+      <% end %>
     </div>
+  </div>
 
-    <div class="bg-gray-50 rounded-lg">
-      <div class="py-4 px-6 border-b">
-        <h2 class="nata-sans text-lg font-semibold">Location</h2>
-        <p class="nata-sans text-sm font-normal">Let customers know where your business is based, you can add one or multiple locations.</p>
-      </div>
-      <div class="py-4 px-6 border-b">
-        <%= form_with url: manage_settings_general_update_business_location_path, method: :patch, local: false, class: "w-full flex flex-col gap-5", id: "business-info-location-form" do |form| %>
-          <div class="w-full flex gap-5">
-            <div class="w-1/2">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :address_line_one, class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :address_line_one,
-                                  value: current_user.business_info&.dig('location', 'address_line_one'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitLocationForm()" %>
+  <div class="bg-gray-50 rounded-lg">
+    <div class="py-4 px-6 border-b">
+      <h2 class="nata-sans text-lg font-semibold">Location</h2>
+      <p class="nata-sans text-sm font-normal">Let customers know where your business is based, you can add one or multiple locations.</p>
+    </div>
+    <div class="py-4 px-6 border-b">
+      <%= form_with url: manage_settings_general_update_business_location_path, method: :patch, local: false, class: "w-full flex flex-col gap-5", id: "business-info-location-form" do |form| %>
+        <div class="w-full flex gap-5">
+          <div class="w-1/2">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :address_line_one, class: 'h-5 nata-sans lh-5'%>
             </div>
-            <div class="w-1/2">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :address_line_two, class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :address_line_two,
-                                  value: current_user.business_info&.dig('location', 'address_line_two'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitLocationForm()" %>
-            </div>
+            <%= form.text_field :address_line_one,
+                                value: current_user.business_info&.dig('location', 'address_line_one'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitLocationForm()" %>
           </div>
-          <div class="w-full flex gap-5">
-            <div class="w-1/3">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :city, class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :city,
-                                  value: current_user.business_info&.dig('location', 'city'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitLocationForm()" %>
+          <div class="w-1/2">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :address_line_two, class: 'h-5 nata-sans lh-5'%>
             </div>
-            <div class="w-1/3">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :zip_postcode, 'Zip / Postcode', class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :zip_postcode,
-                                  value: current_user.business_info&.dig('location', 'zip_postcode'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitLocationForm()" %>
-            </div>
-            <div class="w-1/3">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :country_region, 'Country / Region', class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :country_region,
-                                  value: current_user.business_info&.dig('location', 'country_region'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitLocationForm()" %>
-            </div>
+            <%= form.text_field :address_line_two,
+                                value: current_user.business_info&.dig('location', 'address_line_two'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitLocationForm()" %>
           </div>
-          <div class="w-full flex gap-5">
-            <div class="w-1/3">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :street_name, class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :street_name,
-                                  value: current_user.business_info&.dig('location', 'street_name'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitLocationForm()" %>
+        </div>
+        <div class="w-full flex gap-5">
+          <div class="w-1/3">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :city, class: 'h-5 nata-sans lh-5'%>
             </div>
-            <div class="w-1/3">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :house_number, class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :house_number,
-                                  value: current_user.business_info&.dig('location', 'house_number'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitLocationForm()" %>
-            </div>
-            <div class="w-1/3">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :apartment_suite_etc, 'Apartment, suite, etc.', class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :apartment_suite_etc,
-                                  placeholder: "e.g., Apartment 11",
-                                  value: current_user.business_info&.dig('location', 'apartment_suite_etc'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitLocationForm()" %>
-            </div>
+            <%= form.text_field :city,
+                                value: current_user.business_info&.dig('location', 'city'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitLocationForm()" %>
           </div>
-          <div class="w-full flex gap-5">
-            <div class="w-1/2">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :location_name, class: 'h-5 nata-sans lh-5'%>
-                <%= render 'shared/help_prompt', help_text: "Your address will be used as your location name, but you can always change it here." %>
-              </div>
-              <%= form.text_field :location_name,
-                                  placeholder: "Add your location name",
-                                  value: current_user.business_info&.dig('location', 'location_name'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitLocationForm()" %>
+          <div class="w-1/3">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :zip_postcode, 'Zip / Postcode', class: 'h-5 nata-sans lh-5'%>
             </div>
-            <div class="w-1/2">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :address_description, 'Address description (optional)', class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :address_description,
-                                  value: current_user.business_info&.dig('location', 'address_description'),
-                                  placeholder: "e.g., Located on the ground floor",
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitLocationForm()" %>
+            <%= form.text_field :zip_postcode,
+                                value: current_user.business_info&.dig('location', 'zip_postcode'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitLocationForm()" %>
+          </div>
+          <div class="w-1/3">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :country_region, 'Country / Region', class: 'h-5 nata-sans lh-5'%>
             </div>
+            <%= form.text_field :country_region,
+                                value: current_user.business_info&.dig('location', 'country_region'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitLocationForm()" %>
+          </div>
+        </div>
+        <div class="w-full flex gap-5">
+          <div class="w-1/3">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :street_name, class: 'h-5 nata-sans lh-5'%>
+            </div>
+            <%= form.text_field :street_name,
+                                value: current_user.business_info&.dig('location', 'street_name'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitLocationForm()" %>
+          </div>
+          <div class="w-1/3">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :house_number, class: 'h-5 nata-sans lh-5'%>
+            </div>
+            <%= form.text_field :house_number,
+                                value: current_user.business_info&.dig('location', 'house_number'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitLocationForm()" %>
+          </div>
+          <div class="w-1/3">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :apartment_suite_etc, 'Apartment, suite, etc.', class: 'h-5 nata-sans lh-5'%>
+            </div>
+            <%= form.text_field :apartment_suite_etc,
+                                placeholder: "e.g., Apartment 11",
+                                value: current_user.business_info&.dig('location', 'apartment_suite_etc'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitLocationForm()" %>
+          </div>
+        </div>
+        <div class="w-full flex gap-5">
+          <div class="w-1/2">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :location_name, class: 'h-5 nata-sans lh-5'%>
+              <%= render 'shared/help_prompt', help_text: "Your address will be used as your location name, but you can always change it here." %>
+            </div>
+            <%= form.text_field :location_name,
+                                placeholder: "Add your location name",
+                                value: current_user.business_info&.dig('location', 'location_name'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitLocationForm()" %>
+          </div>
+          <div class="w-1/2">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :address_description, 'Address description (optional)', class: 'h-5 nata-sans lh-5'%>
+            </div>
+            <%= form.text_field :address_description,
+                                value: current_user.business_info&.dig('location', 'address_description'),
+                                placeholder: "e.g., Located on the ground floor",
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitLocationForm()" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <div class="py-4 px-6">
+      <h2 class="nata-sans text-lg font-semibold">Contact Info</h2>
+      <p class="nata-sans text-sm font-normal">Add your business contact details so clients can reach you easily.</p>
+      <div class="mt-5">
+        <%= form_with url: manage_settings_general_update_business_contact_path, method: :patch, local: false, class: "w-full flex gap-5", id: "business-info-contact-form" do |form| %>
+          <div class="w-1/3">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :email, class: 'h-5 nata-sans lh-5'%>
+            </div>
+            <%= form.text_field :email,
+                                placeholder: "Type your email address",
+                                value: current_user.business_info&.dig('email'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitContactForm()" %>
+          </div>
+          <div class="w-1/3">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :phone, class: 'h-5 nata-sans lh-5'%>
+            </div>
+            <%= form.text_field :phone,
+                                placeholder: "Add your phone number",
+                                value: current_user.business_info&.dig('phone'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitContactForm()" %>
+          </div>
+          <div class="w-1/3">
+            <div class="flex gap-2 items-center mb-2">
+              <%= form.label :Fax, class: 'h-5 nata-sans lh-5'%>
+            </div>
+            <%= form.text_field :Fax,
+                                placeholder: "Add your fax number",
+                                value: current_user.business_info&.dig('fax'),
+                                class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                onblur: "submitContactForm()" %>
           </div>
         <% end %>
-      </div>
-      <div class="py-4 px-6">
-        <h2 class="nata-sans text-lg font-semibold">Contact Info</h2>
-        <p class="nata-sans text-sm font-normal">Add your business contact details so clients can reach you easily.</p>
-        <div class="mt-5">
-          <%= form_with url: manage_settings_general_update_business_contact_path, method: :patch, local: false, class: "w-full flex gap-5", id: "business-info-contact-form" do |form| %>
-            <div class="w-1/3">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :email, class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :email,
-                                  placeholder: "Type your email address",
-                                  value: current_user.business_info&.dig('email'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitContactForm()" %>
-            </div>
-            <div class="w-1/3">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :phone, class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :phone,
-                                  placeholder: "Add your phone number",
-                                  value: current_user.business_info&.dig('phone'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitContactForm()" %>
-            </div>
-            <div class="w-1/3">
-              <div class="flex gap-2 items-center mb-2">
-                <%= form.label :Fax, class: 'h-5 nata-sans lh-5'%>
-              </div>
-              <%= form.text_field :Fax,
-                                  placeholder: "Add your fax number",
-                                  value: current_user.business_info&.dig('fax'),
-                                  class: "nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                  onblur: "submitContactForm()" %>
-            </div>
-          <% end %>
-          <div class="flex gap-2 items-center mt-3">
-            <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Info--Streamline-Phosphor" height="20" width="20">
-              <path d="M8 0.16c-6.0352375 0 -9.80725625 6.53333125 -6.7896375 11.76 3.0176125 5.22666875 10.56165625 5.22666875 13.579275 0C15.47774375 10.72816875 15.84 9.37620625 15.84 8 15.83543125 3.67198125 12.32801875 0.164575 8 0.16Zm0 14.47384375c-5.1067375 0.00023125 -8.2984 -5.52783125 -5.745225 -9.9505125 2.55316875 -4.422675 8.9365875 -4.4229625 11.49015625 -0.0005125 0.5823375 1.00853125 0.8889125 2.1526 0.8889125 3.31718125 -0.00415 3.66205 -2.97179375 6.6296875 -6.63384375 6.63384375Zm1.20615625 -3.01538125c0 0.33305625 -0.27001875 0.6030625 -0.60308125 0.603075 -0.6661625 0.00003125 -1.20615 -0.53999375 -1.20615 -1.20615V8c-0.46425 0 -0.75440625 -0.5025625 -0.52228125 -0.9046125 0.107725 -0.1865875 0.30683125 -0.30153125 0.52228125 -0.30154375 0.66615625 -0.000025 1.20615 0.53999375 1.20615 1.20615625v3.0153875c0.3330625 0.0000125 0.60308125 0.2700125 0.60308125 0.603075Zm-2.4123125 -6.9353875c0 -0.69636875 0.75385 -1.13160625 1.356925 -0.78341875 0.603075 0.3481875 0.603075 1.21865625 0 1.56684375 -0.13750625 0.0793875 -0.293525 0.1211875 -0.45230625 0.12119375 -0.499625 0.00001875 -0.90461875 -0.40499375 -0.90461875 -0.90461875Z" stroke-width="0.0625"></path>
-            </svg>
-            <p>Your default time zone is set to (GMT+00:00) London. To change it, go to <u>Language & region settings.</u></p>
-          </div>
+        <div class="flex gap-2 items-center mt-3">
+          <svg class="fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Info--Streamline-Phosphor" height="20" width="20">
+            <path d="M8 0.16c-6.0352375 0 -9.80725625 6.53333125 -6.7896375 11.76 3.0176125 5.22666875 10.56165625 5.22666875 13.579275 0C15.47774375 10.72816875 15.84 9.37620625 15.84 8 15.83543125 3.67198125 12.32801875 0.164575 8 0.16Zm0 14.47384375c-5.1067375 0.00023125 -8.2984 -5.52783125 -5.745225 -9.9505125 2.55316875 -4.422675 8.9365875 -4.4229625 11.49015625 -0.0005125 0.5823375 1.00853125 0.8889125 2.1526 0.8889125 3.31718125 -0.00415 3.66205 -2.97179375 6.6296875 -6.63384375 6.63384375Zm1.20615625 -3.01538125c0 0.33305625 -0.27001875 0.6030625 -0.60308125 0.603075 -0.6661625 0.00003125 -1.20615 -0.53999375 -1.20615 -1.20615V8c-0.46425 0 -0.75440625 -0.5025625 -0.52228125 -0.9046125 0.107725 -0.1865875 0.30683125 -0.30153125 0.52228125 -0.30154375 0.66615625 -0.000025 1.20615 0.53999375 1.20615 1.20615625v3.0153875c0.3330625 0.0000125 0.60308125 0.2700125 0.60308125 0.603075Zm-2.4123125 -6.9353875c0 -0.69636875 0.75385 -1.13160625 1.356925 -0.78341875 0.603075 0.3481875 0.603075 1.21865625 0 1.56684375 -0.13750625 0.0793875 -0.293525 0.1211875 -0.45230625 0.12119375 -0.499625 0.00001875 -0.90461875 -0.40499375 -0.90461875 -0.90461875Z" stroke-width="0.0625"></path>
+          </svg>
+          <p>Your default time zone is set to (GMT+00:00) London. To change it, go to <u>Language & region settings.</u></p>
         </div>
       </div>
     </div>
   </div>
 
+  <div class="bg-gray-50 rounded-lg">
+    <div class="py-4 px-6 border-b">
+      <h2 class="nata-sans text-lg font-semibold">Social Media</h2>
+      <p class="nata-sans text-sm font-normal">Add your social media accounts to help customers connect with you on their preferred platforms.</p>
+    </div>
+    <div class="py-4 px-6">
+      <%= form_with url: manage_settings_general_update_social_media_path, method: :patch, local: false, class: "w-full", id: "social-media-form" do |form| %>
+        <div id="social-media-container">
+          <% existing_social_media = current_user.business_info&.dig('social_media') || {} %>
+          <% if existing_social_media.any? %>
+            <% existing_social_media.each_with_index do |(platform, data), index| %>
+              <div class="social-media-row flex gap-3 items-center mb-3" data-index="<%= index %>">
+                <div class="w-1/3">
+                  <select name="social_media[<%= index %>][platform]" class="nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateSocialMediaIcon(this)">
+                    <option value="">Select platform</option>
+                    <option value="facebook" <%= 'selected' if platform == 'facebook' %>>Facebook</option>
+                    <option value="instagram" <%= 'selected' if platform == 'instagram' %>>Instagram</option>
+                    <option value="twitter" <%= 'selected' if platform == 'twitter' %>>Twitter/X</option>
+                    <option value="linkedin" <%= 'selected' if platform == 'linkedin' %>>LinkedIn</option>
+                    <option value="youtube" <%= 'selected' if platform == 'youtube' %>>YouTube</option>
+                    <option value="tiktok" <%= 'selected' if platform == 'tiktok' %>>TikTok</option>
+                    <option value="pinterest" <%= 'selected' if platform == 'pinterest' %>>Pinterest</option>
+                    <option value="snapchat" <%= 'selected' if platform == 'snapchat' %>>Snapchat</option>
+                  </select>
+                </div>
+                <div class="w-2/3">
+                  <input type="url" name="social_media[<%= index %>][link]" value="<%= data['link'] %>" placeholder="https://..." class="nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="button" onclick="removeSocialMediaRow(this)" class="text-red-500 hover:text-red-700 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3,6 5,6 21,6"></polyline>
+                    <path d="m19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="social-media-row flex gap-3 items-center mb-3" data-index="0">
+              <div class="w-1/3">
+                <select name="social_media[0][platform]" class="nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateSocialMediaIcon(this)">
+                  <option value="">Select platform</option>
+                  <option value="facebook">Facebook</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="twitter">Twitter/X</option>
+                  <option value="linkedin">LinkedIn</option>
+                  <option value="youtube">YouTube</option>
+                  <option value="tiktok">TikTok</option>
+                  <option value="pinterest">Pinterest</option>
+                  <option value="snapchat">Snapchat</option>
+                </select>
+              </div>
+              <div class="w-2/3">
+                <input type="url" name="social_media[0][link]" placeholder="https://..." class="nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              <button type="button" onclick="removeSocialMediaRow(this)" class="text-red-500 hover:text-red-700 p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3,6 5,6 21,6"></polyline>
+                  <path d="m19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2,2h4a2,2 0 0,1,2,2v2"></path>
+                </svg>
+              </button>
+            </div>
+          <% end %>
+        </div>
 
-
+        <div class="flex gap-3 mt-4">
+          <button type="button" onclick="addSocialMediaRow()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md nata-sans text-sm font-semibold">
+            Add Social Media
+          </button>
+          <button type="button" onclick="submitSocialMediaForm()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md nata-sans text-sm font-semibold">
+            Save Changes
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
 </div>
 
 <script>
+
+    let socialMediaIndex = <%= (current_user.business_info&.dig('social_media')&.length || 1) %>;
+
+    const socialMediaIcons = {
+        facebook: 'fab fa-facebook-f',
+        instagram: 'fab fa-instagram',
+        twitter: 'fab fa-twitter',
+        linkedin: 'fab fa-linkedin-in',
+        youtube: 'fab fa-youtube',
+        tiktok: 'fab fa-tiktok',
+        pinterest: 'fab fa-pinterest-p',
+        snapchat: 'fab fa-snapchat-ghost'
+    };
+
+    function addSocialMediaRow() {
+        const container = document.getElementById('social-media-container');
+        const newRow = document.createElement('div');
+        newRow.className = 'social-media-row flex gap-3 items-center mb-3';
+        newRow.setAttribute('data-index', socialMediaIndex);
+
+        newRow.innerHTML = `
+            <div class="w-1/3">
+                <select name="social_media[${socialMediaIndex}][platform]" class="nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateSocialMediaIcon(this)">
+                    <option value="">Select platform</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="twitter">Twitter/X</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="pinterest">Pinterest</option>
+                    <option value="snapchat">Snapchat</option>
+                </select>
+            </div>
+            <div class="w-2/3">
+                <input type="url" name="social_media[${socialMediaIndex}][link]" placeholder="https://..." class="nata-sans w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button type="button" onclick="removeSocialMediaRow(this)" class="text-red-500 hover:text-red-700 p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3,6 5,6 21,6"></polyline>
+                    <path d="m19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2,2h4a2,2 0 0,1,2,2v2"></path>
+                </svg>
+            </button>
+        `;
+
+        container.appendChild(newRow);
+        socialMediaIndex++;
+    }
+
+    function removeSocialMediaRow(button) {
+        const row = button.closest('.social-media-row');
+        const container = document.getElementById('social-media-container');
+
+        // Don't remove if it's the last row
+        if (container.children.length > 1) {
+            row.remove();
+        } else {
+            // Clear the values instead of removing
+            const select = row.querySelector('select');
+            const input = row.querySelector('input');
+            select.value = '';
+            input.value = '';
+        }
+    }
+
+    function updateSocialMediaIcon(select) {
+        // This function can be used to update icons or perform other actions
+        // when the platform changes
+        console.log('Platform changed to:', select.value);
+    }
+
+    function submitSocialMediaForm() {
+        const form = document.getElementById('social-media-form');
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'PATCH',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                showFlashMessage(data.message, data.flash_type);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showFlashMessage('An error occurred', 'alert');
+            });
+    }
+
+    function submitForm() {
+        const form = document.getElementById('business-info-form');
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'PATCH',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                showFlashMessage(data.message, data.flash_type);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showFlashMessage('An error occurred', 'alert');
+            });
+    }
+
+    function submitLocationForm() {
+        const form = document.getElementById('business-info-location-form');
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'PATCH',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                showFlashMessage(data.message, data.flash_type);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showFlashMessage('An error occurred', 'alert');
+            });
+    }
+
+    function submitContactForm() {
+        const form = document.getElementById('business-info-contact-form');
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'PATCH',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                showFlashMessage(data.message, data.flash_type);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showFlashMessage('An error occurred', 'alert');
+            });
+    }
+
+    function triggerFileUpload() {
+        document.getElementById('logo_input').click();
+    }
+
+    function submitFormWithFile() {
+        const form = document.getElementById('business-info-form');
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'PATCH',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                showFlashMessage(data.message, data.flash_type);
+                if (data.status === 'success') {
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showFlashMessage('An error occurred', 'alert');
+            });
+    }
+
+    function showFlashMessage(message, type) {
+        const existingFlash = document.querySelector('.flash-message');
+        if (existingFlash) {
+            existingFlash.remove();
+        }
+
+        const flashDiv = document.createElement('div');
+        flashDiv.className = `flash-message ${type === 'notice' ? 'absolute top-5 right-5 bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'} border px-4 py-3 rounded mb-4`;
+        flashDiv.textContent = message;
+
+        const container = document.querySelector('body') || document.querySelector('main');
+        container.insertBefore(flashDiv, container.firstChild);
+
+        setTimeout(() => {
+            flashDiv.remove();
+        }, 3000);
+    }
+
+
     function submitForm() {
         const form = document.getElementById('business-info-form');
         const formData = new FormData(form);

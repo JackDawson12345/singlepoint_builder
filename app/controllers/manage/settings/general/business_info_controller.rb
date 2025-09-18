@@ -165,9 +165,72 @@ class Manage::Settings::General::BusinessInfoController < Manage::BaseController
     }
   end
 
+  def update_social_media
+    begin
+
+      byebug
+
+      # Parse the social media data from params
+      social_media_data = {}
+
+      if params[:social_media].present?
+        params[:social_media].each do |index, data|
+          platform = data[:platform]
+          link = data[:link]
+
+          # Only save if both platform and link are present
+          if platform.present? && link.present?
+            # Get the appropriate icon for the platform
+            icon = get_social_media_icon(platform)
+
+            social_media_data[platform] = {
+              'icon' => icon,
+              'link' => link
+            }
+          end
+        end
+      end
+
+      # Update the user's business info
+      business_info = current_user.business_info || {}
+      business_info['social_media'] = social_media_data
+
+      current_user.update!(business_info: business_info)
+
+      render json: {
+        message: 'Social media links updated successfully!',
+        flash_type: 'notice',
+        status: 'success'
+      }
+    rescue => e
+      render json: {
+        message: 'Failed to update social media links',
+        flash_type: 'alert',
+        status: 'error'
+      }
+    end
+  end
+
+
   private
 
   def set_website
     @website = current_user.website
   end
+
+  def get_social_media_icon(platform)
+    icons = {
+      'facebook' => 'fab fa-facebook-f',
+      'instagram' => 'fab fa-instagram',
+      'twitter' => 'fab fa-twitter',
+      'linkedin' => 'fab fa-linkedin-in',
+      'youtube' => 'fab fa-youtube',
+      'tiktok' => 'fab fa-tiktok',
+      'pinterest' => 'fab fa-pinterest-p',
+      'snapchat' => 'fab fa-snapchat-ghost'
+    }
+
+    icons[platform] || 'fas fa-link'
+  end
+
 end

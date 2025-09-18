@@ -29,52 +29,57 @@
   <%= form.hidden_field :user_id, value: user_id %>
   <%= form.hidden_field :component_page_id, value: component_page_id %>
 
-  <% component.field_types.each do |name, type| %>
+  <div class="sidebar-form-fields">
+    <% component.field_types.each do |name, type| %>
 
-    <div class="sidebar-field">
-      <%= form.label name, name.to_s.humanize, class: 'nata-sans text-sm font-semibold' %>
-      <div>
-        <% if type == 'text' %>
-          <%= form.text_field name,
-                              value: custom_values[name] || component.editable_fields[name],
-                              placeholder: "Enter your #{name}",
-                              class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
-        <% elsif type == 'textarea' %>
-          <%= form.textarea name,
-                            value: custom_values[name] || component.editable_fields[name],
-                            placeholder: "Enter your #{name}",
-                            class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
-        <% elsif type == 'image' %>
-          <% current_image = custom_values[name] || component.editable_fields[name] %>
-
-          <div class="image-field">
-            <% if current_image %>
-              <div class="current-image mb-3">
-                <%= image_tag current_image, class: "w-32 h-32 object-cover rounded border" %>
-                <p class="text-sm text-gray-600 mt-1">Current image</p>
+      <% unless name.include? "global" %>
+        <div class="sidebar-field">
+          <%= form.label name, name.to_s.humanize, class: 'nata-sans text-sm font-semibold' %>
+          <div>
+            <% if type == 'text' %>
+              <%= form.text_field name,
+                                  value: custom_values[name] || component.editable_fields[name],
+                                  placeholder: "Enter your #{name}",
+                                  class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
+            <% elsif type == 'textarea' %>
+              <div class="wysiwyg-container" data-controller="wysiwyg">
+                <div data-wysiwyg-target="editor" class="border border-gray-300 rounded-md"></div>
+                <%= form.hidden_field name,
+                                      value: custom_values[name] || component.editable_fields[name],
+                                      data: { wysiwyg_target: "input" },
+                                      class: 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
               </div>
-            <% end %>
+            <% elsif type == 'image' %>
+              <% current_image = custom_values[name] || component.editable_fields[name] %>
 
-            <div class="file-input">
-              <%= form.file_field name,
-                                  accept: "image/*",
-                                  class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" %>
-            </div>
+              <div class="image-field">
+                <% if current_image %>
+                  <div class="current-image mb-3">
+                    <%= image_tag current_image, class: "w-32 h-32 object-cover rounded border" %>
+                    <p class="text-sm text-gray-600 mt-1">Current image</p>
+                  </div>
+                <% end %>
 
-            <% if current_image %>
-              <div class="remove-option mt-2">
-                <%= form.check_box "remove_#{name}", {}, "1", "" %>
-                <%= form.label "remove_#{name}", "Remove current image", class: "ml-2 text-sm text-gray-600" %>
+                <div class="file-input">
+                  <%= form.file_field name,
+                                      accept: "image/*",
+                                      class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" %>
+                </div>
+
+                <% if current_image %>
+                  <div class="remove-option mt-2">
+                    <%= form.check_box "remove_#{name}", {}, "1", "" %>
+                    <%= form.label "remove_#{name}", "Remove current image", class: "ml-2 text-sm text-gray-600" %>
+                  </div>
+                <% end %>
               </div>
             <% end %>
           </div>
-        <% end %>
-      </div>
+        </div>
+      <% end %>
 
-
-
-    </div>
-  <% end %>
+    <% end %>
+  </div>
 
   <div>
     <%= form.submit "Save Changes", class: "btn btn-primary" %>

@@ -7,4 +7,11 @@ class LoginActivity < ApplicationRecord
   def location_display
     [city, country].compact.join(', ')
   end
+
+  def browser_display
+    return 'Unknown Browser' if browser.blank?
+
+    # Just return the first word (browser name)
+    browser.split(' ').first
+  end
 end
