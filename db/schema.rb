@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_17_143937) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_22_130757) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,6 +52,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_17_143937) do
     t.json "template_patterns"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "invoice_templates", force: :cascade do |t|
+    t.bigint "website_id", null: false
+    t.json "numbering"
+    t.json "header_fields"
+    t.json "business_info"
+    t.json "customer_details"
+    t.json "items_tax_display"
+    t.json "footer_notes"
+    t.json "design", default: {"text" => {"headline" => {"font" => "roboto", "size" => "30px", "style" => {"bold" => "true", "underline" => "false", "italic" => "false"}, "color" => "#000000"}, "title" => {"font" => "roboto", "size" => "14px", "style" => {"bold" => "true", "underline" => "false", "italic" => "false"}, "color" => "#000000"}, "text" => {"font" => "roboto", "size" => "12px", "style" => {"bold" => "false", "underline" => "false", "italic" => "false"}, "color" => "#000000"}, "items" => {"font" => "roboto", "size" => "12px", "style" => {"bold" => "false", "underline" => "false", "italic" => "false"}, "color" => "#000000"}}, "divider" => "divider-1", "image" => {"has_image" => "false"}}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["website_id"], name: "index_invoice_templates_on_website_id"
   end
 
   create_table "login_activities", force: :cascade do |t|
@@ -270,6 +284,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_17_143937) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "invoice_templates", "websites"
   add_foreign_key "login_activities", "users"
   add_foreign_key "notifications", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id"

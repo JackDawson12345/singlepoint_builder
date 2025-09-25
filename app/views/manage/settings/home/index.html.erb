@@ -26,17 +26,17 @@
           </svg>
         </div>
       </div>
-      <div class="flex  py-4 px-6 hover:bg-blue-50">
+      <%= link_to manage_settings_payments_invoices_path, class: 'flex border-b py-4 px-6 hover:bg-blue-50' do %>
         <div class="w-4/5">
-          <h3 class="nata-sans text-base font-semibold">Receipts</h3>
-          <p class="nata-sans text-sm font-normal">Manage when receipts are sent and how they appear to customers.</p>
+          <h3 class="nata-sans text-base font-semibold">Invoices</h3>
+          <p class="nata-sans text-sm font-normal">Manage when invoices are sent and how they appear to customers.</p>
         </div>
         <div class="w-1/5 flex justify-end items-center">
           <svg style="transform: rotate(270deg)" class="w-6 h-6 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </div>
-      </div>
+      <% end %>
     </div>
   </div>
   <div class="mb-5">

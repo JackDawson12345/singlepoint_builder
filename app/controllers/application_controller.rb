@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
 
   # Add multi-tenant domain detection before all actions
   before_action :find_current_website, if: -> { Rails.env.production? }
+  helper_method :popular_fonts
 
   protected
 
@@ -132,6 +133,40 @@ class ApplicationController < ActionController::Base
       'Product Inner',
       'Login Section',
       'Sign Up Section'
+    ]
+  end
+
+  def popular_fonts
+    [
+      "Roboto",
+      "Open Sans",
+      "Lato",
+      "Montserrat",
+      "Oswald",
+      "Source Sans 3",
+      "Slabo",
+      "Raleway",
+      "PT Sans",
+      "Merriweather",
+      "Noto Sans",
+      "Nunito Sans",
+      "Poppins",
+      "Roboto Condensed",
+      "Playfair Display",
+      "Ubuntu",
+      "Lora",
+      "Dosis",
+      "Droid Sans",
+      "Quicksand",
+      "Rubik",
+      "PT Serif",
+      "Zilla Slab",
+      "Bitter",
+      "Libre Baskerville",
+      "Arvo",
+      "Inter",
+      "Rubik",
+      "Work Sans"
     ]
   end
 end

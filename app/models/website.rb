@@ -6,6 +6,7 @@ class Website < ApplicationRecord
   has_many_attached :editor_images
   has_one_attached :favicon
   validate :favicon_validation
+  has_one :invoice_template, dependent: :destroy
 
   validates :user_id, uniqueness: { message: "can only have one website" }
 

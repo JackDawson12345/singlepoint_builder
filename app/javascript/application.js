@@ -2,5 +2,6 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 import "editor"
+import "invoice_design"
 
 

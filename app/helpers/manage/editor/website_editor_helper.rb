@@ -1,5 +1,7 @@
 module Manage::Editor::WebsiteEditorHelper
 
+  require 'nokogiri'
+
   def render_editor_content(component, user_id = nil, theme_page_id = nil, component_page_id)
     componentHTML = component.content['html']
     updated_content = componentHTML
@@ -7,23 +9,67 @@ module Manage::Editor::WebsiteEditorHelper
     updated_content = render_global_changes(current_user, component, updated_content)
 
     unless component.editable_fields == ""
-      # Get customisations if user_id and theme_page_id are provided
-      field_values = get_component_field_values(component, user_id, theme_page_id, component_page_id)
+      result = render_custom_styles(current_user.id, component, theme_page_id, component_page_id)
+      field_values = result[:field_values]
+      customisations = result[:customisations]
 
+      # FIRST: Handle class replacements before styling
+      if componentHTML.include?('_class}}')
+        class_variables = componentHTML.scan(/\{\{(\w+_class)\}\}/).flatten
+        class_values = get_component_class_values(component, user_id, theme_page_id, component_page_id, class_variables)
+
+        class_values.each do |class_value|
+          component_value = class_value.split("_")[2..-1].join("_")
+          updated_content = updated_content.gsub('{{'+component_value.to_s+'_class}}', class_value.to_s)
+        end
+      end
+
+      # SECOND: Replace all field values
       field_values.each do |field_name, field_value|
-        updated_content = updated_content.gsub('{{'+field_name.to_s+'}}', field_value.to_s)
+        if field_value.is_a?(Hash)
+          field_value.each do |sub_key, sub_value|
+            byebug
+            updated_content = updated_content.gsub("{{#{sub_key}}}", sub_value.to_s)
+          end
+        else
+          # Check if the field value contains HTML that matches the container
+          clean_value = field_value.to_s
+          if clean_value.match?(/^<p>(.*)<\/p>$/m) && updated_content.include?("<p class=\"#{theme_page_id}_#{component_page_id}_#{field_name}")
+            # Extract content from p tags if we're inserting into a p tag
+            clean_value = clean_value.gsub(/^<p>(.*)<\/p>$/m, '\1')
+          end
+          updated_content = updated_content.gsub("{{#{field_name}}}", clean_value)
+        end
       end
-    end
 
-    if componentHTML.include?('_class}}')
-      class_variables = componentHTML.scan(/\{\{(\w+_class)\}\}/).flatten
-      class_values = get_component_class_values(component, user_id, theme_page_id, component_page_id, class_variables)
+      # THIRD: Apply styling to the resolved class names
+      if customisations && customisations.any?
+        customisations.each do |customisation|
+          field_name = customisation['field_name']
+          field_styling = customisation['field_styling']
 
-      class_values.each do |class_value|
-        component_value = class_value.split("_")[2..-1].join("_")
-        updated_content = updated_content.gsub('{{'+component_value.to_s+'_class}}', class_value.to_s)
+          next if field_styling.empty?
+
+          # Use the actual resolved class name (UUID format)
+          resolved_class_name = "#{theme_page_id}_#{component_page_id}_#{field_name}"
+
+          # Build the style string
+          style_pairs = []
+          field_styling.each do |key, value|
+            style_pairs << "#{key}: #{value}"
+          end
+          style_string = style_pairs.join('; ')
+
+          # Find elements with the resolved class name and add styling
+          pattern = /class="([^"]*#{Regexp.escape(resolved_class_name)}[^"]*)"/
+          updated_content = updated_content.gsub(pattern) do |match|
+            existing_classes = $1
+            "class=\"#{existing_classes}\" style=\"#{style_string}\""
+          end
+
+          puts "Applied styling for #{field_name} to class #{resolved_class_name}: #{style_string}"
+        end
       end
-
     end
 
     if updated_content.include?('{{nav_items}}')
@@ -52,6 +98,7 @@ module Manage::Editor::WebsiteEditorHelper
       updated_content = updated_content.gsub!('{{service_title}}', service['name'])
       updated_content = updated_content.gsub!('{{service_content}}', simple_format(service['content']))
       updated_content = updated_content.gsub!('{{service_image}}', service['featured_image'])
+      updated_content = updated_content.gsub!('{{service_excerpt}}', service['excerpt'])
     elsif component.component_type == 'Blog Inner'
 
     elsif component.component_type == 'Product Inner'
@@ -105,8 +152,6 @@ module Manage::Editor::WebsiteEditorHelper
 
     end
 
-
-
     updated_content
   end
 
@@ -145,6 +190,31 @@ module Manage::Editor::WebsiteEditorHelper
       global_css = global_css.gsub('{{secondary_colour}}', user.website.settings['Colour Scheme']['secondary_colour'])
     end
 
+  end
+
+  def render_edit_field_button(html_content)
+    doc = Nokogiri::HTML::DocumentFragment.parse(html_content)
+
+    doc.css('.editable-field').each do |element|
+      unless element['onclick']
+        classes = element['class'].split(' ')
+
+        target_class = classes.find do |cls|
+          cls != 'editable-field' && cls.match?(/\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_\w+\z/)
+        end
+
+        onclick_value = target_class ? "showEditorFields('#{target_class}')" : 'showEditorFields()'
+
+        # If current element is empty and has a next sibling with content, move onclick there
+        if element.content.strip.empty? && element.next_sibling&.name == element.name
+          element.next_sibling['onclick'] = onclick_value
+        else
+          element['onclick'] = onclick_value
+        end
+      end
+    end
+
+    doc.to_html.html_safe
   end
 
   def render_preview_css(component, user_id)
@@ -222,6 +292,14 @@ module Manage::Editor::WebsiteEditorHelper
       updated_content = updated_content.gsub!('{{service_title}}', service['name'])
       updated_content = updated_content.gsub!('{{service_content}}', simple_format(service['content']))
       updated_content = updated_content.gsub!('{{service_image}}', service['featured_image'])
+      updated_content = updated_content.gsub!('{{service_excerpt}}', service['excerpt'])
+
+      global_number = current_user['business_info']['phone'] || '01234 567890'
+      updated_content = updated_content.gsub!('{{global_number}}', global_number)
+
+      service_links_html = render_service_inner_items(component, service)
+      updated_content = updated_content.gsub!('{{service_links}}', service_links_html)
+
     elsif component.component_type == 'Blog Inner'
 
     elsif component.component_type == 'Product Inner'
@@ -431,6 +509,7 @@ module Manage::Editor::WebsiteEditorHelper
         # Replace service template placeholders with actual service data
         item_html.gsub!('{{service_title}}', service_name)
         item_html.gsub!('{{service_excerpt}}', service['excerpt'].to_s) # or service.description
+        item_html.gsub!('{{service_icon}}', service['icon'].to_s) # or whatever holds the image
         item_html.gsub!('{{service_image}}', service['featured_image'].to_s) # or whatever holds the image
         item_html.gsub!('{{service_number}}', '0' + (index + 1).to_s) # or whatever holds the image
 
@@ -687,6 +766,98 @@ module Manage::Editor::WebsiteEditorHelper
 
       item_html
     end.join("\n")
+  end
+
+  def render_service_inner_items(component, service)
+    if component.template_patterns.is_a?(Hash)
+      services_template = component.template_patterns["service_links"]
+    elsif component.template_patterns.is_a?(String)
+      # Parse JSON string and extract service_links
+      begin
+        parsed_patterns = JSON.parse(component.template_patterns)
+        services_template = parsed_patterns["service_links"]
+      rescue JSON::ParserError
+        # Fallback to regex if JSON parsing fails
+        if match = component.template_patterns.match(/"service_links":\s*"(.+)"\s*}/)
+          services_template = match[1].gsub('\\"', '"')
+        else
+          services_template = nil
+        end
+      end
+    else
+      services_template = nil
+    end
+
+    # Return empty string if no template found
+    return "" unless services_template
+
+    current_user.website['services'].map do |data|
+
+      # Create a copy of the template for this iteration
+      item_html = services_template.dup
+
+      if controller_name == "preview"
+        link = data['slug'] == '/' ? '/manage/website/preview/services/' : '/manage/website/preview/services/' + data['slug']
+      elsif controller_name == "website_editor"
+        link = data['slug'] == '/' ? '/manage/website/editor/services/' : '/manage/website/editor/services/' + data['slug']
+      end
+
+      # Replace nav_item placeholder
+      item_html.gsub!('{{service_name}}', data['name'] )
+      item_html.gsub!('{{service_link}}', link)
+
+      item_html
+    end.join("\n")
+  end
+
+  def render_custom_styles(user_id, component, theme_page_id, component_page_id)
+    # Start with default values
+    field_values = component.editable_fields.to_h
+    customisations = []
+
+    # Override with customisations if they exist
+    if user_id && theme_page_id
+      user = User.find(user_id)
+      user_customisations = user.website&.customisations&.dig("customisations") || []
+
+      user_customisations.each do |customisation|
+        if customisation["component_id"] == component.id.to_s &&
+           customisation["theme_page_id"] == theme_page_id.to_s &&
+           customisation['component_page_id'] == component_page_id
+
+          field_values[customisation["field_name"]] = customisation["field_value"]
+
+          # Add this customisation to our array with converted styling
+          if customisation['field_styling'].present?
+            styling = customisation['field_styling']
+            converted_customisation = {
+              "field_name" => customisation["field_name"],
+              "component_id" => customisation['component_id'],
+              "component_page_id" => customisation['component_page_id'],
+              "theme_page_id" => customisation['theme_page_id'],
+              "field_styling" => {
+                "text-align" => styling['alignment'],
+                "color" => styling['text_colour'],
+                "font-size" => styling['font_size'],
+                "font-weight" => styling['font_weight'],
+                "text-transform" => styling['font_transform'],
+                "font-style" => styling['font_style'],
+                "text-decoration" => styling['font_decoration'],
+                "line-height" => styling['line_height'],
+                "letter-spacing" => styling['letter_spacing'],
+                "word-spacing" => styling['word_spacing']
+              }
+            }
+            customisations << converted_customisation
+          end
+        end
+      end
+    end
+
+    {
+      field_values: field_values,
+      customisations: customisations  # Return the array instead of single field_styling
+    }
   end
 
 end

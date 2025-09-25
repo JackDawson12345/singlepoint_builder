@@ -6,7 +6,7 @@
     </div>
     <div class="w-1/2 flex justify-end gap-5 items-center">
       <button class="nata-sans text-sm border rounded-full px-5 py-1">Site Actions</button>
-      <%= link_to 'Design Site', manage_website_editor_website_editor_path, class: 'nata-sans text-sm bg-blue-500 text-white border border-blue-500 rounded-full px-5 py-1' %>
+      <%= link_to 'Design Site', manage_website_editor_website_editor_path, class: 'nata-sans text-sm bg-green-500 text-white border border-green-500 rounded-full px-5 py-1' %>
     </div>
   </div>
 
@@ -21,20 +21,20 @@
           <p class="nata-sans font-bold text-xs text-gray-400">Not Published</p>
         </div>
         <div class="w-1/2 flex justify-end items-center">
-          <%= link_to 'Site Settings', manage_settings_website_website_settings_path, class: 'nata-sans font-normal text-xs text-blue-500' %>
+          <%= link_to 'Site Settings', manage_settings_website_website_settings_path, class: 'nata-sans font-normal text-xs text-green-500' %>
         </div>
       </div>
       <div class="px-4 pt-2 flex gap-5">
         <div>
-          <p class="nata-sans font-normal text-xs">Free plan <span class="text-blue-500">Compare Plans</span></p>
+          <p class="nata-sans font-normal text-xs">Free plan <span class="text-green-500">Compare Plans</span></p>
         </div>
         <% if current_user.user_setup.domain_name %>
           <div>
-            <p class="nata-sans font-normal text-xs">Website Address: <span class="text-blue-500"><%= link_to 'https://' + current_user.user_setup.domain_name, 'https://' + current_user.user_setup.domain_name, target: blank? %></span></p>
+            <p class="nata-sans font-normal text-xs">Website Address: <span class="text-green-500"><%= link_to 'https://' + current_user.user_setup.domain_name, 'https://' + current_user.user_setup.domain_name, target: blank? %></span></p>
           </div>
         <% end %>
         <div>
-          <p class="nata-sans font-normal text-xs">No business email <span class="text-blue-500">Connect</span></p>
+          <p class="nata-sans font-normal text-xs">No business email <span class="text-green-500">Connect</span></p>
         </div>
       </div>
     </div>
@@ -60,31 +60,31 @@
     <div class="w-2/3 bg-gray-50 rounded-lg">
       <div class="py-4 px-6 border-b">
         <h2 class="nata-sans text-lg font-bold">Site Performance</h2>
-        <p class="nata-sans font-normal text-xs">Monitor the performance of your site and ensure a smooth experience for your visitors. To see your site speed and uptime, <span class="text-blue-500">publish your website in the editor.</span></p>
+        <p class="nata-sans font-normal text-xs">Monitor the performance of your site and ensure a smooth experience for your visitors. To see your site speed and uptime, <span class="text-green-500">publish your website in the editor.</span></p>
       </div>
       <div class="py-4 px-6 flex gap-3">
         <div class="w-1/2 border rounded-lg p-3">
           <h3 class="nata-sans text-sm font-semibold mb-2">Monitor your site speed</h3>
           <p class="nata-sans font-normal text-xs mb-2">Once your site has enough traffic, you can check its loading time and optimize it.</p>
-          <a class="nata-sans font-normal text-xs text-blue-500">Learn More</a>
+          <a class="nata-sans font-normal text-xs text-green-500">Learn More</a>
         </div>
         <div class="w-1/2 border rounded-lg p-3">
           <h3 class="nata-sans text-sm font-semibold mb-2">Track your site uptime</h3>
           <p class="nata-sans font-normal text-xs mb-2">Track your published site's availability and learn how Wix provides business continuity at all times.</p>
-          <a class="nata-sans font-normal text-xs text-blue-500">Learn More</a>
+          <a class="nata-sans font-normal text-xs text-green-500">Learn More</a>
         </div>
       </div>
     </div>
     <div class="w-1/3 bg-gray-50 rounded-lg">
       <div class="py-4 px-6 border-b">
         <h2 class="nata-sans text-lg font-bold">Accessibility</h2>
-        <p class="nata-sans font-normal text-xs">Help people with disabilities use your site. <span class="text-blue-500">About your site's accessibility status</span><br></p>
+        <p class="nata-sans font-normal text-xs">Help people with disabilities use your site. <span class="text-green-500">About your site's accessibility status</span><br></p>
       </div>
       <div class="py-4 px-6">
         <div class="border rounded-lg p-3">
           <h3 class="nata-sans text-sm font-semibold mb-2">Make your site accessible</h3>
           <p class="nata-sans font-normal text-xs mb-2">Scan your site to find and fix any accessibility issues.</p>
-          <a class="nata-sans font-normal text-xs text-blue-500">Scan for Issues</a>
+          <a class="nata-sans font-normal text-xs text-green-500">Scan for Issues</a>
         </div>
       </div>
     </div>

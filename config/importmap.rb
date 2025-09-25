@@ -16,3 +16,5 @@ pin "lodash.clonedeep" # @4.5.0
 pin "lodash.isequal" # @4.5.0
 pin "parchment" # @3.0.0
 pin "quill-delta" # @5.1.0
+
+pin "invoice_design", to: "invoice_design.js"

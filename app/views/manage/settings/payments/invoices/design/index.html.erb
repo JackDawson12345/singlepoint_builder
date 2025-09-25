@@ -1,0 +1,230 @@
+<!-- invoice design banner -->
+<div class="flex justify-between w-full p-5 border-b bg-white">
+  <div class="flex gap-5 items-center">
+    <div class="flex gap-2 items-center">
+      <%= link_to manage_settings_payments_invoices_path, class: 'flex gap-2 items-center' do %>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Arrow-Left-Light--Streamline-Phosphor" height="16" width="16">
+          <path d="M15.84 7.9875125c0 0.27638125 -0.22405625 0.5004375 -0.5004375 0.5004375H1.8685625l5.15035625 5.15119375c0.2818375 0.262625 0.17368125 0.731875 -0.19468125 0.8446375 -0.183075 0.05604375 -0.38208125 0.00271875 -0.51260625 -0.13735L0.30635625 8.34115625c-0.19514375 -0.1953875 -0.19514375 -0.51190625 0 -0.7072875l6.005275 -6.005275c0.2818375 -0.26263125 0.74229375 -0.121675 0.82881875 0.25371875 0.0373375 0.1619875 -0.0082 0.33195 -0.12153125 0.45356875l-5.15035625 5.1511875h13.471c0.27638125 0 0.5004375 0.22405625 0.5004375 0.50044375Z" stroke-width="0.0625"></path>
+        </svg>
+        <p class="nata-sans text-sm">Back to Invoice Settings</p>
+      <% end %>
+    </div>
+
+    <div style="width: 1px; height: 25px; background: rgb(229, 231, 235)"></div>
+    <div class="flex gap-2 items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Arrow-Counter-Clockwise-Light--Streamline-Phosphor" height="16" width="16">
+        <path d="M15.84 8.00140625c0.00035625 3.95279375 -3.1758125 7.1721125 -7.12825 7.2251h-0.09685c-1.84440625 0.00385625 -3.61959375 -0.7020875 -4.95764375 -1.97153125 -0.2631125 -0.2383375 -0.16955 -0.67213125 0.1684125 -0.780825 0.16348125 -0.052575 0.34263125 -0.00996875 0.4649375 0.11058125C7.820625 15.9133125 13.63018125 14.1723125 14.74780625 9.4509375c1.117625 -4.72138125 -3.2949 -8.88210625 -7.94254375 -7.48930625 -1.00019375 0.29973125 -1.91025 0.84325625 -2.6484 1.5817375l-0.01460625 0.0146L1.8079375 5.695525h2.50265c0.3550125 0 0.5769 0.3843125 0.39939375 0.6917625 -0.08238125 0.1426875 -0.23463125 0.2305875 -0.39939375 0.2305875H0.621175c-0.2547 0 -0.461175 -0.206475 -0.461175 -0.461175V2.4672875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.14269375 0.08238125 0.23059375 0.234625 0.23059375 0.3993875v2.63946875l2.4311625 -2.22440625c3.9386375 -3.92705 10.6514375 -2.11775 12.0830375 3.25673125 0.16183125 0.6075375 0.24366875 1.2336 0.24344375 1.862325Z" stroke-width="0.0625"></path>
+      </svg>
+      <p class="nata-sans text-sm">Reset Template</p>
+    </div>
+  </div>
+  <div>
+    <button class="nata-sans text-sm bg-blue-500 text-white border border-blue-500 rounded-full px-5 py-1">Apply</button>
+  </div>
+</div>
+
+<div class="flex" style="min-height: calc(100vh - 120px)">
+  <div style="width: 90px; min-height: calc(100vh - 120px);" class="space-y-5 py-5 border-r bg-white">
+    <!-- Text Button -->
+    <div class="flex flex-col items-center justify-center">
+      <div class="tool-button flex flex-col items-center justify-center" data-partial="text" style="cursor: pointer;">
+        <div class="border rounded-full p-2.5 tool-button-outer active-invoice-button-outer" data-tool="text">
+          <svg class="tool-button-icon active-invoice-button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Text-T-Light--Streamline-Phosphor" height="14" width="14">
+            <path d="M15.84 0.763075v3.2164125c0 0.46425 -0.5025625 0.75440625 -0.9046125 0.52228125 -0.18659375 -0.10773125 -0.30154375 -0.306825 -0.30154375 -0.52228125V1.36615625h-6.03076875v13.2676875h2.6133375c0.46424375 0.000025 0.75440625 0.5026 0.5222625 0.90464375 -0.107725 0.18656875 -0.306825 0.3015 -0.5222625 0.3015125H4.7835875c-0.46424375 -0.00001875 -0.75440625 -0.5026 -0.5222625 -0.9046375 0.107725 -0.186575 0.306825 -0.30150625 0.5222625 -0.30151875h2.6133375V1.36615625H1.36615625v2.61333125c0 0.46425 -0.50256875 0.75440625 -0.90461875 0.52228125C0.27494375 4.3940375 0.16 4.19494375 0.16 3.9794875V0.763075c0 -0.33308125 0.26999375 -0.6030875 0.603075 -0.603075h14.47385c0.33305625 0.0000125 0.603075 0.27001875 0.603075 0.603075Z" stroke-width="0.0625"></path>
+          </svg>
+        </div>
+        <p class="nata-sans text-xs tool-button-text active-invoice-button-text">Text</p>
+      </div>
+    </div>
+
+    <!-- Dividers Button -->
+    <div class="flex flex-col items-center justify-center">
+      <div class="tool-button flex flex-col items-center justify-center" data-partial="dividers" style="cursor: pointer;">
+        <div class="border rounded-full p-2.5 tool-button-outer" data-tool="dividers">
+          <svg class="tool-button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Minus-Light--Streamline-Phosphor" height="14" width="14">
+            <path d="M15.84 8c0 0.276375 -0.22405 0.500425 -0.500425 0.500425H0.660425c-0.385225 0 -0.62599375 -0.41701875 -0.43338125 -0.7506375 0.08939375 -0.15483125 0.25459375 -0.2502125 0.43338125 -0.2502125h14.67915c0.276375 0 0.500425 0.22405 0.500425 0.500425Z" stroke-width="0.0625"></path>
+          </svg>
+        </div>
+        <p class="nata-sans text-xs tool-button-text">Dividers</p>
+      </div>
+    </div>
+
+    <!-- Image Button -->
+    <div class="flex flex-col items-center justify-center">
+      <div class="tool-button flex flex-col items-center justify-center" data-partial="image" style="cursor: pointer;">
+        <div class="border rounded-full p-2.5 tool-button-outer" data-tool="image">
+          <svg class="tool-button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Image-Square-Light--Streamline-Phosphor" height="14" width="14">
+            <path d="M14.6723375 0.16H1.3276625C0.68278125 0.16 0.16 0.68278125 0.16 1.32765625v13.34468125c0 0.6449 0.52275625 1.1676875 1.1676625 1.1676625h13.344675c0.6448625 -0.00003125 1.1676625 -0.5228 1.1676625 -1.1676625V1.3276625c0 -0.64488125 -0.52278125 -1.1676625 -1.1676625 -1.1676625ZM1.16085 14.6723375V1.3276625c0 -0.09213125 0.07468125 -0.16681875 0.1668125 -0.1668125h13.344675c0.092125 0.00000625 0.1668125 0.0746875 0.1668125 0.1668125v6.855825l-2.3436625 -2.34365625c-0.45600625 -0.45605625 -1.19539375 -0.45605625 -1.6514 0L1.84476875 14.83915h-0.51710625c-0.09213125 0 -0.1668125 -0.07468125 -0.1668125 -0.1668125Zm13.5114875 0.1668125H3.2601375l8.2912125 -8.29121875c0.0651625 -0.06523125 0.17088123 -0.06523125 0.2360375 0l3.0517625 3.05093125v5.073475c0 0.09213125 -0.07468125 0.1668125 -0.1668125 0.1668125ZM5.3310625 7.16595625c1.41250625 0 2.29531875 -1.529075 1.58906875 -2.7523375 -0.70625625 -1.2232625 -2.47188125 -1.2232625 -3.17813125 0 -0.16104375 0.2789375 -0.24583125 0.59535625 -0.24583125 0.91744375 0 1.01341875 0.82148125 1.8349375 1.83489375 1.83489375Zm0 -2.6689375c0.64205 0 1.043325 0.6950375 0.72230625 1.25106875 -0.321025 0.556025 -1.12358125 0.556025 -1.44460625 0 -0.0732 -0.12679375 -0.11174375 -0.27061875 -0.11174375 -0.417025 0 -0.46064375 0.3734 -0.8340625 0.83404375 -0.83404375Z" stroke-width="0.0625"></path>
+          </svg>
+        </div>
+        <p class="nata-sans text-xs tool-button-text">Image</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="partial-container" style="width: 300px; min-height: calc(100vh - 120px);" class="border-r bg-white">
+    <%= render 'text' %>
+  </div>
+
+  <div style="width: calc(100% - 390px); min-height: calc(100vh - 120px);" class="p-5 flex items-center justify-center">
+    <div class="bg-white rounded p-5" style="width: 826.66px; height: 1169.33px">
+      <!-- Header Section -->
+      <div>
+        <h1 class="headline-text-change" style="text-align: right;">Receipt 1</h1>
+        <p class="text-text-change" style="text-align: right;">Issue Date: 19 Sept 2025</p>
+      </div>
+      <!-- Name Section -->
+      <div>
+        <p class="title-text-change">Jack Dawson</p>
+      </div>
+      <!-- Break Section -->
+      <div style="padding: 20px 0px">
+        <hr>
+      </div>
+      <!-- Address Section -->
+      <div>
+        <p class="title-text-change" style="line-height: 16px; margin-bottom: 5px">Customer Details</p>
+        <p class="text-text-change">Customer Name</p>
+        <p class="text-text-change">Company Name</p>
+        <p class="text-text-change">123 Street<br>Los Angeles, California 00000<br>United States</p>
+        <p class="text-text-change">Email@domain.com</p>
+        <p class="text-text-change">(123) 456-7890</p>
+        <p class="text-text-change">VAT ID: 1234567</p>
+      </div>
+      <!-- Tables Section -->
+      <div style="margin-top: 40px">
+        <!-- Items Table -->
+        <div style="border-bottom: 2px solid black;">
+          <!-- Items Table Top -->
+          <div style="display: flex; border-bottom: 2px solid black; padding: 10px 0px;">
+            <div style="width: 20%;">
+              <p class="title-text-change">Items</p>
+            </div>
+            <div style="width: 20%;">
+              <p class="title-text-change">Quantity</p>
+            </div>
+            <div style="width: 20%;">
+              <p class="title-text-change">Price</p>
+            </div>
+            <div style="width: 20%;">
+              <p class="title-text-change">Tax</p>
+            </div>
+            <div style="width: 20%;">
+              <p class="title-text-change" style="text-align: right">Line Total</p>
+            </div>
+          </div>
+          <!-- Items Table Row -->
+          <div style="padding: 10px 0px; display: flex; align-items: center">
+            <div style="width: 20%;">
+              <p class="items-text-change">Item Name</p>
+              <p class="text-text-change">Item Description</p>
+            </div>
+            <div style="width: 20%;">
+              <p class="text-text-change">1</p>
+            </div>
+            <div style="width: 20%;">
+              <p class="text-text-change">£100.00</p>
+            </div>
+            <div style="width: 20%;">
+              <p class="text-text-change">Tax 1 (15%)</p>
+            </div>
+            <div style="width: 20%;">
+              <p class="text-text-change" style="text-align: right">£115.00</p>
+            </div>
+          </div>
+          <!-- Items Table Break -->
+          <div>
+            <hr>
+          </div>
+          <!-- Items Table Row -->
+          <div style="padding: 10px 0px; display: flex; align-items: center">
+            <div style="width: 20%;">
+              <p class="items-text-change">Item Name</p>
+              <p class="text-text-change">Item Description</p>
+            </div>
+            <div style="width: 20%;">
+              <p  class="text-text-change">1</p>
+            </div>
+            <div style="width: 20%;">
+              <p class="text-text-change">£100.00</p>
+            </div>
+            <div style="width: 20%;">
+              <p  class="text-text-change">Tax 1 (15%)</p>
+            </div>
+            <div style="width: 20%;">
+              <p class="text-text-change" style=" text-align: right">£115.00</p>
+            </div>
+          </div>
+        </div>
+        <!-- Totals Section -->
+        <div style="display: flex; justify-content: end; margin: 10px 0px;">
+          <div style="width: 50%;">
+            <!-- Subtotal -->
+            <div style="padding: 10px 0px;">
+              <div style="display: flex;">
+                <div style="width: 50%;">
+                  <p class="title-text-change">Subtotal</p>
+                </div>
+                <div style="width: 50%;">
+                  <p class="title-text-change" style="text-align: right">£200.00</p>
+                </div>
+              </div>
+              <div style="display: flex;">
+                <div style="width: 50%;">
+                  <p class="text-text-change">Taxes</p>
+                </div>
+                <div style="width: 50%;">
+                  <p class="text-text-change" style="text-align: right">£30.00</p>
+                </div>
+              </div>
+            </div>
+            <!-- Break Section -->
+            <div>
+              <hr>
+            </div>
+            <!-- Total -->
+            <div style="padding: 10px 0px;">
+              <div style="display: flex;">
+                <div style="width: 50%;">
+                  <p class="title-text-change" >Total</p>
+                </div>
+                <div style="width: 50%;">
+                  <p class="title-text-change" style="text-align: right">£230.00</p>
+                </div>
+              </div>
+              <div style="display: flex;">
+                <div style="width: 50%;">
+                  <p class="text-text-change">Total Paid</p>
+                </div>
+                <div style="width: 50%;">
+                  <p class="text-text-change" style="text-align: right">£140.00</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Break Section -->
+        <div>
+          <hr>
+        </div>
+        <!-- Payment Details Section -->
+        <div style="padding: 10px 0px;">
+          <h3 class="title-text-change">Payment Details</h3>
+          <div style="display: flex; gap: 20px; margin-top: 10px">
+            <p class="text-text-change">19/09/2025</p>
+            <p class="text-text-change">Credit Card ****0000</p>
+            <p class="text-text-change">£140.00</p>
+          </div>
+        </div>
+        <!-- Break Section -->
+        <div>
+          <hr>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    window.invoiceDesignData = <%= raw current_user.website.invoice_template.design.to_json %>;
+</script>

@@ -66,7 +66,7 @@
             </svg>
           </div>
         </div>
-        <%= raw(render_editor_content(foundComponent, current_user.id, @page_data['theme_page_id'], component['component_page_id'])) %>
+        <%= raw(render_edit_field_button(render_editor_content(foundComponent, current_user.id, @page_data['theme_page_id'], component['component_page_id']))) %>
       </section>
     <% end %>
 
@@ -77,6 +77,7 @@
       <% foundComponent = Component.find(component["component_id"]) %>
       <% component_js = foundComponent.content['js'] %>
       <% if component_js.present? && !included_js.include?(foundComponent.id) %>
+      <% component_js = component_js.gsub(/document\.addEventListener\(["']DOMContentLoaded["']/, 'document.addEventListener("turbo:load"') %>
       <%= raw(component_js) %>
       <% included_js.add(foundComponent.id) %>
       <% end %>

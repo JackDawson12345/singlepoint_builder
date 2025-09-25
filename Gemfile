@@ -83,3 +83,5 @@ gem 'omniauth-rails_csrf_protection'
 
 gem 'useragent'
 gem 'geocoder'
+
+gem 'nokogiri'

@@ -5,7 +5,7 @@
 
 .ql-editor {
     min-height: 120px;
-    font-family: "Nata Sans", sans-serif !important;
+    font-family: "Montserrat", sans-serif !important;
     font-size: 0.875rem !important;
     line-height: 1.25rem !important;
 }
@@ -85,6 +85,10 @@
 .nata-sans{
     font-family: "Nata Sans", sans-serif;
 }
+.montserrat{
+    font-family: "Montserrat", sans-serif;
+}
+
 .page-title{
     font-size: 28px;
     font-weight: 700;
@@ -233,4 +237,116 @@
     background-color: #3b82f6;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.active-invoice-button-outer{
+    background: rgba(59, 130, 246, 1);
+}
+
+.active-invoice-button{
+    fill: white !important;
+}
+
+.active-invoice-button-text{
+    color: rgba(59, 130, 246, 1);
+}
+
+.tool-button {
+    text-decoration: none;
+    color: inherit;
+}
+
+.tool-button:hover {
+    text-decoration: none;
+}
+
+.active-divider-button{
+    position: relative;
+    border-color: rgba(59, 130, 246, 1);
+}
+
+.active-divider-button::before{
+    content: "✓";
+    width: 20px;
+    height: 20px;
+    background: rgba(59, 130, 246, 1);
+    color: white;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.text-invoice-selector button{
+    opacity: 0;
+}
+
+
+.text-invoice-selector:hover h3{
+    opacity: 0;
+}
+.text-invoice-selector:hover .text-overlay{
+    opacity: 1;
+    background: #b6b6b6;
+    transition: 0.4s;
+}
+
+.text-invoice-selector:hover button{
+    opacity: 1;
+    transition: 0.4s;
+}
+
+.active-font-style{
+    background: rgba(219,234,254);
+    border-color: rgba(59,130,246);
+}
+.active-font-style svg{
+    fill: rgba(59,130,246)
+}
+
+.accordion-arrow.rotated {
+    transform: rotate(180deg) !important;
+}
+
+.single-field-form{
+    min-height: calc(100vh - 251px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.number-with-suffix {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.number-field-with-px {
+    padding-right: 30px !important;
+}
+
+.number-with-suffix::after {
+    content: "px";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    pointer-events: none;
+}
+
+.text-green-500{
+    color: #0e8c0e !important;
+}
+
+.bg-green-500{
+    background-color: #0e8c0e !important;
+}
+
+.border-green-500{
+    border-color: #0e8c0e !important;
 }

@@ -20,6 +20,7 @@ class Manage::Website::ServicesController < Manage::BaseController
       "content" => "",
       "excerpt" => "",
       "featured_image" => "",
+      "icon" => "",
       "categories" => [],
       "parent_page" => nil
     }
@@ -38,6 +39,17 @@ class Manage::Website::ServicesController < Manage::BaseController
         content_type: uploaded_file.content_type
       )
       @service["featured_image"] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
+    end
+
+    # Handle file upload for icon
+    if params[:service][:icon].present?
+      uploaded_file = params[:service][:icon]
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: uploaded_file.open,
+        filename: uploaded_file.original_filename,
+        content_type: uploaded_file.content_type
+      )
+      @service["icon"] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
     end
 
     # Handle parent page - save full page information
@@ -85,8 +97,6 @@ class Manage::Website::ServicesController < Manage::BaseController
                   "title_tag" => '',
                   "meta_description" => ''}
       }
-    else
-
     end
 
     if @website.update(services: services)
@@ -100,6 +110,8 @@ class Manage::Website::ServicesController < Manage::BaseController
   end
 
   def update
+    service_params_hash = service_params.to_h
+
     # Handle file upload for featured_image
     if params[:service][:featured_image].present?
       uploaded_file = params[:service][:featured_image]
@@ -108,11 +120,22 @@ class Manage::Website::ServicesController < Manage::BaseController
         filename: uploaded_file.original_filename,
         content_type: uploaded_file.content_type
       )
-      service_params_hash = service_params.to_h
       service_params_hash["featured_image"] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
     else
-      service_params_hash = service_params.to_h
       service_params_hash["featured_image"] = @service["featured_image"] # Keep existing image
+    end
+
+    # Handle file upload for icon
+    if params[:service][:icon].present?
+      uploaded_file = params[:service][:icon]
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: uploaded_file.open,
+        filename: uploaded_file.original_filename,
+        content_type: uploaded_file.content_type
+      )
+      service_params_hash["icon"] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
+    else
+      service_params_hash["icon"] = @service["icon"] # Keep existing icon
     end
 
     # Handle parent page - save full page information
@@ -209,13 +232,13 @@ class Manage::Website::ServicesController < Manage::BaseController
     categories["services"] ||= {}
     categories["products"] ||= {}
 
-    # Add new category to blogs categories
+    # Add new category to services categories
     categories["services"][@category["id"]] = @category
 
     if @website.update(categories: categories)
-      redirect_to categories_manage_website_services_path, notice: 'Blog category was successfully created.'
+      redirect_to categories_manage_website_services_path, notice: 'Service category was successfully created.'
     else
-      @blog_categories = categories["services"]
+      @service_categories = categories["services"]
       @new_category = @category
       render :categories
     end
@@ -239,8 +262,9 @@ class Manage::Website::ServicesController < Manage::BaseController
   end
 
   def service_params
-    params.require(:service).permit(:name, :slug, :content, :excerpt, :categories, :parent_page)
+    params.require(:service).permit(:name, :slug, :content, :excerpt, :categories, :parent_page, :icon)
   end
+
   def category_params
     params.require(:category).permit(:name, :slug, :parent_category, :description, :image)
   end

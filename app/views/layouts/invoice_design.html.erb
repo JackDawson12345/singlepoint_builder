@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= content_for(:title) || "Manage Website - Website Builder" %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= yield :head %>
+
+  <link rel="icon" href="/icon.png" type="image/png">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icon.png">
+
+  <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nata+Sans:wght@100..900&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-black-gray" data-load-partial-url="<%= manage_settings_payments_invoices_load_partial_path(partial: 'PARTIAL_PLACEHOLDER') %>"
+      data-load-text-partial-url="<%= manage_settings_payments_invoices_load_text_partial_path(partial: 'PARTIAL_PLACEHOLDER') %>">
+<!-- Manage Navigation -->
+<nav class="bg-black-gray px-6 py-3 flex gap-5 justify-between">
+  <div class="w-auto">
+    <h1 class="text-white text-3xl">SinglePoint</h1>
+  </div>
+  <div class="flex gap-5" style="width: 31%">
+    <div class="flex items-center gap-2">
+      <a href="" class="text-white">My Website</a>
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M11.7233 3.70549L6.37816 9.05067C6.16937 9.2597 5.83061 9.2597 5.62182 9.05067L0.276632 3.70549C-0.0144847 3.41438 0.118711 2.91728 0.516384 2.81073C0.700945 2.76128 0.897871 2.81404 1.03298 2.94915L5.99999 7.91683L10.967 2.94915C11.2581 2.65803 11.7552 2.79123 11.8618 3.1889C11.9112 3.37346 11.8585 3.57038 11.7233 3.70549Z" fill="white"/>
+      </svg>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="" class="text-white">Explore</a>
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M11.7233 3.70549L6.37816 9.05067C6.16937 9.2597 5.83061 9.2597 5.62182 9.05067L0.276632 3.70549C-0.0144847 3.41438 0.118711 2.91728 0.516384 2.81073C0.700945 2.76128 0.897871 2.81404 1.03298 2.94915L5.99999 7.91683L10.967 2.94915C11.2581 2.65803 11.7552 2.79123 11.8618 3.1889C11.9112 3.37346 11.8585 3.57038 11.7233 3.70549Z" fill="white"/>
+      </svg>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="" class="text-white">Hire A Professional</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="" class="text-white">Help</a>
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M11.7233 3.70549L6.37816 9.05067C6.16937 9.2597 5.83061 9.2597 5.62182 9.05067L0.276632 3.70549C-0.0144847 3.41438 0.118711 2.91728 0.516384 2.81073C0.700945 2.76128 0.897871 2.81404 1.03298 2.94915L5.99999 7.91683L10.967 2.94915C11.2581 2.65803 11.7552 2.79123 11.8618 3.1889C11.9112 3.37346 11.8585 3.57038 11.7233 3.70549Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+  <div style="width: 34%;" class="min-h-full flex flex-items">
+    <form action="/action_page.php" class="flex flex-items w-full">
+      <input class="w-full" type="text" id="fname" name="fname" style="background: #303030; border: 1px solid #484848; border-radius: 10px">
+    </form>
+  </div>
+  <div class="flex gap-5 items-center w-auto relative">
+    <div>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M21.9508 1.14465H2.04926C1.05008 1.1447 0.240022 1.9547 0.240022 2.95388V21.0462C0.23585 21.7505 0.644647 22.392 1.28486 22.6858C1.52437 22.797 1.78518 22.8549 2.04926 22.8554C2.47397 22.8544 2.88461 22.7029 3.20829 22.428L3.21847 22.42L6.91155 19.2369H21.9508C22.95 19.2369 23.76 18.4269 23.76 17.4277V2.95388C23.76 1.95467 22.95 1.14465 21.9508 1.14465ZM21.9508 17.4277H6.57233C6.35512 17.4278 6.14519 17.5061 5.98093 17.6482L2.04926 21.0462V2.95388H21.9508V17.4277ZM7.47694 8.38156C7.47694 7.88196 7.88195 7.47695 8.38155 7.47695H15.6185C16.3148 7.47698 16.7501 8.23085 16.4019 8.83391C16.2403 9.11378 15.9416 9.28618 15.6185 9.28618H8.38155C7.88195 9.28618 7.47694 8.88117 7.47694 8.38156ZM7.47694 12C7.47694 11.5004 7.88195 11.0954 8.38155 11.0954H15.6185C16.3148 11.0954 16.7501 11.8493 16.4019 12.4523C16.2403 12.7322 15.9417 12.9047 15.6185 12.9046H8.38155C7.88193 12.9047 7.47694 12.4996 7.47694 12Z" fill="white"/>
+      </svg>
+    </div>
+    <div class="notification-top">
+      <div class="relative notification-icon cursor-pointer">
+        <p class="bg-blue-500 w-5 h-5 rounded-full text-sm flex items-center justify-center text-white nata-sans absolute" style="top: -10px; right: -10px"><%= current_user.unread_notifications_count %></p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M22.4494 6.23899C22.0225 6.46006 21.4972 6.29341 21.2759 5.86667C20.4446 4.2244 19.1863 2.83636 17.6332 1.8484C17.0658 1.49055 17.0986 0.652706 17.6922 0.340275C17.9677 0.195281 18.2996 0.208265 18.5629 0.374344C20.3729 1.53327 21.8427 3.15215 22.8218 5.06541C23.0428 5.49232 22.8762 6.01761 22.4494 6.23899ZM1.95095 6.33697C2.27621 6.33683 2.57429 6.15547 2.7239 5.86667C3.55521 4.2244 4.81352 2.83636 6.36659 1.8484C6.93394 1.49055 6.90117 0.652706 6.30758 0.340275C6.0321 0.195281 5.70018 0.208265 5.43686 0.374344C3.62685 1.53327 2.15713 3.15215 1.178 5.06541C0.877742 5.645 1.29821 6.33669 1.95095 6.33697ZM22.211 17.6526C22.8865 18.8109 22.0548 20.2661 20.7139 20.2719C20.7118 20.2719 20.7097 20.2719 20.7076 20.2719H16.2658C15.5987 23.5571 11.6255 24.8882 9.114 22.6679C8.4047 22.0408 7.91908 21.1997 7.73068 20.2719H3.28893C1.94804 20.2692 1.11285 18.816 1.78559 17.6561C1.78627 17.6549 1.78697 17.6538 1.78766 17.6526C2.76855 15.9597 3.28893 13.5526 3.28893 10.6916C3.28893 3.98719 10.5467 -0.203091 16.3529 3.14914C19.0476 4.70491 20.7076 7.58009 20.7076 10.6916C20.7076 13.5516 21.228 15.9586 22.211 17.6526ZM14.4608 20.2719H9.5357C10.2079 22.1676 12.6802 22.6247 13.9858 21.0947C14.1931 20.8518 14.3541 20.5729 14.4608 20.2719ZM20.7076 18.53C19.5492 16.541 18.9657 13.9043 18.9657 10.6916C18.9657 5.32807 13.1595 1.97586 8.51452 4.65763C6.35878 5.90225 5.03079 8.20239 5.03079 10.6916C5.03079 13.9054 4.44509 16.5421 3.28893 18.53H20.7076Z" fill="white"/>
+        </svg>
+      </div>
+
+      <div style="left: -14px;" class="notification-section z-10 absolute top-13 px-1 bg-black-gray w-300 hidden">
+        <% notifications = Notification.where(user_id: current_user.id, read: false) %>
+        <% if notifications.count == 0 %>
+          <div class="p-2 py-6 pt-4 flex flex-col gap-4 items-center">
+            <p class="nata-sans text-white text-sm text-center">No new notifications to show. You can view all your notifications with the button below</p>
+            <%= link_to 'View all Notifications', admin_notifications_path, class: 'nata-sans bg-blue-500 px-4 py-0.5 rounded-full text-white' %>
+          </div>
+        <% else %>
+          <% notifications.last(5).each do |notification| %>
+            <div class="border-b px-2 py-2">
+              <%= link_to notification.notification_type.truncate(40), admin_notification_path(notification), class: 'nata-sans text-white text-sm font-semibold hover:text-blue-500'%>
+              <p class="nata-sans text-white text-xs font-base"><%= notification.message.truncate(80) %></p>
+            </div>
+          <% end %>
+        <% end %>
+
+      </div>
+
+    </div>
+    <div>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M21.9508 1.59717H2.04922C1.04998 1.59712 0.23999 2.40716 0.23999 3.4064V21.4987C0.240346 22.1711 0.948112 22.6081 1.54942 22.3072L4.76307 20.7004L7.97671 22.3072C8.23153 22.4347 8.53153 22.4347 8.78634 22.3072L12 20.7004L15.2136 22.3072C15.4684 22.4347 15.7685 22.4347 16.0233 22.3072L19.2369 20.7004L22.4506 22.3072C23.0519 22.6081 23.7596 22.1711 23.76 21.4987V3.4064C23.76 2.40719 22.95 1.59717 21.9508 1.59717ZM21.9508 20.0355L19.6417 18.8799C19.3869 18.7523 19.0869 18.7523 18.8321 18.8799L15.6184 20.4878L12.4048 18.8799C12.15 18.7523 11.85 18.7523 11.5952 18.8799L8.38153 20.4878L5.16788 18.8799C4.91307 18.7523 4.61307 18.7523 4.35825 18.8799L2.04922 20.0355V3.4064H21.9508V20.0355ZM12.9046 9.73871C12.9046 9.23911 13.3096 8.8341 13.8092 8.8341H19.2369C19.9333 8.8341 20.3685 9.58794 20.0203 10.191C19.8587 10.4709 19.5601 10.6433 19.2369 10.6433H13.8092C13.3096 10.6434 12.9046 10.2383 12.9046 9.73871ZM12.9046 13.3572C12.9046 12.8575 13.3096 12.4525 13.8092 12.4526H19.2369C19.9333 12.4526 20.3685 13.2064 20.0203 13.8095C19.8587 14.0894 19.5601 14.2618 19.2369 14.2618H13.8092C13.3096 14.2618 12.9046 13.8568 12.9046 13.3572ZM4.76306 16.071H10.1908C10.6903 16.071 11.0954 15.666 11.0954 15.1664V7.92947C11.0954 7.42989 10.6903 7.02488 10.1908 7.02486H4.76307C4.26345 7.02484 3.85845 7.42985 3.85845 7.92947V15.1664C3.85845 15.666 4.26344 16.071 4.76306 16.071ZM5.66768 8.8341H9.28614V14.2618H5.66768V8.8341Z" fill="white"/>
+      </svg>
+    </div>
+  </div>
+  <div class="w-auto relative profile-icon">
+    <div class="flex gap-3">
+      <div class="bg-blue-500 w-10 h-10 flex items-center justify-center rounded-lg">
+        <% if current_user.profile_image.attached? %>
+          <%= image_tag current_user.profile_image, class: "w-10 h-10 rounded-lg" %>
+        <% else %>
+          <% unless current_user.full_name.nil? %>
+            <h1 class="text-white text-1xl uppercase"><%= current_user.full_name.first(2) %></h1>
+          <% else %>
+            <h1 class="text-white text-1xl uppercase"><%= current_user.get_name_from_email.first(2) %></h1>
+          <% end %>
+
+        <% end %>
+      </div>
+      <div class="flex items-center">
+        <% unless current_user.full_name.nil? %>
+          <p class="text-white capitalize"> <%= current_user.full_name.truncate(10) %></p>
+        <% else %>
+          <p class="text-white capitalize"> <%= current_user.get_name_from_email.truncate(10) %></p>
+        <% end %>
+      </div>
+    </div>
+    <div class="profile-section hidden bg-black-gray absolute w-75 right--6 top-13 p-5">
+      <div class="flex gap-2 border-b pb-4">
+        <div>
+          <% if current_user.profile_image.attached? %>
+            <%= image_tag current_user.profile_image, class: "w-15 h-15 rounded-full" %>
+          <% else %>
+            <% unless current_user.full_name.nil? %>
+              <h1 class="text-white text-1xl uppercase"><%= current_user.full_name.first(2) %></h1>
+            <% else %>
+              <h1 class="text-white text-1xl uppercase"><%= current_user.get_name_from_email.first(2) %></h1>
+            <% end %>
+
+          <% end %>
+        </div>
+        <div class="flex flex-col justify-center">
+          <h4 class="text-white text-base font-bold"><%= current_user.full_name %></h4>
+          <h5 class="text-white text-sm"><%= current_user.email %></h5>
+        </div>
+      </div>
+      <div class="flex items-center pt-4">
+        <div class="w-7/10">
+          <%= link_to manage_account_settings_path, class: 'flex gap-2 items-center' do %>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="white" id="Gear-Light--Streamline-Phosphor" height="12" width="12">
+              <path d="M8.999142187499999 5.04689765625c-3.04193671875 0 -4.9431515625 3.2930015624999998 -3.4221796875 5.92739296875 1.5209648437499999 2.6343984375 5.323387500000001 2.6343984375 6.844359375 0 0.3468234375 -0.60071484375 0.5294109375 -1.2821484375 0.5294109375 -1.9757953125 -0.002840625 -2.18122734375 -1.7703632812499999 -3.94875703125 -3.951590625 -3.9515976562499997Zm0 6.87234375c-2.24838984375 0.0000984375 -3.6536132812499997 -2.43378984375 -2.52950625 -4.381003125 1.1241070312499999 -1.94721328125 3.93459609375 -1.94733984375 5.0588789062499995 -0.00022500000000000002 0.2563875 0.44403046875 0.39136640624999997 0.9477421874999999 0.39136640624999997 1.46048203125 0 1.61303203125 -1.30770703125 2.9206687500000004 -2.9207390625 2.9207460937499996Zm7.387762500000001 -2.67677578125c0.0051539062500000005 -0.16235859375 0.0051539062500000005 -0.32558203124999996 0 -0.487940625l1.3169109374999999 -1.64592421875c0.1020796875 -0.127771875 0.1374609375 -0.29640234374999996 0.09535078125 -0.4544296875 -0.20603671875 -0.7765171875 -0.51456796875 -1.52213203125 -0.9174515624999999 -2.2171921875000002 -0.08116171875 -0.14307890625 -0.22573828125 -0.23882343749999999 -0.3891515625 -0.257709375l-2.10035390625 -0.2328046875q-0.165796875 -0.1778203125 -0.3436171875 -0.3436171875l-0.2336625 -2.10121171875c-0.0188859375 -0.16341328125000001 -0.11463046875 -0.30798984375 -0.257709375 -0.3891515625 -0.69421640625 -0.4017234375 -1.43861484375 -0.70965 -2.21375390625 -0.9157359374999999 -0.15843515625 -0.0414 -0.32711484375 -0.0050484375 -0.4544296875 0.09793125l-1.6493625 1.32034921875c-0.16235859375 -0.0051539062500000005 -0.32558203124999996 -0.0051539062500000005 -0.487940625 0L7.10924765625 0.293821875c-0.127771875 -0.1020796875 -0.29640234374999996 -0.13746796875 -0.4544296875 -0.0953578125C5.87830078125 0.4045078125 5.1326859375 0.7130390625 4.43762578125 1.11592265625c-0.14307890625 0.08116171875 -0.23882343749999999 0.22573828125 -0.257709375 0.38914453125000004l-0.22936640625000002 2.1003609375q-0.1778203125 0.1666546875 -0.3436171875 0.3436171875l-2.1020765625 0.23881640625c-0.16340624999999998 0.0188859375 -0.30798281250000004 0.11463046875 -0.38914453125000004 0.257709375C0.71398828125 5.139780468750001 0.4060546875 5.8841859375 0.19996875 6.659325000000001c-0.04038046875 0.15642421874999998 -0.0050835937500000004 0.32274140625 0.0953578125 0.44927578125l1.32034921875 1.6493625c-0.0051539062500000005 0.16235859375 -0.0051539062500000005 0.325575 0 0.48793359375L0.29446875 10.892685937500001c-0.1020796875 0.127771875 -0.13746796875 0.29640234374999996 -0.0953578125 0.4544296875 0.20640234375000002 0.77503359375 0.5149265625 1.51917890625 0.9174585937499999 2.21289609375 0.08116171875 0.14307890625 0.22573828125 0.23882343749999999 0.38914453125000004 0.257709375l2.1003609375 0.2328046875q0.1666546875 0.1778203125 0.3436171875 0.3436171875l0.238809375 2.09863828125c0.0188859375 0.16340624999999998 0.1146375 0.30798281250000004 0.25771640625 0.38914453125000004 0.694209375 0.4017234375 1.43861484375 0.70965 2.21375390625 0.9157359374999999 0.15802734375 0.04211015625 0.32665781250000003 0.00672890625 0.4544296875 -0.09535078125l1.6407703125 -1.3160531249999998c0.16235859375 0.0051539062500000005 0.32558203124999996 0.0051539062500000005 0.487940625 0l1.6502203125 1.3212070312500002c0.09148359375 0.0729984375 0.20509453125 0.11268984375 0.32213671875 0.11253515625 0.04464140625 -0.00016171875 0.08909296874999999 -0.005934375 0.13229296875 -0.017184375 0.7750265625 -0.2063953125 1.51917890625 -0.51491953125 2.21289609375 -0.9174515624999999 0.14307890625 -0.08116171875 0.23882343749999999 -0.22573828125 0.257709375 -0.3891515625l0.23279765625 -2.10035390625q0.17782734375 -0.165796875 0.3436171875 -0.3436171875l2.10121875 -0.2336625c0.16340624999999998 -0.0188859375 0.30798984375 -0.11463046875 0.38914453125000004 -0.257709375 0.40187109374999996 -0.6941390624999999 0.70981171875 -1.4385656249999998 0.9157429687499999 -2.21375390625 0.04211015625 -0.15802734375 0.006721875 -0.32665781250000003 -0.0953578125 -0.4544296875Zm-0.2663015625 3.5761921875000002 -2.0307796875 0.225928125c-0.12689296875 0.014624999999999999 -0.24383671875000001 0.075853125 -0.32815546874999996 0.17180859375 -0.16978359375 0.1912640625 -0.35078906249999997 0.37226953125 -0.542053125 0.542053125 -0.09595546875 0.08431875 -0.15717656249999998 0.2012625 -0.17180859375 0.32815546874999996l-0.225928125 2.0299148437500003c-0.47546015625000004 0.25355390625 -0.97503046875 0.45902109375 -1.4912999999999998 0.61335703125l-1.5952359375 -1.2765375c-0.09149062499999999 -0.0729984375 -0.2051015625 -0.1126828125 -0.32214375 -0.11253515625h-0.0309234375c-0.25521328125000003 0.01460390625 -0.51105234375 0.01460390625 -0.766265625 0 -0.1274625 -0.00779765625 -0.25327968749999996 0.03199921875 -0.3530671875 0.11167734375L6.66855703125 16.729875c-0.5157984375 -0.15518671875 -1.01480625 -0.36152578125 -1.48957734375 -0.61593046875l-0.225928125 -2.0290640625000003c-0.014624999999999999 -0.12689296875 -0.075853125 -0.24383671875000001 -0.17180859375 -0.3281484375 -0.1912640625 -0.169790625 -0.37226953125 -0.35079609375 -0.542053125 -0.54206015625 -0.08431875 -0.0959484375 -0.2012625 -0.15717656249999998 -0.32815546874999996 -0.17180859375l-2.0299148437500003 -0.225928125c-0.25329375 -0.47408203125 -0.45875390625 -0.9722109375 -0.61335703125 -1.486996875l1.2765375 -1.59524296875c0.07967109375 -0.09979453125 0.11946796875 -0.22561171875 0.11167031250000001 -0.3530671875 -0.01460390625 -0.25521328125000003 -0.01460390625 -0.51105234375 0 -0.766265625 0.00779765625 -0.1274625 -0.03199921875 -0.25327265625 -0.11167031250000001 -0.3530671875L1.2677625 6.66791015625c0.15518671875 -0.5157984375 0.36151875 -1.01480625 0.61593046875 -1.48957734375l2.0290570312500003 -0.225928125c0.12689999999999999 -0.014624999999999999 0.24383671875000001 -0.075853125 0.32815546874999996 -0.17180859375 0.169790625 -0.1912640625 0.35078906249999997 -0.37226953125 0.542053125 -0.542053125 0.09595546875 -0.08431875 0.15718359375000002 -0.2012625 0.17180859375 -0.32815546874999996l0.225928125 -2.0299148437500003c0.47408906250000005 -0.25329375 0.9722109375 -0.45875390625 1.48700390625 -0.61335703125l1.59524296875 1.2765375c0.09979453125 0.07967109375 0.2256046875 0.11946796875 0.3530671875 0.11167031250000001 0.25521328125000003 -0.01460390625 0.51105234375 -0.01460390625 0.766265625 0 0.12745546875 0.00779765625 0.25327265625 -0.03199921875 0.3530671875 -0.11167031250000001l1.594378125 -1.2765375c0.51580546875 0.15518671875 1.01480625 0.36151875 1.489584375 0.61593046875l0.225928125 2.0307796875c0.014624999999999999 0.12689296875 0.075853125 0.24383671875000001 0.17180859375 0.32815546874999996 0.1912640625 0.16978359375 0.37226953125 0.35078906249999997 0.542053125 0.542053125 0.08431875 0.09595546875 0.2012625 0.15717656249999998 0.32815546874999996 0.17180859375l2.0299148437500003 0.225928125c0.25318828125000004 0.473540625 0.45864843749999995 0.97107890625 0.61335703125 1.4852812499999999L15.453984375 8.262295312500001c-0.079678125 0.09979453125 -0.11946796875 0.22561171875 -0.11167734375 0.3530671875 0.01460390625 0.25521328125000003 0.01460390625 0.51105234375 0 0.766265625 -0.007790625 0.1274625 0.03199921875 0.25327265625 0.11167734375 0.3530671875l1.2765375 1.594378125c-0.15463828125 0.5157421875 -0.36039375 1.01474296875 -0.61421484375 1.489584375Z" stroke-width="0.0703"></path>
+            </svg>
+            <p class="text-xs text-white nata-sans font-semibold">Account Settings</p>
+          <% end %>
+        </div>
+        <div class="w-3/10">
+          <%= link_to "Log Out", destroy_user_session_path, class: 'text-white nata-sans text-xs cursor-pointer py-1 px-3 border rounded-full', data: { "turbo-method": :delete } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="bg-gray-50" style="border-radius: 20px 20px 0px 0px; min-height: calc(100vh - 64px)">
+  <!-- Flash Messages -->
+  <% if notice.present? %>
+    <div class="mb-4 px-4 py-3 bg-green-100 border border-green-400 text-green-700 rounded">
+      <%= notice %>
+    </div>
+  <% end %>
+
+  <% if alert.present? %>
+    <div class="mb-4 px-4 py-3 bg-red-100 border border-red-400 text-red-700 rounded">
+      <%= alert %>
+    </div>
+  <% end %>
+
+  <!-- Page Content -->
+  <div class="w-full">
+    <%= yield %>
+  </div>
+</main>
+
+<script>
+    // Store function references for proper cleanup (using window to avoid redeclaration errors)
+    window.notificationToggleHandler = window.notificationToggleHandler || null;
+    window.notificationOutsideHandler = window.notificationOutsideHandler || null;
+    window.profileToggleHandler = window.profileToggleHandler || null;
+    window.profileOutsideHandler = window.profileOutsideHandler || null;
+
+    // Notification dropdown functionality
+    function initializeNotificationDropdown() {
+        const notificationIcon = document.querySelector('.notification-icon');
+        const notificationSection = document.querySelector('.notification-section');
+
+        if (notificationIcon && notificationSection) {
+            // Remove existing listeners to prevent duplicates
+            if (window.notificationToggleHandler) {
+                notificationIcon.removeEventListener('click', window.notificationToggleHandler);
+            }
+            if (window.notificationOutsideHandler) {
+                document.removeEventListener('click', window.notificationOutsideHandler);
+            }
+
+            // Create new handlers
+            window.notificationToggleHandler = function() {
+                notificationSection.classList.toggle('hidden');
+            };
+
+            window.notificationOutsideHandler = function(event) {
+                if (!notificationIcon.contains(event.target) && !notificationSection.contains(event.target)) {
+                    notificationSection.classList.add('hidden');
+                }
+            };
+
+            // Add new listeners
+            notificationIcon.addEventListener('click', window.notificationToggleHandler);
+            document.addEventListener('click', window.notificationOutsideHandler);
+        }
+    }
+
+    // Profile dropdown functionality
+    function initializeProfileDropdown() {
+        const profileIcon = document.querySelector('.profile-icon');
+        const profileSection = document.querySelector('.profile-section');
+
+        if (profileIcon && profileSection) {
+            // Remove existing listeners to prevent duplicates
+            if (window.profileToggleHandler) {
+                profileIcon.removeEventListener('click', window.profileToggleHandler);
+            }
+            if (window.profileOutsideHandler) {
+                document.removeEventListener('click', window.profileOutsideHandler);
+            }
+
+            // Create new handlers
+            window.profileToggleHandler = function() {
+                profileSection.classList.toggle('hidden');
+            };
+
+            window.profileOutsideHandler = function(event) {
+                if (!profileIcon.contains(event.target) && !profileSection.contains(event.target)) {
+                    profileSection.classList.add('hidden');
+                }
+            };
+
+            // Add new listeners
+            profileIcon.addEventListener('click', window.profileToggleHandler);
+            document.addEventListener('click', window.profileOutsideHandler);
+        }
+    }
+
+    // Sidebar dropdown functionality
+    function toggleDropdown(menuId) {
+        const dropdown = document.getElementById(menuId + '-dropdown');
+        const arrow = document.getElementById(menuId + '-arrow');
+
+        if (!dropdown || !arrow) return;
+
+        // Close all other dropdowns
+        const allDropdowns = document.querySelectorAll('[id$="-dropdown"]');
+        const allArrows = document.querySelectorAll('[id$="-arrow"]');
+
+        allDropdowns.forEach(dd => {
+            if (dd.id !== menuId + '-dropdown') {
+                dd.classList.add('hidden');
+            }
+        });
+
+        allArrows.forEach(arr => {
+            if (arr.id !== menuId + '-arrow') {
+                arr.classList.remove('rotate-180');
+            }
+        });
+
+        // Toggle current dropdown
+        dropdown.classList.toggle('hidden');
+        arrow.classList.toggle('rotate-180');
+    }
+
+    // Initialize all functionality
+    function initializePageFunctionality() {
+        initializeNotificationDropdown();
+        initializeProfileDropdown();
+
+        // Make toggleDropdown globally available
+        window.toggleDropdown = toggleDropdown;
+    }
+
+    // Listen for both initial page load and Turbo navigation
+    document.addEventListener('DOMContentLoaded', initializePageFunctionality);
+    document.addEventListener('turbo:load', initializePageFunctionality);
+
+    // Optional: Clean up on page unload to prevent memory leaks
+    document.addEventListener('turbo:before-visit', function() {
+        // Clean up global references
+        window.toggleDropdown = null;
+        window.notificationToggleHandler = null;
+        window.notificationOutsideHandler = null;
+        window.profileToggleHandler = null;
+        window.profileOutsideHandler = null;
+    });
+</script>
+
+</body>
+</html>

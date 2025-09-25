@@ -1,0 +1,164 @@
+<%= form_with model: current_user.website.invoice_template, url: manage_settings_payments_invoices_update_design_path, method: :patch, local: true, data: { turbo: false }, class: "invoice-design-form" do |form| %>
+
+  <!-- Current text element being edited -->
+  <%= form.hidden_field :current_text_element, value: text_name || params[:text_name] || 'headline' %>
+
+  <!-- Design fields for each text element -->
+  <%= form.fields_for :design do |design_form| %>
+    <%= design_form.fields_for :text do |text_form| %>
+      <% %w[headline title text items].each do |element| %>
+        <%= text_form.fields_for element.to_sym do |element_form| %>
+          <%= element_form.text_field :font, value: current_user.website.invoice_template.design.dig('text', element, 'font') || 'roboto', class: 'hidden font-field', data: { element: element } %>
+          <%= element_form.text_field :size, value: current_user.website.invoice_template.design.dig('text', element, 'size') || '12px', class: 'hidden size-field', data: { element: element } %>
+          <%= element_form.text_field :color, value: current_user.website.invoice_template.design.dig('text', element, 'color') || '#000000', class: 'hidden color-field', data: { element: element } %>
+
+          <%= element_form.fields_for :style do |style_form| %>
+            <%= style_form.hidden_field :bold, value: current_user.website.invoice_template.design.dig('text', element, 'style', 'bold') || 'false', class: 'bold-field', data: { element: element } %>
+            <%= style_form.hidden_field :underline, value: current_user.website.invoice_template.design.dig('text', element, 'style', 'underline') || 'false', class: 'underline-field', data: { element: element } %>
+            <%= style_form.hidden_field :italic, value: current_user.website.invoice_template.design.dig('text', element, 'style', 'italic') || 'false', class: 'italic-field', data: { element: element } %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <div class="p-5 border-b text-editor-initial">
+    <div data-partial="text" class="back-to-text flex items-center gap-2 cursor-pointer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Arrow-Left-Light--Streamline-Phosphor" height="16" width="16">
+        <path d="M15.84 7.9875125c0 0.27638125 -0.22405625 0.5004375 -0.5004375 0.5004375H1.8685625l5.15035625 5.15119375c0.2818375 0.262625 0.17368125 0.731875 -0.19468125 0.8446375 -0.183075 0.05604375 -0.38208125 0.00271875 -0.51260625 -0.13735L0.30635625 8.34115625c-0.19514375 -0.1953875 -0.19514375 -0.51190625 0 -0.7072875l6.005275 -6.005275c0.2818375 -0.26263125 0.74229375 -0.121675 0.82881875 0.25371875 0.0373375 0.1619875 -0.0082 0.33195 -0.12153125 0.45356875l-5.15035625 5.1511875h13.471c0.27638125 0 0.5004375 0.22405625 0.5004375 0.50044375Z" stroke-width="0.0625"></path>
+      </svg>
+      <p class="nata-sans text-sm">Back To Text</p>
+    </div>
+    <h2 class="nata-sans text-lg font-bold capitalize" id="text-element-title"><%= (text_name || params[:text_name] || 'headline').humanize %></h2>
+  </div>
+
+  <div class="text-editor-initial">
+    <div class="p-5 border-b">
+      <p class="nata-sans text-sm">Font</p>
+      <div class="flex gap-2 items-center">
+        <div class="w-3/5">
+          <p class="text-sm nata-sans" id="current-font-display">
+            <%= current_user.website.invoice_template.design.dig('text', text_name || params[:text_name] || 'headline', 'font')&.humanize || 'Roboto' %>
+          </p>
+        </div>
+        <div class="w-2/5 flex justify-end">
+          <button type="button" id="changeButton" class="text-xs nata-sans bg-blue-500 text-white border border-blue-500 rounded-full px-2 py-1">Change</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-5 border-b">
+      <p class="nata-sans text-sm">Size</p>
+      <div class="flex items-center gap-3 mt-2">
+        <input
+          id="fontSlider"
+          type="range"
+          min="8"
+          max="72"
+          value="<%= (current_user.website.invoice_template.design.dig('text', text_name || params[:text_name] || 'headline', 'size') || '16px').gsub('px', '') %>"
+          class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+          />
+        <div class="flex items-center gap-1">
+          <input
+            id="fontInput"
+            type="number"
+            min="8"
+            max="72"
+            value="<%= (current_user.website.invoice_template.design.dig('text', text_name || params[:text_name] || 'headline', 'size') || '16px').gsub('px', '') %>"
+            class="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+            />
+          <span class="text-xs text-gray-500">px</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-5 border-b">
+      <p class="nata-sans text-sm">Style</p>
+      <div class="flex gap-2 mt-2">
+        <button type="button" class="border p-2 rounded style-button <%= 'active-font-style' if current_user.website.invoice_template.design.dig('text', text_name || params[:text_name] || 'headline', 'style', 'bold') == 'true' %>" data-style="bold">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Text-B-Light--Streamline-Phosphor" height="16" width="16">
+            <path d="M11.3166875 7.274325c2.38539375 -1.9661 1.7479 -5.777175 -1.1474875 -6.85993125 -0.44916875 -0.16796875 -0.9247875 -0.25413125 -1.4043375 -0.25439375H2.2634c-0.31683125 -0.0000125 -0.57365625 0.256825 -0.57365625 0.57365625v14.5326875c0 0.31683125 0.256825 0.57366875 0.57365625 0.57365625h7.64878125c3.38561875 -0.0003 5.501325 -3.66553125 3.80825 -6.5974125 -0.53511875 -0.9266625 -1.38973125 -1.62645 -2.40374375 -1.9682625ZM2.8370625 1.30731875h5.9278c2.20801875 0 3.588025 2.39024375 2.48401875 4.3024375 -0.512375 0.88745 -1.459275 1.43414375 -2.48401875 1.43414375H2.8370625Zm7.07511875 13.3853625H2.8370625V8.19121875h7.07511875c2.5024125 0.0011 4.0652375 2.7107375 2.813075 4.8773375 -0.58061875 1.0046375 -1.652725 1.6236125 -2.813075 1.624125Z" stroke-width="0.0625"></path>
+          </svg>
+        </button>
+        <button type="button" class="border p-2 rounded style-button <%= 'active-font-style' if current_user.website.invoice_template.design.dig('text', text_name || params[:text_name] || 'headline', 'style', 'underline') == 'true' %>" data-style="underline">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Text-Underline-Light--Streamline-Phosphor" height="16" width="16">
+            <path d="M14.097775 15.31733125c0 0.28865625 -0.2340125 0.52265625 -0.5226625 0.52266875H2.4248875c-0.40235 -0.0004375 -0.6533375 -0.43626875 -0.45178125 -0.78449375 0.0933375 -0.16125625 0.2654625 -0.2606375 0.45178125 -0.2608375h11.150225c0.28865 0.0000125 0.52266875 0.2340125 0.52266875 0.5226625ZM8 13.05244375c2.98143125 -0.0033625 5.39753125 -2.41945625 5.4008875 -5.4008875V0.68266875c-0.0004375 -0.40235 -0.43626875 -0.65334375 -0.78449375 -0.4517875 -0.16125625 0.0933375 -0.26063125 0.2654625 -0.2608375 0.4517875v6.9688875c0 3.35290625 -3.62963125 5.448475 -6.53333125 3.77201875 -1.34761875 -0.77804375 -2.17778125 -2.21593125 -2.17778125 -3.77201875V0.68266875c-0.0004375 -0.40235 -0.43626875 -0.65334375 -0.78449375 -0.4517875 -0.16125625 0.0933375 -0.2606375 0.2654625 -0.2608375 0.4517875v6.9688875c0.0033625 2.98143125 2.41945625 5.397525 5.4008875 5.4008875Z" stroke-width="0.0625"></path>
+          </svg>
+        </button>
+        <button type="button" class="border p-2 rounded style-button <%= 'active-font-style' if current_user.website.invoice_template.design.dig('text', text_name || params[:text_name] || 'headline', 'style', 'italic') == 'true' %>" data-style="italic">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Text-Italic-Light--Streamline-Phosphor" height="16" width="16">
+            <path d="M15.0359 0.763075c0 0.3330625 -0.27001875 0.6030625 -0.60308125 0.60308125h-3.58629375l-4.42256875 13.2676875h3.18425c0.46425 0.000025 0.75440625 0.5026 0.5222625 0.90464375 -0.107725 0.18656875 -0.306825 0.3015 -0.5222625 0.3015125H1.56718125c-0.46425 -0.00001875 -0.7544125 -0.5026 -0.52226875 -0.9046375 0.10773125 -0.186575 0.306825 -0.30150625 0.52226875 -0.30151875h3.58629375l4.42256875 -13.2676875h-3.18425c-0.46425 0 -0.75440625 -0.50256875 -0.52228125 -0.90461875 0.10773125 -0.18659375 0.306825 -0.3015375 0.52228125 -0.3015375h8.041025c0.3330625 0.0000125 0.60308125 0.27001875 0.60308125 0.603075Z" stroke-width="0.0625"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="p-5 border-b">
+      <p class="nata-sans text-sm">Colour</p>
+      <div class="mt-2">
+        <input
+          type="color"
+          id="colorPicker"
+          value="<%= current_user.website.invoice_template.design.dig('text', text_name || params[:text_name] || 'headline', 'color') || '#000000' %>"
+          class="w-full h-10 border border-gray-300 rounded cursor-pointer"
+          />
+      </div>
+    </div>
+
+    <!-- Remove the save button section since we're auto-saving -->
+  </div>
+
+  <div class="text-editor-fonts">
+    <div class="p-5">
+      <div id="backButton" class="flex items-center gap-2 cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Arrow-Left-Light--Streamline-Phosphor" height="16" width="16">
+          <path d="M15.84 7.9875125c0 0.27638125 -0.22405625 0.5004375 -0.5004375 0.5004375H1.8685625l5.15035625 5.15119375c0.2818375 0.262625 0.17368125 0.731875 -0.19468125 0.8446375 -0.183075 0.05604375 -0.38208125 0.00271875 -0.51260625 -0.13735L0.30635625 8.34115625c-0.19514375 -0.1953875 -0.19514375 -0.51190625 0 -0.7072875l6.005275 -6.005275c0.2818375 -0.26263125 0.74229375 -0.121675 0.82881875 0.25371875 0.0373375 0.1619875 -0.0082 0.33195 -0.12153125 0.45356875l-5.15035625 5.1511875h13.471c0.27638125 0 0.5004375 0.22405625 0.5004375 0.50044375Z" stroke-width="0.0625"></path>
+        </svg>
+        <p class="nata-sans text-sm">Back</p>
+      </div>
+    </div>
+    <div>
+      <% fonts = ['Roboto', 'Arial', 'Helvetica', 'Times New Roman', 'Georgia', 'Verdana', 'Tahoma', 'Trebuchet MS', 'Impact'] %>
+      <% fonts.each_with_index do |font, index| %>
+        <div class="px-5 py-3 nata-sans text-sm cursor-pointer font-option hover:bg-blue-100 <%= 'bg-blue-500 text-white' if current_user.website.invoice_template.design.dig('text', text_name || params[:text_name] || 'headline', 'font')&.downcase == font.downcase %>" data-font="<%= font.downcase.gsub(' ', '_') %>">
+          <p style="font-family: <%= font %>"><%= font %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+<% end %>
+
+<style>
+    .text-editor-initial {
+        display: block;
+    }
+
+    .text-editor-fonts {
+        display: none;
+    }
+
+    .text-editor-fonts.active {
+        display: block;
+    }
+
+    .text-editor-initial.hidden {
+        display: none;
+    }
+
+    .active-font-style {
+        background-color: rgba(219,234,254);
+        color: white;
+    }
+
+    .style-button:hover {
+        background-color: rgba(219,234,254);
+    }
+    .style-button:hover svg{
+        fill: rgba(59,130,246)
+    }
+
+    .active-font-style:hover {
+        background-color: rgba(219,234,254);
+    }
+</style>

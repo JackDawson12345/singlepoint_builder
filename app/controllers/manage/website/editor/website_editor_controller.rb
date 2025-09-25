@@ -160,6 +160,38 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
 
   end
 
+  def single_field_data
+    field_name = params['field_name']
+    theme_page_id = params['theme_page_id']
+    component_id = params['component_id']
+
+    possible_paths = [
+      'editor_single_field_sidebar',
+      'manage/website/editor/website_editor/editor_single_field_sidebar',
+      'website_editor/editor_single_field_sidebar'
+    ]
+
+    possible_paths.each do |path|
+      begin
+        test_render = render_to_string(partial: path, locals: { field_name: field_name, theme_page_id: theme_page_id, component_id: component_id, user_id: current_user.id})
+
+        respond_to do |format|
+          format.json do
+            render json: {
+              html: test_render,
+              success: true,
+              path_used: path
+            }
+          end
+        end
+
+        return
+      rescue => e
+      end
+    end
+
+  end
+
   def sidebar_editor_fields_data
     component_id = params[:website_editor][:component_id]
     component_type = params[:website_editor][:component_type]
@@ -195,41 +227,50 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
   end
 
   def sidebar_editor_fields_save
-    Rails.logger.debug "=== DEBUG EDITOR FIELDS SAVE ==="
-    Rails.logger.debug "All params: #{params.inspect}"
-    Rails.logger.debug "Request content type: #{request.content_type}"
-    Rails.logger.debug "Request format: #{request.format}"
-
     component = Component.find(params[:component_id])
     theme_page_id = params[:theme_page_id]
     user = User.find(params[:user_id])
     component_page_id = params[:component_page_id]
 
-    Rails.logger.debug "Component field_types: #{component.field_types.inspect}"
-
     field_values = {}
+    field_stylings = {}
+
+    # Define styling parameters that should be collected
+    styling_params = %w[
+    alignment text_colour font_family font_size font_weight
+    font_transform font_style font_decoration line_height
+    letter_spacing word_spacing
+  ]
+
+    # Collect styling information from params
+    styling_data = {}
+    styling_params.each do |style_param|
+      param_value = params[style_param] || params.dig(:manage_website_editor_website_editor, style_param) || params.dig(:website_editor, style_param)
+      if param_value.present?
+        # Add 'px' suffix to size-related parameters if they're numeric
+        if %w[font_size line_height letter_spacing word_spacing].include?(style_param) && param_value.match?(/^\d+$/)
+          styling_data[style_param] = "#{param_value}px"
+        else
+          styling_data[style_param] = param_value
+        end
+      end
+    end
 
     # Process each field based on its type, handling images with Active Storage
     component.field_types.each do |name, type|
-      Rails.logger.debug "Processing field: #{name} of type: #{type}"
+      # Skip styling parameters as they're not field values
+      next if styling_params.include?(name.to_s)
 
       # Try multiple parameter locations
       param_value = params[name] || params.dig(:manage_website_editor_website_editor, name) || params.dig(:website_editor, name)
-
-      Rails.logger.debug "Param value for #{name}: #{param_value.inspect}"
-      Rails.logger.debug "Param class for #{name}: #{param_value.class}" if param_value
 
       if type == 'image'
         remove_param = params["remove_#{name}"] || params.dig(:manage_website_editor_website_editor, "remove_#{name}")
 
         if remove_param == '1'
-          Rails.logger.debug "Removing image for field: #{name}"
           field_values[name] = ''
+          field_stylings[name] = styling_data
         elsif params[name].present? && params[name].respond_to?(:original_filename)
-          Rails.logger.debug "Uploading new image for field: #{name}"
-          Rails.logger.debug "Image filename: #{params[name].original_filename}"
-          Rails.logger.debug "Image content type: #{params[name].content_type}"
-
           # Handle image upload with Active Storage
           begin
             blob = ActiveStorage::Blob.create_and_upload!(
@@ -240,32 +281,25 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
 
             # Store the blob URL as the field value
             field_values[name] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
-            Rails.logger.debug "Image uploaded successfully. Blob URL: #{field_values[name]}"
+            field_stylings[name] = styling_data
           rescue => e
-            Rails.logger.error "Error uploading image for field #{name}: #{e.message}"
-            Rails.logger.error e.backtrace.join("\n")
             # Keep existing value if upload fails
             next
           end
         elsif params[name].blank?
-          Rails.logger.debug "No new image for field: #{name}, keeping existing value"
           # If no new image and field is empty, keep existing value
           # This will be handled by not including it in field_values,
           # so existing customization will be preserved
           next
-        else
-          Rails.logger.debug "Image field #{name} present but not a valid file: #{params[name].inspect}"
         end
       else
-        # Handle text and textarea fields as before
-        if params[name].present?
-          field_values[name] = params[name]
-          Rails.logger.debug "Added text field #{name}: #{params[name]}"
+        # Handle text and textarea fields
+        if param_value.present?
+          field_values[name] = param_value
+          field_stylings[name] = styling_data
         end
       end
     end
-
-    Rails.logger.debug "Final field_values: #{field_values.inspect}"
 
     # Get current customisations
     website = user.website
@@ -297,7 +331,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     if component.global == true
       new_customisations = []
       theme_page_ids.each do |page_id|
-
         page = website.pages["theme_pages"].values.find { |page| page["theme_page_id"] == page_id }
 
         if page
@@ -335,7 +368,7 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
           end
           new_customisations.concat(existing_for_page)
 
-          # Add new/updated field values
+          # Add new/updated field values with styling
           field_values.each do |field_name, field_value|
             new_customisations << {
               "component_id" => component.id.to_s,
@@ -343,7 +376,7 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
               "theme_page_id" => page_id.to_s,
               "field_name" => field_name.to_s,
               "field_value" => field_value.to_s,
-              "field_styling" => ""
+              "field_styling" => field_stylings[field_name] || {}
             }
           end
         end
@@ -371,7 +404,7 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
         end
         new_customisations.concat(existing_for_component)
 
-        # Add new/updated field values
+        # Add new/updated field values with styling
         theme_page_ids.each do |page_id|
           field_values.each do |field_name, field_value|
             new_customisations << {
@@ -380,7 +413,7 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
               "theme_page_id" => page_id.to_s,
               "field_name" => field_name.to_s,
               "field_value" => field_value.to_s,
-              "field_styling" => ""
+              "field_styling" => field_stylings[field_name] || {}
             }
           end
         end
@@ -399,8 +432,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     # Combine all customisations
     all_customisations = other_customisations + new_customisations
 
-    Rails.logger.debug "Final customisations to save: #{all_customisations.inspect}"
-
     # Update the website
     website.update!(customisations: { "customisations" => all_customisations })
 
@@ -410,9 +441,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     end
 
   rescue StandardError => e
-    Rails.logger.error "Error saving editor fields: #{e.message}"
-    Rails.logger.error e.backtrace.join("\n")
-
     respond_to do |format|
       format.html { redirect_back(fallback_location: manage_website_editor_website_editor_path, alert: 'Error saving changes!') }
       format.js { render json: { error: 'An error occurred while saving' }, status: :internal_server_error }

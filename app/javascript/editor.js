@@ -12,10 +12,13 @@ window.removeSection = removeSection;
 window.initializeDragAndDrop = initializeDragAndDrop;
 window.updateComponentPositions = updateComponentPositions;
 window.updateContentWidth = updateContentWidth;
-window.initializeRealtimeUpdates = initializeRealtimeUpdates; // NEW
+window.initializeRealtimeUpdates = initializeRealtimeUpdates;
 window.showColourOption = showColourOption;
 window.showTextOption = showTextOption;
 window.showBackgroundOption = showBackgroundOption;
+window.showEditorFields = showEditorFields;
+window.singleFieldTab = singleFieldTab;
+window.initializeLiveStyleUpdates = initializeLiveStyleUpdates;
 
 function hideSidebar(){
     const sidebar = document.querySelector('.editor-sidebar');
@@ -141,7 +144,6 @@ function fetchSidebarData(title) {
         });
 }
 
-
 function updateSidebarContent(data) {
     const sidebar = document.querySelector('.editor-sidebar');
     const contentArea = sidebar.querySelector('.sidebar-content');
@@ -149,6 +151,13 @@ function updateSidebarContent(data) {
     if (contentArea && data) {
         // Replace the entire content area with the AJAX response
         contentArea.innerHTML = data.html || '';
+
+        // Initialize live style updates for single field forms
+        if (data.html && data.html.includes('single-field-form')) {
+            setTimeout(() => {
+                initializeLiveStyleUpdates();
+            }, 100);
+        }
 
         // Initialize component sidebar functionality after content is loaded
         if (data.html && data.html.includes('menu-item')) {
@@ -347,7 +356,7 @@ function updateEditorFieldsContent(data, theme_page_id, component_page_id) {
         // Replace the entire content area with the AJAX response
         contentArea.innerHTML = data.html || '';
 
-        // Initialize real-time updates for the new form - NEW
+        // Initialize real-time updates for the new form
         if (theme_page_id && component_page_id) {
             setTimeout(() => {
                 initializeRealtimeUpdates(theme_page_id, component_page_id);
@@ -364,7 +373,7 @@ function updateEditorFieldsContent(data, theme_page_id, component_page_id) {
     }
 }
 
-// NEW REAL-TIME UPDATES FUNCTIONALITY
+// REAL-TIME UPDATES FUNCTIONALITY
 function initializeRealtimeUpdates(themePageId, componentPageId) {
     // Get all form fields for this component
     const fieldSelector = `.field_${themePageId}_${componentPageId}_`;
@@ -558,7 +567,7 @@ function removeSection(component_id, theme_page_id, user_id, current_component_i
         });
 }
 
-// NEW DRAG AND DROP FUNCTIONALITY
+// DRAG AND DROP FUNCTIONALITY
 function initializeDragAndDrop() {
     const sections = document.querySelectorAll('.edit-content-section');
 
@@ -721,7 +730,7 @@ function updateContentWidth() {
         if (pageContentSections.length > 0) {
             pageContentSections.forEach(contentSection => {
                 if (sidebar.classList.contains('show')) {
-                    contentSection.style.width = 'calc(100% - 503px)';
+                    contentSection.style.width = 'calc(100% - 350px)';
                 } else {
                     contentSection.style.width = ''; // Reset to default
                 }
@@ -793,4 +802,250 @@ function showBackgroundOption(){
     backgroundOption.classList.add("show-sidebar-option");
 }
 
+function showEditorFields(field_class){
+    const classes = splitUuidStringRegex(field_class)
+    const fieldNameWithSpaces = classes.fieldName.replace(/_/g, ' ');
+    const themePageId = classes.firstUuid
+    const componentPageId = classes.secondUuid
 
+    const sidebar = document.querySelector('.editor-sidebar');
+    if (sidebar) {
+        sidebar.classList.toggle('show');
+
+        // Call the function when needed
+        updateContentWidth();
+
+        // If sidebar is being shown, fetch data via AJAX
+        if (sidebar.classList.contains('show')) {
+            fetchSingleFieldSidebarData(classes.fieldName, themePageId, componentPageId)
+        }
+
+        if (fieldNameWithSpaces) {
+            const titleElement = sidebar.querySelector('.sidebar-title');
+            if (titleElement) {
+                titleElement.textContent = 'Edit ' + fieldNameWithSpaces;
+            }
+        }
+    }
+}
+
+function splitUuidStringRegex(str) {
+    // Regex to match: UUID_UUID_fieldname pattern
+    const regex = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})_([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})_(.+)$/;
+
+    const match = str.match(regex);
+
+    if (match) {
+        return {
+            firstUuid: match[1],
+            secondUuid: match[2],
+            fieldName: match[3]
+        };
+    } else {
+        console.error('String does not match expected UUID_UUID_fieldname pattern');
+        return null;
+    }
+}
+
+function fetchSingleFieldSidebarData(field_name, theme_page_id, component_id){
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch('/manage/website/editor/single_field_data', {  // Updated to match your namespace
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': token,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            field_name: field_name,
+            theme_page_id: theme_page_id,
+            component_id: component_id
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Update sidebar content with the received data
+            updateSidebarContent(data);
+        })
+        .catch(error => {
+            console.error('Error fetching sidebar data:', error);
+        });
+}
+
+function singleFieldTab(tabType){
+    if(tabType === 'content'){
+        // Hide style form, show content form
+        document.querySelector('.single-sidebar-form-style').style.display = 'none';
+        document.querySelector('.single-sidebar-form-fields').style.display = 'block';
+
+        // Update tab styling
+        document.querySelector('.content-tab-title').classList.add('text-blue-500');
+        document.querySelector('.style-tab-title').classList.remove('text-blue-500');
+
+        document.querySelector('.content-tab-icon').classList.add('fill-blue-500');
+        document.querySelector('.style-tab-icon').classList.remove('fill-blue-500');
+
+    } else if(tabType === 'style'){
+        // Show style form, hide content form
+        document.querySelector('.single-sidebar-form-style').style.display = 'block';
+        document.querySelector('.single-sidebar-form-fields').style.display = 'none';
+
+        // Update tab styling
+        document.querySelector('.style-tab-title').classList.add('text-blue-500');
+        document.querySelector('.content-tab-title').classList.remove('text-blue-500');
+
+        document.querySelector('.style-tab-icon').classList.add('fill-blue-500');
+        document.querySelector('.content-tab-icon').classList.remove('fill-blue-500');
+    }
+}
+
+// Live style updates for form fields
+// Updated initializeLiveStyleUpdates function with proper CSS selector escaping
+function initializeLiveStyleUpdates() {
+    console.log('Initializing live style updates...');
+
+    // Get the current field class from the form
+    function getCurrentFieldClass() {
+        const form = document.querySelector('.single-field-form');
+        if (!form) return null;
+
+        const themePageId = form.querySelector('[name="theme_page_id"]')?.value;
+        const componentPageId = form.querySelector('[name="component_page_id"]')?.value;
+
+        // Get the field name from the visible content field
+        const contentField = form.querySelector('.single-sidebar-form-fields input[type="text"], .single-sidebar-form-fields textarea, .single-sidebar-form-fields input[type="hidden"]');
+        if (contentField && themePageId && componentPageId) {
+            const fieldName = contentField.name;
+            return `${themePageId}_${componentPageId}_${fieldName}`;
+        }
+        return null;
+    }
+
+    // Escape CSS selector for classes that start with numbers or contain special characters
+    function escapeSelector(selector) {
+        // CSS.escape is the standard way, but if not available, use manual escaping
+        if (typeof CSS !== 'undefined' && CSS.escape) {
+            return CSS.escape(selector);
+        }
+
+        // Manual escaping for common cases
+        return selector.replace(/^(\d)/, '\\3$1 ').replace(/([!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~])/g, '\\$1');
+    }
+
+    // Update element style property
+    function updateElementStyle(property, value, suffix = '') {
+        const fieldClass = getCurrentFieldClass();
+        if (!fieldClass) {
+            console.warn('Could not get field class');
+            return;
+        }
+
+        // Use attribute selector instead of class selector to avoid CSS parsing issues
+        const element = document.querySelector(`[class~="${fieldClass}"]`);
+
+        if (element) {
+            element.style[property] = value + suffix;
+            console.log(`Updated ${property} to ${value}${suffix} for field class: ${fieldClass}`);
+        } else {
+            console.warn(`Could not find element with class: ${fieldClass}`);
+
+            // Fallback: try to find by escaped class selector
+            try {
+                const escapedClass = escapeSelector(fieldClass);
+                const fallbackElement = document.querySelector(`.${escapedClass}`);
+                if (fallbackElement) {
+                    fallbackElement.style[property] = value + suffix;
+                    console.log(`Updated ${property} using escaped selector for: ${fieldClass}`);
+                } else {
+                    console.warn(`No element found even with escaped selector: ${escapedClass}`);
+                }
+            } catch (e) {
+                console.error('Error with escaped selector:', e);
+            }
+        }
+    }
+
+    // Map form field names to CSS properties
+    const styleMapping = {
+        'alignment': { property: 'textAlign', suffix: '' },
+        'text_colour': { property: 'color', suffix: '' },
+        'font_size': { property: 'fontSize', suffix: 'px' },
+        'font_weight': { property: 'fontWeight', suffix: '' },
+        'font_transform': { property: 'textTransform', suffix: '' },
+        'font_style': { property: 'fontStyle', suffix: '' },
+        'font_decoration': { property: 'textDecoration', suffix: '' },
+        'line_height': { property: 'lineHeight', suffix: 'px' },
+        'letter_spacing': { property: 'letterSpacing', suffix: 'px' },
+        'word_spacing': { property: 'wordSpacing', suffix: 'px' }
+    };
+
+    // Add event listeners to all style form fields
+    Object.keys(styleMapping).forEach(fieldName => {
+        const field = document.querySelector(`[name="${fieldName}"]`);
+        if (field) {
+            const config = styleMapping[fieldName];
+            console.log(`Found field: ${fieldName}, type: ${field.type}`);
+
+            if (field.type === 'select-one') {
+                field.addEventListener('change', function() {
+                    let value = this.value;
+
+                    // Handle special cases for default values
+                    if (value === 'default' || value === '') {
+                        switch(fieldName) {
+                            case 'font_transform':
+                                value = 'none';
+                                break;
+                            case 'font_style':
+                                value = 'normal';
+                                break;
+                            case 'font_decoration':
+                                value = 'none';
+                                break;
+                            default:
+                                value = '';
+                        }
+                    }
+
+                    // Handle alignment mapping
+                    if (fieldName === 'alignment') {
+                        if (value === 'justified') value = 'justify';
+                    }
+
+                    updateElementStyle(config.property, value, config.suffix);
+                });
+            } else if (field.type === 'number') {
+                field.addEventListener('input', function() {
+                    const value = this.value;
+                    updateElementStyle(config.property, value, config.suffix);
+                });
+            } else if (field.type === 'color') {
+                field.addEventListener('input', function() {
+                    const value = this.value;
+                    updateElementStyle(config.property, value, config.suffix);
+                });
+            }
+        } else {
+            console.warn(`Field not found: ${fieldName}`);
+        }
+    });
+
+    // Handle font family separately as it might need special handling
+    const fontFamilyField = document.querySelector('[name="font_family"]');
+    if (fontFamilyField) {
+        console.log('Found font family field');
+        fontFamilyField.addEventListener('change', function() {
+            // You might need to map these values to actual font names
+            const fontMapping = {
+                'value1': 'Arial, sans-serif',
+                'value2': 'Georgia, serif',
+                'value3': 'Courier New, monospace'
+                // Add more mappings as needed
+            };
+
+            const value = fontMapping[this.value] || this.value;
+            updateElementStyle('fontFamily', value, '');
+        });
+    }
+}

@@ -1,0 +1,31 @@
+<%= turbo_stream.update "flash-messages" do %>
+  <div class="alert alert-success" style="position: fixed; top: 20px; right: 20px; z-index: 1000; padding: 12px 16px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 6px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); font-size: 14px; max-width: 300px; display: flex; align-items: center; justify-content: between;">
+    <span style="flex: 1;">Changes saved successfully</span>
+    <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #155724; font-size: 18px; font-weight: bold; margin-left: 12px; cursor: pointer; padding: 0; line-height: 1; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">×</button>
+  </div>
+<% end %>
+
+<%= turbo_stream.append "body" do %>
+  <script>
+      // Auto-hide the notice after 3 seconds
+      setTimeout(function() {
+          const notice = document.querySelector('.flash-notice');
+          if (notice) {
+              notice.remove();
+          }
+      }, 3000);
+
+      // Keep numbering accordion open
+      setTimeout(function() {
+          var numberingTitle = $('h2:contains("Numbering")').closest('.accordion-title');
+
+          if (numberingTitle.length) {
+              var accordionBody = numberingTitle.parent().find('.accordion-body');
+              var accordionArrow = numberingTitle.parent().find('.accordion-arrow');
+
+              accordionBody.show().removeClass('hidden');
+              accordionArrow.addClass('rotated');
+          }
+      }, 100);
+  </script>
+<% end %>

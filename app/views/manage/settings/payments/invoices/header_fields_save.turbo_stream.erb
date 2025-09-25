@@ -1,0 +1,23 @@
+<%= turbo_stream.update "flash-messages" do %>
+  <div class="flash-notice alert-success">
+    <span>Header fields saved successfully</span>
+    <button type="button" class="close-btn" onclick="this.parentElement.remove()">×</button>
+  </div>
+<% end %>
+
+<%= turbo_stream.append "body" do %>
+  <script>
+      // Keep header fields accordion open
+      setTimeout(function() {
+          var headerFieldsTitle = $('h2:contains("Header Fields")').closest('.accordion-title');
+
+          if (headerFieldsTitle.length) {
+              var accordionBody = headerFieldsTitle.parent().find('.accordion-body');
+              var accordionArrow = headerFieldsTitle.parent().find('.accordion-arrow');
+
+              accordionBody.show().removeClass('hidden');
+              accordionArrow.addClass('rotated');
+          }
+      }, 100);
+  </script>
+<% end %>

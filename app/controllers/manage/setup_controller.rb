@@ -228,6 +228,10 @@ class Manage::SetupController < Manage::BaseController
 
     )
 
+    @invoice_template = InvoiceTemplate.create(
+      website_id: @website.id
+    )
+
     @user_setup = current_user.user_setup.update(theme_id: theme.id)
 
     notify_all_admins("A new website has been set up for #{current_user.email} with the id of #{current_user.website.id}", "New Website Setup Successfully")

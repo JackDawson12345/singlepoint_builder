@@ -22,11 +22,26 @@
                 <% if service["categories"].present? %>
                   <div class="absolute left-0 bottom-0 flex flex-wrap gap-1 p-2">
                     <% categories = service["categories"].is_a?(Array) ? service["categories"] : [service["categories"]] %>
-                    <% categories.take(3).each do |category| %>
-                      <span class="px-2 py-1 bg-blue-500 text-white nata-sans text-xs font-bold rounded"><%= category %></span>
-                    <% end %>
-                    <% if categories.length > 3 %>
-                      <span class="px-2 py-1 bg-gray-500 text-white nata-sans text-xs font-bold rounded">+<%= categories.length - 3 %></span>
+
+                    <% if categories.present? %>
+                      <div class="flex flex-wrap gap-2">
+                        <% categories.each do |category_id| %>
+                          <%
+                            # Find category name by searching through all category types
+                            category_name = nil
+                            current_user.website.categories.each do |category_type, type_categories|
+                              if type_categories.is_a?(Hash) && type_categories[category_id]
+                                category_name = type_categories[category_id]["name"]
+                                break
+                              end
+                            end
+                            category_name ||= "Unknown Category"
+                          %>
+                          <span class="capitalize px-2 py-1 bg-blue-500 text-white nata-sans text-xs font-bold rounded">
+                            <%= category_name %>
+                          </span>
+                        <% end %>
+                      </div>
                     <% end %>
                   </div>
                 <% end %>

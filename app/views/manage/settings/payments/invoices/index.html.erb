@@ -1,0 +1,667 @@
+<%= javascript_include_tag "https://code.jquery.com/jquery-3.6.0.min.js" %>
+
+<div>
+  <%= render 'manage/settings/settings_header', page_name: "Invoice Settings", subpage_name: nil, subpage_path: nil, page_description: 'Manage how invoices are sent and how they appear to customers' %>
+</div>
+
+<% template_options = current_user.website.invoice_template.design %>
+<style>
+    .headline-text-change{
+        font-size: <%= ((template_options['text']['headline']['size']).gsub('px', '').to_i * 0.6).to_s + 'px' %>;
+        color: <%= template_options['text']['headline']['color'] %>;
+        font-weight: <%= template_options['text']['headline']['style']['bold'] == "true" ? "bold" : "400" %>;
+        text-decoration: <%= template_options['text']['headline']['style']['underline'] == "true" ? "underline" : "none" %>;
+        font-style: <%= template_options['text']['headline']['style']['italic'] == "true" ? "italic" : "none" %>;
+    }
+    .title-text-change{
+        font-size: <%= ((template_options['text']['title']['size']).gsub('px', '').to_i * 0.6).to_s + 'px' %>;
+        color: <%= template_options['text']['title']['color'] %>;
+        font-weight: <%= template_options['text']['title']['style']['bold'] == "true" ? "bold" : "400" %>;
+        text-decoration: <%= template_options['text']['title']['style']['underline'] == "true" ? "underline" : "none" %>;
+        font-style: <%= template_options['text']['title']['style']['italic'] == "true" ? "italic" : "none" %>;
+    }
+    .text-text-change{
+        font-size: <%= ((template_options['text']['text']['size']).gsub('px', '').to_i * 0.6).to_s + 'px' %>;
+        color: <%= template_options['text']['text']['color'] %>;
+        font-weight: <%= template_options['text']['text']['style']['bold'] == "true" ? "bold" : "400" %>;
+        text-decoration: <%= template_options['text']['text']['style']['underline'] == "true" ? "underline" : "none" %>;
+        font-style: <%= template_options['text']['text']['style']['italic'] == "true" ? "italic" : "none" %>;
+    }
+    .items-text-change{
+        font-size: <%= ((template_options['text']['items']['size']).gsub('px', '').to_i * 0.6).to_s + 'px' %>;
+        color: <%= template_options['text']['items']['color'] %>;
+        font-weight: <%= template_options['text']['items']['style']['bold'] == "true" ? "bold" : "400" %>;
+        text-decoration: <%= template_options['text']['items']['style']['underline'] == "true" ? "underline" : "none" %>;
+        font-style: <%= template_options['text']['items']['style']['italic'] == "true" ? "italic" : "none" %>;
+    }
+</style>
+
+<div id="flash-messages"></div>
+
+<div>
+  <div class="flex gap-5">
+    <div class="w-3/10 space-y-5">
+      <div class="bg-gray-50 px-5 py-3 rounded flex justify-between items-center">
+        <h2 class="nata-sans font-semibold text-lg">Design</h2>
+        <%= link_to 'Design', manage_settings_payments_invoices_design_invoices_path, class: 'nata-sans text-sm bg-blue-500 text-white border border-blue-500 rounded-full px-5 py-1' %>
+      </div>
+      <div class="bg-gray-50 rounded numbering-accordion">
+        <div class="flex justify-between items-center px-5 py-3 accordion-title">
+          <h2 class="nata-sans font-semibold text-lg">Numbering</h2>
+          <svg style="transform: rotate(0deg)" class="accordion-arrow w-5 h-5 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+        <div class="px-5 py-3 pt-0 accordion-body hidden">
+          <p class="nata-sans text-sm">Numbers are unique and increase by 1 with each new receipt.</p>
+          <%= form_with url: manage_settings_payments_numbering_save_path, remote: true, local: false do |form| %>
+            <div class="pt-3 pb-3 border-b">
+              <div class="flex">
+                <div class="w-4/5">
+                  <p class="nata-sans text-sm font-bold">Next receipt number: <%= @invoice_template.numbering['invoice_numbering'] %></p>
+                </div>
+                <div class="w-1/5 flex justify-end">
+                  <svg class="invoice-number-edit-button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="#000000" id="Pencil-Line-Light--Streamline-Phosphor" height="18" width="18">
+                    <path d="m17.4509296875 4.5713953125 -4.0218750000000005 -4.0218750000000005c-0.49203984375 -0.49209609375 -1.2898546875 -0.49209609375 -1.78189453125 0L0.54897890625 11.64679453125c-0.23677734375 0.23596875 -0.36959765625 0.55667109375 -0.36897890625 0.89095078125v4.0218750000000005c0 0.695840625 0.5640890625 1.2599296875000001 1.2599296875000001 1.2599296875000001h15.11914921875c0.41566640624999995 0 0.6754640625 -0.44997890625000003 0.46762734375 -0.8099578125 -0.0964546875 -0.1670625 -0.2747109375 -0.2699859375 -0.46762734375 -0.2699859375H7.063713281249999L17.4509296875 6.353296875c0.49209609375 -0.492046875 0.49209609375 -1.2898617187499999 0 -1.7819015625ZM4.0038890625 14.75971875 11.879346093750002 6.88336171875l1.7567015625 1.7567015625L5.759690625 16.5155203125Zm-0.7640578125 -0.7631578125 -1.7558015624999999 -1.7566945312500002L9.359486718749999 4.364409375l1.7567015625 1.7558015624999999Zm-1.9798875 2.563059375v-3.0166312499999997l3.1966171875000002 3.19662421875H1.4399296874999998c-0.0994078125 0 -0.1799859375 -0.08058515625 -0.1799859375 -0.17999296874999998ZM16.686871875 5.5892390625l-2.28766640625 2.28766640625 -4.2756609375 -4.27655390625 2.28676640625 -2.2867734375000004c0.0703125 -0.07038281249999999 0.18438046875 -0.07038281249999999 0.2546859375 0l4.0218750000000005 4.020975c0.07038281249999999 0.07030546875 0.07038281249999999 0.18438046875 0 0.2546859375Z" stroke-width="0.0703"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="invoice-number-outer hidden">
+                <%= form.number_field :invoice_number,
+                                    placeholder: "1",
+                                    value: @invoice_template.numbering['invoice_numbering'],
+                                    class: 'w-full border rounded px-3 py-2 mt-2 nata-sans text-sm',
+                                    data: { behavior: "auto-submit" } %>
+              </div>
+            </div>
+            <div class="pt-3">
+              <div>
+                <div class="flex justify-between prefix-section">
+                  <p class="nata-sans text-sm">Prefix</p>
+                  <p class="prefix-count nata-sans text-sm">0/10</p>
+                </div>
+                <div>
+                  <%= form.text_field :prefix,
+                                      placeholder: "e.g., date or initials",
+                                      value: @invoice_template.numbering['prefix'],
+                                      maxlength: 10,
+                                      class: 'w-full border rounded px-3 py-2 mt-1 nata-sans text-sm',
+                                      data: { behavior: "auto-submit" } %>
+                </div>
+              </div>
+              <div class="pt-3">
+                <div class="flex justify-between suffix-section">
+                  <p class="nata-sans text-sm">Suffix</p>
+                  <p class="suffix-count nata-sans text-sm">0/10</p>
+                </div>
+                <div>
+                  <%= form.text_field :suffix,
+                                      placeholder: "e.g., date or initials",
+                                      value: @invoice_template.numbering['suffix'],
+                                      maxlength: 10,
+                                      class: 'w-full border rounded px-3 py-2 mt-1 nata-sans text-sm',
+                                      data: { behavior: "auto-submit" } %>
+                </div>
+              </div>
+
+            </div>
+            <%= form.submit "Submit", style: "display: none;" %>
+          <% end %>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded header-fields-accordion">
+        <div class="flex justify-between items-center px-5 py-3 accordion-title">
+          <h2 class="nata-sans font-semibold text-lg">Header Fields</h2>
+          <svg style="transform: rotate(0deg)" class="accordion-arrow w-5 h-5 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+        <div class="px-5 py-3 pt-0 accordion-body hidden">
+          <%= form_with url: manage_settings_payments_header_fields_save_path, remote: true, local: false do |form| %>
+            <div class="pb-3 border-b">
+              <div class="flex justify-between invoice-title-section">
+                <p class="nata-sans text-sm">Invoice Title</p>
+                <p class="invoice-title-count nata-sans text-sm">0/20</p>
+              </div>
+              <div>
+                <%= form.text_field :invoice_title,
+                                    placeholder: "Invoice Title",
+                                    value: @invoice_template.header_fields['invoice_title'],
+                                    maxlength: 20,
+                                    class: 'w-full border rounded px-3 py-2 mt-1 nata-sans text-sm',
+                                    data: { behavior: "auto-submit" } %>
+              </div>
+            </div>
+
+            <div class="pt-3" id="custom-fields-section">
+              <p class="nata-sans text-sm font-bold">Custom fields</p>
+              <p class="nata-sans text-sm">Use this space to provide extra info to your customer, such as a tracking or PO number.</p>
+
+              <div id="custom-fields-container">
+                <!-- Dynamic fields will be inserted here -->
+              </div>
+
+              <button type="button" id="add-custom-field" class="mt-3 px-4 py-2 bg-blue-500 text-white rounded nata-sans text-sm hover:bg-blue-600">
+                Add Custom Field
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded">
+        <div class="flex justify-between items-center px-5 py-3 accordion-title">
+          <h2 class="nata-sans font-semibold text-lg">Business Info</h2>
+          <svg style="transform: rotate(0deg)" class="accordion-arrow w-5 h-5 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+        <div class="px-5 py-3 pt-0 accordion-body hidden">
+          <p>test</p>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded">
+        <div class="flex justify-between items-center px-5 py-3 accordion-title">
+          <h2 class="nata-sans font-semibold text-lg">Customer Details</h2>
+          <svg style="transform: rotate(0deg)" class="accordion-arrow w-5 h-5 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+        <div class="px-5 py-3 pt-0 accordion-body hidden">
+          <p>test</p>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded">
+        <div class="flex justify-between items-center px-5 py-3 accordion-title">
+          <h2 class="nata-sans font-semibold text-lg">Item And Tax Display</h2>
+          <svg style="transform: rotate(0deg)" class="accordion-arrow w-5 h-5 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+        <div class="px-5 py-3 pt-0 accordion-body hidden">
+          <p>test</p>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded">
+        <div class="flex justify-between items-center px-5 py-3 accordion-title">
+          <h2 class="nata-sans font-semibold text-lg">Footer Notes</h2>
+          <svg style="transform: rotate(0deg)" class="accordion-arrow w-5 h-5 ml-1 transform transition-transform duration-200 text-blue-500" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </div>
+        <div class="px-5 py-3 pt-0 accordion-body hidden">
+          <p>test</p>
+        </div>
+      </div>
+    </div>
+    <div class="w-7/10 bg-gray-50 p-10 rounded relative flex justify-center">
+      <div class="absolute left-5 -top-3 bg-black-gray rounded"><p class="nata-sans text-white px-3 py-1 text-sm">PREVIEW</p></div>
+
+      <div class="bg-white rounded p-5" style="width: 620px; min-height: 877px">
+        <!-- Header Section -->
+        <div style="display: flex;">
+          <div style="width: 50%;">
+            <% if current_user.logo.attached? %>
+              <%= image_tag current_user.logo, alt: "Business Logo", style: "max-width: 75px" %>
+            <% end %>
+          </div>
+          <div style="width: 50%;">
+            <h1 class="headline-text-change" style="text-align: right;"><%= @invoice_template.header_fields['invoice_title'] %> <% unless @invoice_template.numbering['prefix'].blank? %><%= @invoice_template.numbering['prefix'] %><% end %><%= @invoice_template.numbering['invoice_numbering'] %><% unless @invoice_template.numbering['suffix'].blank? %><%= @invoice_template.numbering['suffix'] %><% end %></h1>
+            <p class="text-text-change" style="text-align: right;">Issue Date: 19 Sept 2025</p>
+            <% if @invoice_template.header_fields['custom_fields']['custom_field_one'] %>
+              <p class="text-text-change" style="text-align: right;"><%= @invoice_template.header_fields['custom_fields']['custom_field_one'] %></p>
+            <% end %>
+            <% if @invoice_template.header_fields['custom_fields']['custom_field_two'] %>
+              <p class="text-text-change" style="text-align: right;"><%= @invoice_template.header_fields['custom_fields']['custom_field_two'] %></p>
+            <% end %>
+            <% if @invoice_template.header_fields['custom_fields']['custom_field_three'] %>
+              <p class="text-text-change" style="text-align: right;"><%= @invoice_template.header_fields['custom_fields']['custom_field_three'] %></p>
+            <% end %>
+            <% if @invoice_template.header_fields['custom_fields']['custom_field_four'] %>
+              <p class="text-text-change" style="text-align: right;"><%= @invoice_template.header_fields['custom_fields']['custom_field_four'] %></p>
+            <% end %>
+          </div>
+        </div>
+        <!-- Name Section -->
+        <div>
+          <p class="title-text-change">Jack Dawson</p>
+          <% if current_user.business_info['location'] %>
+            <p class="text-text-change"><%= current_user.business_info['location']['address_line_one'] %></p>
+            <p class="text-text-change"><%= current_user.business_info['location']['address_line_two'] %></p>
+            <p class="text-text-change"><%= current_user.business_info['location']['city'] %></p>
+            <p class="text-text-change"><%= current_user.business_info['location']['zip_postcode'] %></p>
+          <% end %>
+          <% if current_user.business_info['email'] %>
+            <p class="text-text-change"><%= current_user.business_info['email'] %></p>
+          <% end %>
+          <% if current_user.business_info['phone'] %>
+            <p class="text-text-change"><%= current_user.business_info['phone'] %></p>
+          <% end %>
+        </div>
+        <!-- Break Section -->
+        <div style="padding: 20px 0px">
+          <hr>
+        </div>
+        <!-- Address Section -->
+        <div>
+          <p class="title-text-change" style="line-height: 16px; margin-bottom: 5px">Customer Details</p>
+          <p class="text-text-change">Customer Name</p>
+          <p class="text-text-change">Company Name</p>
+          <p class="text-text-change">123 Street<br>Los Angeles, California 00000<br>United States</p>
+          <p class="text-text-change">Email@domain.com</p>
+          <p class="text-text-change">(123) 456-7890</p>
+          <p class="text-text-change">VAT ID: 1234567</p>
+        </div>
+        <!-- Tables Section -->
+        <div style="margin-top: 40px">
+          <!-- Items Table -->
+          <div style="border-bottom: 2px solid black;">
+            <!-- Items Table Top -->
+            <div style="display: flex; border-bottom: 2px solid black; padding: 10px 0px;">
+              <div style="width: 20%;">
+                <p class="title-text-change">Items</p>
+              </div>
+              <div style="width: 20%;">
+                <p class="title-text-change">Quantity</p>
+              </div>
+              <div style="width: 20%;">
+                <p class="title-text-change">Price</p>
+              </div>
+              <div style="width: 20%;">
+                <p class="title-text-change">Tax</p>
+              </div>
+              <div style="width: 20%;">
+                <p class="title-text-change" style="text-align: right">Line Total</p>
+              </div>
+            </div>
+            <!-- Items Table Row -->
+            <div style="padding: 10px 0px; display: flex; align-items: center">
+              <div style="width: 20%;">
+                <p class="items-text-change">Item Name</p>
+                <p class="text-text-change">Item Description</p>
+              </div>
+              <div style="width: 20%;">
+                <p class="text-text-change">1</p>
+              </div>
+              <div style="width: 20%;">
+                <p class="text-text-change">£100.00</p>
+              </div>
+              <div style="width: 20%;">
+                <p class="text-text-change">Tax 1 (15%)</p>
+              </div>
+              <div style="width: 20%;">
+                <p class="text-text-change" style="text-align: right">£115.00</p>
+              </div>
+            </div>
+            <!-- Items Table Break -->
+            <div>
+              <hr>
+            </div>
+            <!-- Items Table Row -->
+            <div style="padding: 10px 0px; display: flex; align-items: center">
+              <div style="width: 20%;">
+                <p class="items-text-change">Item Name</p>
+                <p class="text-text-change">Item Description</p>
+              </div>
+              <div style="width: 20%;">
+                <p  class="text-text-change">1</p>
+              </div>
+              <div style="width: 20%;">
+                <p class="text-text-change">£100.00</p>
+              </div>
+              <div style="width: 20%;">
+                <p  class="text-text-change">Tax 1 (15%)</p>
+              </div>
+              <div style="width: 20%;">
+                <p class="text-text-change" style=" text-align: right">£115.00</p>
+              </div>
+            </div>
+          </div>
+          <!-- Totals Section -->
+          <div style="display: flex; justify-content: end; margin: 10px 0px;">
+            <div style="width: 50%;">
+              <!-- Subtotal -->
+              <div style="padding: 10px 0px;">
+                <div style="display: flex;">
+                  <div style="width: 50%;">
+                    <p class="title-text-change">Subtotal</p>
+                  </div>
+                  <div style="width: 50%;">
+                    <p class="title-text-change" style="text-align: right">£200.00</p>
+                  </div>
+                </div>
+                <div style="display: flex;">
+                  <div style="width: 50%;">
+                    <p class="text-text-change">Taxes</p>
+                  </div>
+                  <div style="width: 50%;">
+                    <p class="text-text-change" style="text-align: right">£30.00</p>
+                  </div>
+                </div>
+              </div>
+              <!-- Break Section -->
+              <div>
+                <hr>
+              </div>
+              <!-- Total -->
+              <div style="padding: 10px 0px;">
+                <div style="display: flex;">
+                  <div style="width: 50%;">
+                    <p class="title-text-change" >Total</p>
+                  </div>
+                  <div style="width: 50%;">
+                    <p class="title-text-change" style="text-align: right">£230.00</p>
+                  </div>
+                </div>
+                <div style="display: flex;">
+                  <div style="width: 50%;">
+                    <p class="text-text-change">Total Paid</p>
+                  </div>
+                  <div style="width: 50%;">
+                    <p class="text-text-change" style="text-align: right">£140.00</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Break Section -->
+          <div>
+            <hr>
+          </div>
+          <!-- Payment Details Section -->
+          <div style="padding: 10px 0px;">
+            <h3 class="title-text-change">Payment Details</h3>
+            <div style="display: flex; gap: 20px; margin-top: 10px">
+              <p class="text-text-change">19/09/2025</p>
+              <p class="text-text-change">Credit Card ****0000</p>
+              <p class="text-text-change">£140.00</p>
+            </div>
+          </div>
+          <!-- Break Section -->
+          <div>
+            <hr>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $(".accordion-title").click(function(){
+            $(this).parent().find('.accordion-body').toggle();
+
+            var arrow = $(this).parent().find('.accordion-arrow');
+
+            // Toggle the rotation class instead of setting CSS directly
+            arrow.toggleClass('rotated');
+        });
+
+        $('.invoice-number-edit-button').click(function(){
+            $('.invoice-number-outer').toggle()
+        })
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('blur', function(e) {
+            if (e.target.dataset.behavior === 'auto-submit') {
+                const form = e.target.closest('form');
+                if (form && e.target.value.trim() !== '') {
+                    // Use requestSubmit() for Turbo
+                    form.requestSubmit();
+                }
+            }
+        }, true); // Use capture phase to ensure we catch the event
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to update character count
+        function updateCharacterCount(input) {
+            const current = input.value.length;
+            const max = input.maxLength;
+
+            if (input.name === 'prefix') {
+                const counter = document.querySelector('.prefix-count');
+                if (counter) {
+                    counter.textContent = `${current}/${max}`;
+                }
+            } else if (input.name === 'suffix') {
+                const counter = document.querySelector('.suffix-count');
+                if (counter) {
+                    counter.textContent = `${current}/${max}`;
+                }
+            } else if (input.name === 'invoice_title') {
+                const counter = document.querySelector('.invoice-title-count');
+                if (counter) {
+                    counter.textContent = `${current}/${max}`;
+                }
+            }
+        }
+
+        // Update counts on page load for existing values
+        const prefixInput = document.querySelector('input[name="prefix"]');
+        const suffixInput = document.querySelector('input[name="suffix"]');
+        const invoiceTitleInput = document.querySelector('input[name="invoice_title"]');
+
+        if (prefixInput) updateCharacterCount(prefixInput);
+        if (suffixInput) updateCharacterCount(suffixInput);
+        if (invoiceTitleInput) updateCharacterCount(invoiceTitleInput);
+
+        // Update counts as user types
+        document.addEventListener('input', function(e) {
+            if (e.target.name === 'prefix' || e.target.name === 'suffix' || e.target.name === 'invoice_title') {
+                updateCharacterCount(e.target);
+            }
+        });
+
+        // Auto-submit on blur
+        document.addEventListener('blur', function(e) {
+            if (e.target.dataset.behavior === 'auto-submit') {
+                const form = e.target.closest('form');
+                if (form) {
+                    form.requestSubmit();
+                }
+            }
+        }, true);
+    });
+
+    // Function to show notices
+    function showNotice(message, type = 'info') {
+        // Remove any existing notices
+        const existingNotice = document.querySelector('.flash-notice');
+        if (existingNotice) {
+            existingNotice.remove();
+        }
+
+        // Create new notice
+        const notice = document.createElement('div');
+        notice.className = `flash-notice alert alert-${type}`;
+        notice.innerHTML = `
+    <span>${message}</span>
+    <button type="button" class="close" onclick="this.parentElement.remove()">×</button>
+  `;
+
+        // Insert at top of page or in a specific container
+        const container = document.querySelector('.notice-container') || document.body;
+        container.insertBefore(notice, container.firstChild);
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            if (notice.parentElement) {
+                notice.remove();
+            }
+        }, 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        let customFieldCount = 0;
+        const maxFields = 4;
+        const container = document.getElementById('custom-fields-container');
+        const addButton = document.getElementById('add-custom-field');
+
+        // Load existing fields on page load
+        loadExistingFields();
+
+        addButton.addEventListener('click', function() {
+            if (customFieldCount < maxFields) {
+                addCustomField();
+                updateAddButton();
+            }
+        });
+
+        function loadExistingFields() {
+            // Check for existing field values from the nested structure
+            const customFields = [
+                '<%= j (@invoice_template.header_fields.dig("custom_fields", "custom_field_one") || "") %>',
+                '<%= j (@invoice_template.header_fields.dig("custom_fields", "custom_field_two") || "") %>',
+                '<%= j (@invoice_template.header_fields.dig("custom_fields", "custom_field_three") || "") %>',
+                '<%= j (@invoice_template.header_fields.dig("custom_fields", "custom_field_four") || "") %>'
+            ];
+
+            customFields.forEach((value, index) => {
+                if (value && value.trim() !== '') {
+                    addCustomField(index + 1, value);
+                }
+            });
+
+            updateAddButton();
+        }
+
+        function addCustomField(fieldNumber = null, existingValue = '') {
+            if (customFieldCount >= maxFields) return;
+
+            customFieldCount++;
+            const displayNum = fieldNumber || customFieldCount;
+
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'flex items-center gap-2 mt-2 custom-field-row';
+            fieldDiv.dataset.displayNumber = displayNum;
+
+            fieldDiv.innerHTML = `
+            <input type="text"
+                   name="custom_field_${getFieldName(displayNum)}"
+                   placeholder="Custom field ${displayNum}"
+                   value="${existingValue}"
+                   class="flex-1 border rounded px-3 py-2 nata-sans text-sm"
+                   data-behavior="auto-submit">
+            <button type="button"
+                    class="remove-field px-2 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    onclick="removeCustomField(this)">×</button>
+        `;
+
+            container.appendChild(fieldDiv);
+            updateAddButton();
+        }
+
+        function getFieldName(num) {
+            const names = ['one', 'two', 'three', 'four'];
+            return names[num - 1] || 'one';
+        }
+
+        function reorderFields() {
+            const fields = Array.from(container.querySelectorAll('.custom-field-row'));
+            const fieldValues = [];
+
+            // Collect all current values
+            fields.forEach(field => {
+                const input = field.querySelector('input');
+                fieldValues.push(input.value);
+            });
+
+            // Clear container
+            container.innerHTML = '';
+            customFieldCount = 0;
+
+            // Re-add fields in order
+            fieldValues.forEach((value, index) => {
+                if (value.trim() !== '' || index === fieldValues.length - 1) {
+                    addCustomFieldReorder(index + 1, value);
+                }
+            });
+
+            updateAddButton();
+        }
+
+        function addCustomFieldReorder(fieldNumber, existingValue = '') {
+            customFieldCount++;
+
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'flex items-center gap-2 mt-2 custom-field-row';
+            fieldDiv.dataset.displayNumber = fieldNumber;
+
+            fieldDiv.innerHTML = `
+            <input type="text"
+                   name="custom_field_${getFieldName(fieldNumber)}"
+                   placeholder="Custom field ${fieldNumber}"
+                   value="${existingValue}"
+                   class="flex-1 border rounded px-3 py-2 nata-sans text-sm"
+                   data-behavior="auto-submit">
+            <button type="button"
+                    class="remove-field px-2 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    onclick="removeCustomField(this)">×</button>
+        `;
+
+            container.appendChild(fieldDiv);
+        }
+
+        function updateAddButton() {
+            if (customFieldCount >= maxFields) {
+                addButton.style.display = 'none';
+            } else {
+                addButton.style.display = 'block';
+                addButton.textContent = `Add Custom Field (${customFieldCount}/${maxFields})`;
+            }
+        }
+
+        // Global function for remove button
+        window.removeCustomField = function(button) {
+            const fieldRow = button.closest('.custom-field-row');
+            fieldRow.remove();
+            customFieldCount--;
+
+            // Reorder remaining fields
+            reorderFields();
+
+            // Trigger form submission to save the changes
+            setTimeout(() => {
+                const form = container.closest('form');
+                if (form) {
+                    form.requestSubmit();
+                }
+            }, 100);
+        };
+
+        // Handle character count for invoice title
+        function updateCharacterCount(input) {
+            if (input.name === 'invoice_title') {
+                const current = input.value.length;
+                const max = input.maxLength;
+                const counter = document.querySelector('.invoice-title-count');
+                if (counter) {
+                    counter.textContent = `${current}/${max}`;
+                }
+            }
+        }
+
+        // Update character count on page load
+        const invoiceTitleInput = document.querySelector('input[name="invoice_title"]');
+        if (invoiceTitleInput) updateCharacterCount(invoiceTitleInput);
+
+        // Update character count as user types
+        document.addEventListener('input', function(e) {
+            if (e.target.name === 'invoice_title') {
+                updateCharacterCount(e.target);
+            }
+        });
+
+        // Auto-submit on blur
+        document.addEventListener('blur', function(e) {
+            if (e.target.dataset.behavior === 'auto-submit') {
+                const form = e.target.closest('form');
+                if (form) {
+                    form.requestSubmit();
+                }
+            }
+        }, true);
+    });
+</script>

@@ -1,0 +1,327 @@
+<%
+  user = User.find(user_id)
+  websitePages = user.website.pages
+  component_page_id = component_id
+  component_id = websitePages["theme_pages"].values
+                                            .map { |page| page["components"] }
+                                            .flatten
+                                            .find { |component| component["component_page_id"] == component_id }
+    &.dig("component_id")
+
+  component = Component.find(component_id)
+
+  editable_field_pair = { field_name => component.editable_fields[field_name] }
+  field_types_pair = { field_name => component.field_types[field_name] }
+
+  # Get user's customisations for this component and theme_page
+  customisations = user.website&.customisations&.dig("customisations") || []
+
+  # Create a hash of field_name => field_value for quick lookup
+  custom_values = {}
+  custom_styling = {}
+  customisations.each do |customisation|
+    if customisation["component_id"] == component.id.to_s &&
+       customisation["theme_page_id"] == theme_page_id.to_s && customisation['component_page_id'] == component_page_id
+      custom_values[customisation["field_name"]] = customisation["field_value"]
+      custom_styling[customisation["field_name"]] = customisation["field_styling"] if customisation["field_styling"]
+    end
+  end
+
+  # Get styling for the current field
+  current_field_styling = custom_styling[field_name] || {}
+%>
+
+
+<div class="flex border-b">
+  <div onclick="singleFieldTab('content')" class="cursor-pointer w-1/2 border-r p-4 flex flex-col items-center justify-center">
+    <svg class="content-tab-icon fill-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="#000000" id="Pencil-Line-Light--Streamline-Phosphor" height="18" width="18">
+      <path d="m17.4509296875 4.5713953125 -4.0218750000000005 -4.0218750000000005c-0.49203984375 -0.49209609375 -1.2898546875 -0.49209609375 -1.78189453125 0L0.54897890625 11.64679453125c-0.23677734375 0.23596875 -0.36959765625 0.55667109375 -0.36897890625 0.89095078125v4.0218750000000005c0 0.695840625 0.5640890625 1.2599296875000001 1.2599296875000001 1.2599296875000001h15.11914921875c0.41566640624999995 0 0.6754640625 -0.44997890625000003 0.46762734375 -0.8099578125 -0.0964546875 -0.1670625 -0.2747109375 -0.2699859375 -0.46762734375 -0.2699859375H7.063713281249999L17.4509296875 6.353296875c0.49209609375 -0.492046875 0.49209609375 -1.2898617187499999 0 -1.7819015625ZM4.0038890625 14.75971875 11.879346093750002 6.88336171875l1.7567015625 1.7567015625L5.759690625 16.5155203125Zm-0.7640578125 -0.7631578125 -1.7558015624999999 -1.7566945312500002L9.359486718749999 4.364409375l1.7567015625 1.7558015624999999Zm-1.9798875 2.563059375v-3.0166312499999997l3.1966171875000002 3.19662421875H1.4399296874999998c-0.0994078125 0 -0.1799859375 -0.08058515625 -0.1799859375 -0.17999296874999998ZM16.686871875 5.5892390625l-2.28766640625 2.28766640625 -4.2756609375 -4.27655390625 2.28676640625 -2.2867734375000004c0.0703125 -0.07038281249999999 0.18438046875 -0.07038281249999999 0.2546859375 0l4.0218750000000005 4.020975c0.07038281249999999 0.07030546875 0.07038281249999999 0.18438046875 0 0.2546859375Z" stroke-width="0.0703"></path>
+    </svg>
+    <p class="text-center nata-sans text-sm mt-2 content-tab-title text-blue-500">Content</p>
+  </div>
+  <div onclick="singleFieldTab('style')" class="cursor-pointer w-1/2 border-r p-4 flex flex-col items-center justify-center">
+    <svg class="style-tab-icon"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Circle-Half-Light--Streamline-Phosphor" height="18" width="18">
+      <path d="M8 0.16C1.9647625 0.15973125 -1.8072 6.69289375 1.2101875 11.91969375c3.01738125 5.22680625 10.561425 5.22714375 13.579275 0.0006125C15.47768125 10.7284 15.84 9.376325 15.84 8 15.83491875 3.67219375 12.32780625 0.16508125 8 0.16Zm0.461175 0.937725c0.521325 0.0345625 1.0370375 0.1281625 1.53725625 0.2790125v13.246525c-0.50021875 0.15085 -1.01593125 0.24445 -1.53725625 0.2790125Zm2.45960625 0.63258125c0.55345625 0.25923125 1.07033125 0.5902875 1.53725625 0.9846125v10.5701625c-0.466925 0.394325 -0.9838 0.72538125 -1.53725625 0.9846125ZM1.08235 8C1.086875 4.3602875 3.9075125 1.34489375 7.538825 1.097725v13.80455C3.9075125 14.65510625 1.086875 11.6397125 1.08235 8Zm12.29804375 4.34274375V3.65725625c2.0495625 2.532425 2.0495625 6.1530625 0 8.6854875Z" stroke-width="0.0625"></path>
+    </svg>
+    <p class="text-center nata-sans text-sm mt-2 style-tab-title">Style</p>
+  </div>
+</div>
+
+<%= form_with url: manage_website_editor_website_editor_sidebar_editor_fields_save_path,
+              remote: true,
+              method: :post,
+              multipart: true,
+              local: false,
+              class: 'single-field-form' do |form| %>
+
+  <%= form.hidden_field :component_id, value: component.id %>
+  <%= form.hidden_field :theme_page_id, value: theme_page_id %>
+  <%= form.hidden_field :user_id, value: user_id %>
+  <%= form.hidden_field :component_page_id, value: component_page_id %>
+
+  <% name, data = field_types_pair.first %>
+
+  <div class="single-sidebar-form-fields p-4">
+    <% unless name.include? "global" %>
+      <div class="sidebar-field">
+        <%= form.label name, name.to_s.humanize, class: 'nata-sans text-sm font-semibold' %>
+        <div>
+          <% if data['type'] == 'text' %>
+            <%= form.text_field name,
+                                value: custom_values[name] || component.editable_fields[name],
+                                placeholder: "Enter your #{name}",
+                                class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
+          <% elsif data['type'] == 'textarea' %>
+            <div class="wysiwyg-container" data-controller="wysiwyg">
+              <div data-wysiwyg-target="editor" class="border border-gray-300 rounded-md"></div>
+              <%= form.hidden_field name,
+                                    value: custom_values[name] || component.editable_fields[name],
+                                    data: { wysiwyg_target: "input" },
+                                    class: 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
+            </div>
+          <% elsif data['type'] == 'color' %>
+            <%= form.text_field name,
+                                value: custom_values[name] || component.editable_fields[name],
+                                placeholder: "Enter your #{name}",
+                                class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
+          <% elsif data['type'] == 'image' %>
+
+            <% if name.include?("background") %>
+              <% current_image = custom_values[name] || component.editable_fields['background'][name] %>
+            <% else %>
+              <% current_image = custom_values[name] || component.editable_fields[name] %>
+            <% end %>
+
+            <div class="image-field">
+              <% if current_image %>
+                <div class="current-image mb-3">
+                  <%= image_tag current_image, class: "w-32 h-32 object-cover rounded border" %>
+                  <p class="text-sm text-gray-600 mt-1">Current image</p>
+                </div>
+              <% end %>
+
+              <div class="file-input">
+                <%= form.file_field name,
+                                    accept: "image/*",
+                                    class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" %>
+              </div>
+
+              <% if current_image %>
+                <div class="remove-option mt-2">
+                  <%= form.check_box "remove_#{name}", {}, "1", "" %>
+                  <%= form.label "remove_#{name}", "Remove current image", class: "ml-2 text-sm text-gray-600" %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="single-sidebar-form-style p-4 hidden space-y-3">
+    <% if data['type'] == 'text' or data['type'] == 'textarea' %>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Alignment</p>
+        </div>
+        <div class="w-full">
+          <%= form.select :alignment,
+                          options_for_select([
+                                               ['Left', 'left'],
+                                               ['Center', 'center'],
+                                               ['Right', 'right'],
+                                               ['Justified', 'justified']
+                                             ], current_field_styling['alignment'] || data['style']['alignment']),
+                          { prompt: 'Select a Alignment' },
+                          { class: "w-full border p-2 nata-sans text-sm rounded" } %>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Text Colour</p>
+        </div>
+        <div class="w-full">
+          <%= form.color_field :text_colour,
+                               value: current_field_styling['text_colour'] || data['style']['text_colour'],
+                               class: "form-control w-full h-8" %>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Font Family</p>
+        </div>
+        <div class="w-full">
+          <%= form.select :font_family,
+                          options_for_select([
+                                               ['Option 1', 'value1'],
+                                               ['Option 2', 'value2'],
+                                               ['Option 3', 'value3']
+                                             ], current_field_styling['font_family'] || data['style']['font_family']),
+                          { prompt: 'Select a Font Family' },
+                          { class: "w-full border p-2 nata-sans text-sm rounded" } %>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Font Size</p>
+        </div>
+        <div class="w-full">
+          <div class="number-with-suffix">
+            <% font_size_value = current_field_styling['font_size'] || data['style']['font_size'] %>
+            <%= form.number_field :font_size,
+                                  value: font_size_value.to_s.gsub('px', '').to_i,
+                                  class: "w-full border p-2 nata-sans text-sm rounded number-field-with-px" %>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Font Weight</p>
+        </div>
+        <div class="w-full">
+          <%= form.select :font_weight,
+                          options_for_select([
+                                               ['100 (Thin)', '100'],
+                                               ['200 (Extra Light)', '200'],
+                                               ['300 (Light)', '300'],
+                                               ['400 (Normal)', '400'],
+                                               ['500 (Medium)', '500'],
+                                               ['600 (Semi Bold)', '600'],
+                                               ['700 (Bold)', '700'],
+                                               ['800 (Extra Bold)', '800'],
+                                               ['900 (Black)', '900'],
+                                               ['Default', 'default'],
+                                               ['Normal', 'normal'],
+                                               ['Bold', 'bold']
+                                             ], current_field_styling['font_weight'] || data['style']['font_weight']),
+                          { prompt: 'Select a Font Weight' },
+                          { class: "w-full border p-2 nata-sans text-sm rounded" } %>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Font Transform</p>
+        </div>
+        <div class="w-full">
+          <%= form.select :font_transform,
+                          options_for_select([
+                                               ['Default', 'default'],
+                                               ['Uppercase', 'uppercase'],
+                                               ['Lowercase', 'lowercase'],
+                                               ['Capitalise', 'capitalise'],
+                                               ['Normal', 'normal']
+                                             ], current_field_styling['font_transform'] || data['style']['font_transform']),
+                          { prompt: 'Select a Font Transform' },
+                          { class: "w-full border p-2 nata-sans text-sm rounded" } %>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Font Style</p>
+        </div>
+        <div class="w-full">
+          <%= form.select :font_style,
+                          options_for_select([
+                                               ['Default', 'default'],
+                                               ['Normal', 'normal'],
+                                               ['Italic', 'italic'],
+                                               ['Oblique', 'oblique']
+                                             ], current_field_styling['font_style'] || data['style']['font_style']),
+                          { prompt: 'Select a Font Style' },
+                          { class: "w-full border p-2 nata-sans text-sm rounded" } %>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Font Decoration</p>
+        </div>
+        <div class="w-full">
+          <%= form.select :font_decoration,
+                          options_for_select([
+                                               ['Default', 'default'],
+                                               ['Underline', 'underline'],
+                                               ['Overline', 'overline'],
+                                               ['Line Through', 'line-through'],
+                                               ['None', 'none']
+                                             ], current_field_styling['font_decoration'] || data['style']['font_decoration']),
+                          { prompt: 'Select a Font Decoration' },
+                          { class: "w-full border p-2 nata-sans text-sm rounded" } %>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Line Height</p>
+        </div>
+        <div class="w-full">
+          <div class="number-with-suffix">
+            <% line_height_value = current_field_styling['line_height'] || data['style']['line_height'] %>
+            <%= form.number_field :line_height,
+                                  value: line_height_value.to_s.gsub('px', '').to_i,
+                                  class: "w-full border p-2 nata-sans text-sm rounded number-field-with-px" %>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Letter Spacing</p>
+        </div>
+        <div class="w-full">
+          <div class="number-with-suffix">
+            <% letter_spacing_value = current_field_styling['letter_spacing'] || data['style']['letter_spacing'] %>
+            <%= form.number_field :letter_spacing,
+                                  value: letter_spacing_value.to_s.gsub('px', '').to_i,
+                                  class: "w-full border p-2 nata-sans text-sm rounded number-field-with-px" %>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Word Spacing</p>
+        </div>
+        <div class="w-full">
+          <div class="number-with-suffix">
+            <% word_spacing_value = current_field_styling['word_spacing'] || data['style']['word_spacing'] %>
+            <%= form.number_field :word_spacing,
+                                  value: word_spacing_value.to_s.gsub('px', '').to_i,
+                                  class: "w-full border p-2 nata-sans text-sm rounded number-field-with-px" %>
+          </div>
+        </div>
+      </div>
+    <% elsif data['type'] == 'image' %>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Height</p>
+        </div>
+        <div class="w-full">
+          <div class="number-with-suffix">
+            <% font_size_value = current_field_styling['height'] || data['style']['height'] %>
+            <%= form.number_field :height,
+                                  value: font_size_value.to_s.gsub('px', '').to_i,
+                                  class: "w-full border p-2 nata-sans text-sm rounded number-field-with-px" %>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <div class="w-full">
+          <p class="nata-sans text-sm">Object Fit</p>
+        </div>
+        <div class="w-full">
+          <%= form.select :object_fit,
+                          options_for_select([
+                                               ['Cover', 'cover'],
+                                               ['contain', 'contain']
+                                             ], current_field_styling['object_fit'] || data['style']['object_fit']),
+                          { prompt: 'Select a Object Fit' },
+                          { class: "w-full border p-2 nata-sans text-sm rounded" } %>
+        </div>
+      </div>
+
+    <% end %>
+
+  </div>
+
+  <div class="p-4">
+    <%= form.submit "Save Changes", class: "bg-blue-500 nata-sans text-sm py-2 px-5 text-center w-full rounded text-white" %>
+  </div>
+<% end %>

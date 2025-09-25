@@ -117,6 +117,7 @@ Rails.application.routes.draw do
         get "/:page_slug/:inner_page_slug", to: "website_editor#inner_page", as: "website_editor_inner_page"
 
         post "/sidebar_data", to: "website_editor#sidebar_data", as: "website_editor_sidebar_data"
+        post "/single_field_data", to: "website_editor#single_field_data", as: "website_editor_single_field_data"
 
         post '/sidebar_editor_fields_data', to: "website_editor#sidebar_editor_fields_data", as: "website_editor_sidebar_editor_fields_data"
         post '/sidebar_editor_fields_save', to: "website_editor#sidebar_editor_fields_save", as: "website_editor_sidebar_editor_fields_save"
@@ -202,7 +203,20 @@ Rails.application.routes.draw do
       namespace :payments do
         get "/accept-payments", to: "accept_payments#accept_payments", as: "accept_payments"
         get "/accept-payments/more", to: "accept_payments#accept_more_payments", as: "accept_more_payments"
+
+        get "/invoices", to: "invoices#index", as: "invoices"
+        post "/invoices/numbering_save", to: "invoices#numbering_save", as: "numbering_save"
+        post "/invoices/header_fields_save", tp: "invoices#header_fields_save", as: "header_fields_save"
+        namespace :invoices do
+
+          get "/design", to: "design#index", as: "design_invoices"
+          get '/load_partial/:partial', to: 'design#load_partial', as: :load_partial
+          get '/load_partial/text/:partial', to: 'design#load_text_partial', as: :load_text_partial
+
+          patch '/design/update_design', to: 'design#update_design', as: 'update_design'
+        end
       end
+
       namespace :website do
         # Website Settings Controller
         get "website-settings", to: "website_settings#website_settings", as: "website_settings"
