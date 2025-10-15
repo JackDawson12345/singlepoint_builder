@@ -163,6 +163,7 @@ Rails.application.routes.draw do
         post "/show_in_menu", to: "website_editor#show_in_menu", as: "website_editor_show_in_menu"
         post "/delete_from_menu", to: "website_editor#delete_from_menu", as: "website_editor_delete_from_menu"
         post "/duplicate_in_menu", to: "website_editor#duplicate_in_menu", as: "website_editor_duplicate_in_menu"
+        post "/rename_page", to: "website_editor#rename_page", as: "website_editor_rename_page"
 
 
         post '/sidebar_editor_fields_data', to: "website_editor#sidebar_editor_fields_data", as: "website_editor_sidebar_editor_fields_data"

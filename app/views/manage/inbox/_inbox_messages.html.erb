@@ -25,7 +25,7 @@
     <div class="flex justify-<%= is_real_person ? 'end' : 'start' %>">
       <div style="max-width: 60%" class="flex items-end gap-2 <%= is_real_person ? '' : 'flex-row-reverse' %>">
         <div>
-          <div style="border-radius: 10px 10px 0px 10px; padding: 8px 20px;" class="<%= is_real_person ? 'bg-green-500' : '-ml-5 bg-gray-50' %>">
+          <div style="border-radius: 10px 10px 0 10px; padding: 8px 20px;" class="<%= is_real_person ? 'bg-green-500' : '-ml-5 bg-gray-50' %>">
             <p class="nata-sans text-sm <%= is_real_person ? 'text-white text-right' : '' %>"><%= message.message %></p>
           </div>
           <div class="mt-1">

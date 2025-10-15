@@ -25,6 +25,9 @@ export default class extends Controller {
             placeholder: 'Start writing...'
         })
 
+        // Store Quill instance on the element for external access
+        this.editorTarget.__quill = this.quill
+
         // Set initial content if exists
         if (this.inputTarget.value) {
             this.quill.root.innerHTML = this.inputTarget.value
@@ -41,6 +44,8 @@ export default class extends Controller {
         // Sync editor content to hidden input
         this.quill.on('text-change', () => {
             this.inputTarget.value = this.quill.root.innerHTML
+            // Trigger input event for live preview
+            this.inputTarget.dispatchEvent(new Event('input', { bubbles: true }))
         })
     }
 

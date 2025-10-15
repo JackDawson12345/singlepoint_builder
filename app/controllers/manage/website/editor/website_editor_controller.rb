@@ -306,24 +306,47 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     website = user.website
     current_customisations = website.customisations&.dig("customisations") || []
 
-    # Process ONLY the active field
+    # Determine which fields to process
+    # If active_field_name is provided, process only that field
+    # Otherwise, process all background fields that are present in params
+    fields_to_process = []
+
     if active_field_name
-      # Convert to string for consistency
-      active_field_name = active_field_name.to_s
+      fields_to_process = [active_field_name.to_s]
+    else
+      # Check for background fields in params
+      component.field_types.each do |field_name, field_type|
+        if field_name.to_s.include?('background')
+          # Check if this field is in the params
+          param_value = params[field_name] ||
+                        params.dig(:manage_website_editor_website_editor, field_name) ||
+                        params.dig(:website_editor, field_name)
 
-      field_data = component.field_types[active_field_name]
+          if param_value.present? || params["remove_#{field_name}"] == '1'
+            fields_to_process << field_name.to_s
+          end
+        end
+      end
+    end
 
+    Rails.logger.debug "fields_to_process: #{fields_to_process.inspect}"
+
+    # Process each field
+    fields_to_process.each do |field_name|
+      field_data = component.field_types[field_name]
+
+      Rails.logger.debug "Processing field: #{field_name}"
       Rails.logger.debug "field_data: #{field_data.inspect}"
-      Rails.logger.debug "component.field_types keys: #{component.field_types.keys.inspect}"
 
       if field_data
-        type = field_data["type"]
+        # Handle both simple types (e.g., "image", "color") and complex types (e.g., {"type" => "text", "style" => {...}})
+        type = field_data.is_a?(Hash) ? field_data["type"] : field_data
 
         Rails.logger.debug "type: #{type}"
 
-        param_value = params[active_field_name] ||
-                      params.dig(:manage_website_editor_website_editor, active_field_name) ||
-                      params.dig(:website_editor, active_field_name)
+        param_value = params[field_name] ||
+                      params.dig(:manage_website_editor_website_editor, field_name) ||
+                      params.dig(:website_editor, field_name)
 
         Rails.logger.debug "param_value: #{param_value.inspect}"
 
@@ -362,13 +385,13 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
 
         # Process the field
         if type == 'image'
-          remove_param = params["remove_#{active_field_name}"]
+          remove_param = params["remove_#{field_name}"]
 
           Rails.logger.debug "remove_param: #{remove_param.inspect}"
 
           if remove_param == '1'
-            field_values[active_field_name] = ''
-            field_stylings[active_field_name] = styling_data
+            field_values[field_name] = ''
+            field_stylings[field_name] = styling_data
           elsif param_value.present?
             if param_value.is_a?(ActionDispatch::Http::UploadedFile) || param_value.respond_to?(:original_filename)
               begin
@@ -378,14 +401,15 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
                   content_type: param_value.content_type
                 )
 
-                field_values[active_field_name] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
-                field_stylings[active_field_name] = styling_data
+                field_values[field_name] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
+                field_stylings[field_name] = styling_data
+                Rails.logger.debug "Uploaded image and saved to field_values: #{field_values[field_name]}"
               rescue => e
                 Rails.logger.error "Failed to upload image: #{e.message}"
               end
             else
-              field_values[active_field_name] = param_value
-              field_stylings[active_field_name] = styling_data
+              field_values[field_name] = param_value
+              field_stylings[field_name] = styling_data
             end
           elsif styling_data.present?
             Rails.logger.debug "Looking for existing customisation..."
@@ -394,23 +418,25 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
               c["component_id"] == component.id.to_s &&
                 c["theme_page_id"] == theme_page_id.to_s &&
                 c["component_page_id"] == component_page_id &&
-                c["field_name"] == active_field_name.to_s
+                c["field_name"] == field_name.to_s
             end
 
             Rails.logger.debug "existing_customisation: #{existing_customisation.inspect}"
 
             if existing_customisation && existing_customisation["field_value"].present?
-              field_values[active_field_name] = existing_customisation["field_value"]
-              field_stylings[active_field_name] = styling_data
+              field_values[field_name] = existing_customisation["field_value"]
+              field_stylings[field_name] = styling_data
               Rails.logger.debug "Set field_values from existing"
             else
               # No existing customisation - get the default value from component's editable_fields
-              default_value = component.editable_fields[active_field_name]
+              # Check if it's nested under 'background'
+              default_value = component.editable_fields[field_name] ||
+                              component.editable_fields.dig('background', field_name)
 
               if default_value.present?
-                field_values[active_field_name] = default_value
-                field_stylings[active_field_name] = styling_data
-                Rails.logger.debug "Set field_values from default editable_fields"
+                field_values[field_name] = default_value
+                field_stylings[field_name] = styling_data
+                Rails.logger.debug "Set field_values from default editable_fields: #{default_value}"
               else
                 Rails.logger.debug "No existing customisation and no default value found"
               end
@@ -418,30 +444,35 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
           else
             Rails.logger.debug "No styling_data present"
           end
+        elsif type == 'color'
+          # Handle color fields
+          if param_value.present?
+            field_values[field_name] = param_value
+            field_stylings[field_name] = styling_data
+            Rails.logger.debug "Saved color value: #{param_value}"
+          end
         else
           # Handle text and textarea fields
           if param_value.present?
-            field_values[active_field_name] = param_value
-            field_stylings[active_field_name] = styling_data
+            field_values[field_name] = param_value
+            field_stylings[field_name] = styling_data
           elsif styling_data.present?
             existing_customisation = current_customisations.find do |c|
               c["component_id"] == component.id.to_s &&
                 c["theme_page_id"] == theme_page_id.to_s &&
                 c["component_page_id"] == component_page_id &&
-                c["field_name"] == active_field_name.to_s
+                c["field_name"] == field_name.to_s
             end
 
             if existing_customisation && existing_customisation["field_value"].present?
-              field_values[active_field_name] = existing_customisation["field_value"]
-              field_stylings[active_field_name] = styling_data
+              field_values[field_name] = existing_customisation["field_value"]
+              field_stylings[field_name] = styling_data
             end
           end
         end
       else
-        Rails.logger.debug "field_data was nil!"
+        Rails.logger.debug "field_data was nil for field: #{field_name}"
       end
-    else
-      Rails.logger.debug "active_field_name was nil!"
     end
 
     Rails.logger.debug "Final field_values: #{field_values.inspect}"
@@ -1268,7 +1299,102 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       slug: new_menu_item_data["slug"]
     }
   end
+  def rename_page
+    menu_item_id = params[:menu_item_id]
+    new_name = params[:new_name]
+    current_page_slug = params[:current_page_slug]
 
+    menu_items = current_user.website.menu["menu_items"]
+    theme_pages = current_user.website.pages["theme_pages"]
+
+    # Find the menu item (could be main page or inner page)
+    result = find_menu_item_by_id(menu_items, menu_item_id)
+
+    if !result
+      render json: { success: false, message: "Menu item not found" }, status: :not_found
+      return
+    end
+
+    menu_item_name = result[:name]
+    menu_item_data = result[:data]
+    parent_name = result[:parent]
+    is_inner_page = result[:is_inner]
+
+    # Store old slug to check if we're on the current page
+    old_slug = menu_item_data["slug"]
+    new_slug = new_name.parameterize
+
+    # Check if new name already exists
+    if is_inner_page
+      # For inner pages, check within the parent's inner_pages
+      parent_data = menu_items[parent_name]
+      if parent_data["inner_pages"].key?(new_name) && new_name != menu_item_name
+        render json: { success: false, message: "A page with this name already exists" }, status: :unprocessable_entity
+        return
+      end
+    else
+      # For main pages, check in menu_items
+      if menu_items.key?(new_name) && new_name != menu_item_name
+        render json: { success: false, message: "A page with this name already exists" }, status: :unprocessable_entity
+        return
+      end
+    end
+
+    # Update menu item and theme page
+    if is_inner_page
+      # Update inner page in menu
+      parent_menu_data = menu_items[parent_name]
+      parent_menu_data["inner_pages"][new_name] = parent_menu_data["inner_pages"].delete(menu_item_name)
+      parent_menu_data["inner_pages"][new_name]["slug"] = new_slug
+
+      # Update inner page in theme_pages
+      parent_theme_data = theme_pages[parent_name]
+      if parent_theme_data && parent_theme_data["inner_pages"]
+        parent_theme_data["inner_pages"][new_name] = parent_theme_data["inner_pages"].delete(menu_item_name)
+        parent_theme_data["inner_pages"][new_name]["slug"] = new_slug
+      end
+    else
+      # Update main page in menu
+      menu_items[new_name] = menu_items.delete(menu_item_name)
+      menu_items[new_name]["slug"] = new_slug
+
+      # Update main page in theme_pages
+      if theme_pages[menu_item_name]
+        theme_pages[new_name] = theme_pages.delete(menu_item_name)
+        theme_pages[new_name]["slug"] = new_slug
+      end
+    end
+
+    # Save changes
+    if current_user.website.save
+      # Check if we're renaming the current page
+      is_current_page = (current_page_slug == old_slug || current_page_slug == "/#{old_slug}")
+
+      if is_current_page
+        render json: {
+          success: true,
+          message: "Page renamed successfully",
+          new_slug: new_slug,
+          is_current_page: true
+        }
+      else
+        # For non-current pages, just return success without rendering HTML
+        # The sidebar will be refreshed by the JavaScript
+        render json: {
+          success: true,
+          message: "Page renamed successfully",
+          new_slug: new_slug,
+          is_current_page: false
+        }
+      end
+    else
+      render json: { success: false, message: "Failed to save changes" }, status: :unprocessable_entity
+    end
+  rescue => e
+    Rails.logger.error "Error renaming page: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: { success: false, message: "Error: #{e.message}" }, status: :unprocessable_entity
+  end
 
   private
 
@@ -1298,6 +1424,38 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     menu_items.each do |parent_name, parent_data|
       if parent_data["inner_pages"] && parent_data["inner_pages"][page_name]
         return parent_data["inner_pages"][page_name]
+      end
+    end
+
+    nil
+  end
+
+  def find_menu_item_by_id(menu_items, menu_item_id)
+    # Check main pages
+    menu_items.each do |page_name, page_data|
+      if page_data["id"] == menu_item_id
+        return {
+          name: page_name,
+          data: page_data,
+          parent: nil,
+          is_inner: false
+        }
+      end
+    end
+
+    # Check inner pages
+    menu_items.each do |parent_name, parent_data|
+      if parent_data["inner_pages"]
+        parent_data["inner_pages"].each do |inner_page_name, inner_page_data|
+          if inner_page_data["id"] == menu_item_id
+            return {
+              name: inner_page_name,
+              data: inner_page_data,
+              parent: parent_name,
+              is_inner: true
+            }
+          end
+        end
       end
     end
 

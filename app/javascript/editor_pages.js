@@ -3,6 +3,7 @@ window.addNewPage = addNewPage;
 window.showInMenu = showInMenu;
 window.deleteFromMenu = deleteFromMenu;
 window.duplicateFromMenu = duplicateFromMenu;
+window.renamePageFromMenu = renamePageFromMenu;
 
 function changePageType(type, title, text){
 
@@ -192,4 +193,115 @@ function duplicateFromMenu(menu_item_id){
             console.error('Error:', error);
             // Optionally show an error message to the user
         });
+}
+
+function renamePageFromMenu(menu_item_id, current_name){
+    // Find the page link element
+    const pageContainer = document.querySelector(`.container-${menu_item_id}`);
+    if (!pageContainer) {
+        console.error('Page container not found');
+        return;
+    }
+
+    const pageLink = pageContainer.querySelector('a');
+    if (!pageLink) {
+        console.error('Page link not found');
+        return;
+    }
+
+    // Store the original link HTML
+    const originalHTML = pageLink.outerHTML;
+
+    // Replace the link with an input field
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = current_name;
+    input.className = 'nata-sans text-sm capitalize border border-green-500 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-500';
+    input.style.width = '100%';
+
+    // Replace the link with the input
+    pageLink.replaceWith(input);
+
+    // Focus and select the text
+    input.focus();
+    input.select();
+
+    // Function to save the new name
+    const saveName = () => {
+        const newName = input.value.trim();
+
+        // If name hasn't changed or is empty, revert
+        if (!newName || newName === current_name) {
+            input.outerHTML = originalHTML;
+            return;
+        }
+
+        // Get current page slug from URL
+        const pathParts = window.location.pathname.split('/');
+        const currentPageSlug = pathParts[pathParts.length - 1] || '/';
+
+        // Send rename request
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch('/manage/website/editor/rename_page', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': token,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                menu_item_id: menu_item_id,
+                new_name: newName,
+                current_page_slug: currentPageSlug
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Check if we're on the renamed page
+                    if (data.is_current_page) {
+                        // Redirect to the new slug
+                        window.location.href = `/manage/website/editor/${data.new_slug}`;
+                    } else {
+                        // Refresh the sidebar to show the updated name
+                        const sidebar = document.querySelector('.editor-sidebar');
+                        if (sidebar && sidebar.classList.contains('show')) {
+                            // Close the sidebar
+                            hideSidebar();
+
+                            // Wait a moment then reopen it to refresh
+                            setTimeout(() => {
+                                managePagesSidebar('Site Pages and Menu');
+                            }, 100);
+                        } else {
+                            // If sidebar is not open, just show a success message
+                            console.log('Page renamed successfully');
+                        }
+                    }
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to rename page'));
+                    input.outerHTML = originalHTML;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while renaming the page');
+                input.outerHTML = originalHTML;
+            });
+    };
+
+    // Save on blur (clicking away)
+    input.addEventListener('blur', saveName);
+
+    // Save on Enter key
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveName();
+        } else if (e.key === 'Escape') {
+            // Revert on Escape
+            input.outerHTML = originalHTML;
+        }
+    });
 }

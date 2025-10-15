@@ -62,7 +62,7 @@
               <div>
                 <hr>
               </div>
-              <div class="flex gap-2 hover:bg-green-50 p-2.5 py-1.5 items-center">
+              <div onclick="renamePageFromMenu('<%= page_data['id'] %>', '<%= page_name %>')" class="flex gap-2 hover:bg-green-50 p-2.5 py-1.5 items-center cursor-pointer">
                 <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 50 50" width="24" height="24">
                   <path d="M43.67,9.04h-7.17v2h7.03v27.91h-7.03v2h7.17c1.03,0,1.86-.83,1.86-1.86V10.9c0-1.03-.83-1.86-1.86-1.86Z"/>
                   <path d="M4.47,10.9v28.19c0,1.03.83,1.86,1.86,1.86h7.17v-2h-7.03V11.04h7.03v-2h-7.17c-1.03,0-1.86.83-1.86,1.86Z"/>
@@ -160,7 +160,7 @@
                   <div>
                     <hr>
                   </div>
-                  <div class="flex gap-2 hover:bg-green-50 p-2.5 py-1.5 items-center">
+                  <div onclick="renamePageFromMenu('<%= inner_page_data['id'] %>', '<%= inner_page %>')" class="flex gap-2 hover:bg-green-50 p-2.5 py-1.5 items-center cursor-pointer">
                     <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 50 50" width="24" height="24">
                       <path d="M43.67,9.04h-7.17v2h7.03v27.91h-7.03v2h7.17c1.03,0,1.86-.83,1.86-1.86V10.9c0-1.03-.83-1.86-1.86-1.86Z"/>
                       <path d="M4.47,10.9v28.19c0,1.03.83,1.86,1.86,1.86h7.17v-2h-7.03V11.04h7.03v-2h-7.17c-1.03,0-1.86.83-1.86,1.86Z"/>

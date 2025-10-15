@@ -797,3 +797,25 @@
 .add-page-select-outer-active > p{
     color: rgba(16,185,129,1)
 }
+
+/* Live preview update animation */
+.field-updated {
+    animation: fieldUpdatePulse 0.3s ease-in-out;
+}
+
+@keyframes fieldUpdatePulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(14, 140, 14, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(14, 140, 14, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(14, 140, 14, 0);
+    }
+}
+
+/* Background preview styles */
+.background-preview-updating {
+    transition: background-image 0.3s ease-in-out, background-color 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}

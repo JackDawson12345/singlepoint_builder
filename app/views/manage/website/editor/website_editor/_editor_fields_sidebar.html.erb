@@ -38,27 +38,55 @@
           <div class="sidebar-field">
             <%= form.label name, name.to_s.humanize, class: 'nata-sans text-sm font-semibold' %>
             <div>
+              <%
+                # Helper to get default value - check both flat and nested structure
+                default_value = custom_values[name] ||
+                                component.editable_fields[name] ||
+                                component.editable_fields.dig('background', name)
+              %>
+
               <% if type == 'text' %>
-                <%= form.text_field name,
-                                    value: custom_values[name] || component.editable_fields[name],
-                                    placeholder: "Enter your #{name}",
-                                    class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
+                <% if name.include?('opacity') %>
+                  <%= form.number_field name,
+                                        value: default_value,
+                                        placeholder: "Enter your #{name}",
+                                        min: "0",
+                                        max: "1",
+                                        step: "0.1",
+                                        class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s,
+                                        data: {
+                                          field_type: 'opacity',
+                                          theme_page_id: theme_page_id,
+                                          component_page_id: component_page_id,
+                                          field_name: name
+                                        } %>
+                <% else %>
+                  <%= form.text_field name,
+                                      value: default_value,
+                                      placeholder: "Enter your #{name}",
+                                      class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
+                <% end %>
               <% elsif type == 'textarea' %>
                 <div class="wysiwyg-container" data-controller="wysiwyg">
                   <div data-wysiwyg-target="editor" class="border border-gray-300 rounded-md"></div>
                   <%= form.hidden_field name,
-                                        value: custom_values[name] || component.editable_fields[name],
+                                        value: default_value,
                                         data: { wysiwyg_target: "input" },
                                         class: 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
                 </div>
               <% elsif type == 'color' %>
-                <%= form.text_field name,
-                                    value: custom_values[name] || component.editable_fields[name],
-                                    placeholder: "Enter your #{name}",
-                                    class: "nata-sans text-sm font-normal w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s %>
+                <%= form.color_field name,
+                                     value: default_value,
+                                     class: "w-full h-10 border border-gray-300 rounded cursor-pointer " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s,
+                                     data: {
+                                       field_type: 'color',
+                                       theme_page_id: theme_page_id,
+                                       component_page_id: component_page_id,
+                                       field_name: name
+                                     } %>
               <% elsif type == 'image' %>
 
-                <% current_image = custom_values[name] || component.editable_fields['background'][name] %>
+                <% current_image = default_value %>
 
 
                 <div class="image-field">
@@ -72,7 +100,13 @@
                   <div class="file-input">
                     <%= form.file_field name,
                                         accept: "image/*",
-                                        class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" %>
+                                        class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 " + 'field_' + theme_page_id.to_s + '_' + component_page_id.to_s + '_' + name.to_s,
+                                        data: {
+                                          field_type: 'image',
+                                          theme_page_id: theme_page_id,
+                                          component_page_id: component_page_id,
+                                          field_name: name
+                                        } %>
                   </div>
 
                   <% if current_image %>

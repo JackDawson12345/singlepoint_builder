@@ -19,6 +19,7 @@ window.showBackgroundOption = showBackgroundOption;
 window.showEditorFields = showEditorFields;
 window.singleFieldTab = singleFieldTab;
 window.initializeLiveStyleUpdates = initializeLiveStyleUpdates;
+window.initializeLiveContentUpdates = initializeLiveContentUpdates;
 window.managePagesSidebar = managePagesSidebar;
 window.openEditorPopup = openEditorPopup;
 window.hideEditorPopup = hideEditorPopup;
@@ -274,6 +275,7 @@ function updateSidebarContent(data) {
         if (data.html && data.html.includes('single-field-form')) {
             setTimeout(() => {
                 initializeLiveStyleUpdates();
+                initializeLiveContentUpdates();
             }, 100);
         }
 
@@ -556,44 +558,180 @@ function initializeRealtimeUpdates(themePageId, componentPageId) {
         const newField = field.cloneNode(true);
         field.parentNode.replaceChild(newField, field);
 
-        // Add input event listener for real-time updates
-        newField.addEventListener('input', function(e) {
-            const newValue = e.target.value;
+        // Handle different field types
+        if (newField.type === 'file') {
+            // Handle file inputs (for background images)
+            newField.addEventListener('change', function(e) {
+                handleBackgroundImagePreview(e, targetElements, fieldName, themePageId, componentPageId);
+            });
+        } else if (newField.type === 'color' || fieldName.includes('overlay') || fieldName.includes('background_colour')) {
+            // Handle color inputs for overlays and background colors
+            newField.addEventListener('input', function(e) {
+                handleBackgroundColorPreview(e, targetElements, fieldName, themePageId, componentPageId);
+            });
+        } else {
+            // Add input event listener for real-time updates (text fields)
+            newField.addEventListener('input', function(e) {
+                const newValue = e.target.value;
 
-            targetElements.forEach(element => {
-                // Handle different types of elements
-                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                    element.value = newValue;
-                } else if (element.tagName === 'A') {
-                    // For links, update href if it's a link field, otherwise update text content
-                    if (fieldName.includes('link') || fieldName.includes('url') || fieldName.includes('href')) {
-                        element.href = newValue;
+                targetElements.forEach(element => {
+                    // Handle different types of elements
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.value = newValue;
+                    } else if (element.tagName === 'A') {
+                        // For links, update href if it's a link field, otherwise update text content
+                        if (fieldName.includes('link') || fieldName.includes('url') || fieldName.includes('href')) {
+                            element.href = newValue;
+                        } else {
+                            element.textContent = newValue;
+                        }
                     } else {
+                        // For other elements (spans, divs, h1, etc.), update text content
                         element.textContent = newValue;
                     }
-                } else {
-                    // For other elements (spans, divs, h1, etc.), update text content
-                    element.textContent = newValue;
-                }
+                });
+
+                // Add visual feedback to show the update happened
+                targetElements.forEach(element => {
+                    element.classList.add('field-updated');
+                    setTimeout(() => {
+                        element.classList.remove('field-updated');
+                    }, 300);
+                });
+
+                console.log(`Updated ${targetElements.length} elements for field: ${fieldName} with value: ${newValue}`);
             });
 
-            // Add visual feedback to show the update happened
+            // Also listen for paste events
+            newField.addEventListener('paste', function(e) {
+                // Use setTimeout to get the pasted content after it's been inserted
+                setTimeout(() => {
+                    newField.dispatchEvent(new Event('input', { bubbles: true }));
+                }, 10);
+            });
+        }
+    });
+
+    // Initialize background preview listeners
+    initializeBackgroundPreviewListeners(themePageId, componentPageId);
+}
+
+// Handle background image preview
+function handleBackgroundImagePreview(event, targetElements, fieldName, themePageId, componentPageId) {
+    const file = event.target.files[0];
+
+    if (!file) {
+        console.log('No file selected');
+        return;
+    }
+
+    // Check if it's an image
+    if (!file.type.startsWith('image/')) {
+        console.warn('Selected file is not an image');
+        return;
+    }
+
+    // Create a FileReader to read the image
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const imageUrl = e.target.result;
+
+        targetElements.forEach(element => {
+            // Update background image
+            if (fieldName.includes('background_image') || fieldName.includes('background')) {
+                element.style.backgroundImage = `url('${imageUrl}')`;
+                element.style.backgroundSize = 'cover';
+                element.style.backgroundPosition = 'center';
+                element.style.backgroundRepeat = 'no-repeat';
+
+                console.log(`Updated background image for element:`, element);
+            } else if (element.tagName === 'IMG') {
+                // If it's an img tag, update src
+                element.src = imageUrl;
+            }
+
+            // Add visual feedback
+            element.classList.add('field-updated');
+            setTimeout(() => {
+                element.classList.remove('field-updated');
+            }, 300);
+        });
+
+        console.log(`Preview updated for ${targetElements.length} elements with new image`);
+    };
+
+    reader.readAsDataURL(file);
+}
+
+// Handle background color/overlay preview
+function handleBackgroundColorPreview(event, targetElements, fieldName, themePageId, componentPageId) {
+    const colorValue = event.target.value;
+
+    targetElements.forEach(element => {
+        if (fieldName.includes('overlay')) {
+            // Handle overlay color with opacity
+            element.style.backgroundColor = colorValue;
+
+            // If there's an opacity field, try to apply it
+            const opacityField = document.querySelector(`input[class*="field_${themePageId}_${componentPageId}_background_overlay_opacity"]`);
+            if (opacityField && opacityField.value) {
+                element.style.opacity = opacityField.value;
+            }
+
+            console.log(`Updated overlay color for element:`, element);
+        } else if (fieldName.includes('background_colour') || fieldName.includes('background_color')) {
+            // Handle background color
+            element.style.backgroundColor = colorValue;
+            console.log(`Updated background color for element:`, element);
+        }
+
+        // Add visual feedback
+        element.classList.add('field-updated');
+        setTimeout(() => {
+            element.classList.remove('field-updated');
+        }, 300);
+    });
+
+    console.log(`Updated ${targetElements.length} elements with color: ${colorValue}`);
+}
+
+// Initialize additional background preview listeners
+function initializeBackgroundPreviewListeners(themePageId, componentPageId) {
+    // Listen for overlay opacity changes
+    const opacityFields = document.querySelectorAll(`input[class*="field_${themePageId}_${componentPageId}_"][class*="opacity"]`);
+
+    opacityFields.forEach(field => {
+        const classNames = field.className.split(' ');
+        const fieldClass = classNames.find(cls => cls.startsWith(`field_${themePageId}_${componentPageId}_`));
+
+        if (!fieldClass) return;
+
+        const fieldName = fieldClass.replace(`field_${themePageId}_${componentPageId}_`, '');
+        const targetClass = `${themePageId}_${componentPageId}_${fieldName.replace('_opacity', '')}`;
+        const targetSelector = `[class~="${targetClass}"]`;
+        const targetElements = document.querySelectorAll(targetSelector);
+
+        if (targetElements.length === 0) return;
+
+        // Remove existing listeners
+        const newField = field.cloneNode(true);
+        field.parentNode.replaceChild(newField, field);
+
+        newField.addEventListener('input', function(e) {
+            const opacityValue = e.target.value;
+
             targetElements.forEach(element => {
+                element.style.opacity = opacityValue;
+
+                // Add visual feedback
                 element.classList.add('field-updated');
                 setTimeout(() => {
                     element.classList.remove('field-updated');
                 }, 300);
             });
 
-            console.log(`Updated ${targetElements.length} elements for field: ${fieldName} with value: ${newValue}`);
-        });
-
-        // Also listen for paste events
-        newField.addEventListener('paste', function(e) {
-            // Use setTimeout to get the pasted content after it's been inserted
-            setTimeout(() => {
-                newField.dispatchEvent(new Event('input', { bubbles: true }));
-            }, 10);
+            console.log(`Updated opacity for ${targetElements.length} elements: ${opacityValue}`);
         });
     });
 }
@@ -1135,7 +1273,9 @@ function initializeLiveStyleUpdates() {
         'font_decoration': { property: 'textDecoration', suffix: '' },
         'line_height': { property: 'lineHeight', suffix: 'px' },
         'letter_spacing': { property: 'letterSpacing', suffix: 'px' },
-        'word_spacing': { property: 'wordSpacing', suffix: 'px' }
+        'word_spacing': { property: 'wordSpacing', suffix: 'px' },
+        'height': { property: 'height', suffix: 'px' },
+        'object_fit': { property: 'objectFit', suffix: '' }
     };
 
     // Add event listeners to all style form fields
@@ -1206,6 +1346,207 @@ function initializeLiveStyleUpdates() {
             updateElementStyle('fontFamily', value, '');
         });
     }
+}
+
+// Live content updates for text and images
+function initializeLiveContentUpdates() {
+    console.log('Initializing live content updates...');
+
+    // Get the current field class from the form
+    function getCurrentFieldClass() {
+        const form = document.querySelector('.single-field-form');
+        if (!form) return null;
+
+        const themePageId = form.querySelector('[name="theme_page_id"]')?.value;
+        const componentPageId = form.querySelector('[name="component_page_id"]')?.value;
+        const fieldName = form.querySelector('[name="field_name"]')?.value;
+
+        if (themePageId && componentPageId && fieldName) {
+            return `${themePageId}_${componentPageId}_${fieldName}`;
+        }
+        return null;
+    }
+
+    // Get all target elements in the preview
+    function getTargetElements() {
+        const fieldClass = getCurrentFieldClass();
+        if (!fieldClass) {
+            console.warn('Could not get field class');
+            return [];
+        }
+
+        // Use attribute selector to find elements with this class
+        const elements = document.querySelectorAll(`[class~="${fieldClass}"]`);
+        console.log(`Found ${elements.length} target elements for class: ${fieldClass}`);
+        return Array.from(elements);
+    }
+
+    // Handle text field updates
+    const textFields = document.querySelectorAll('.single-sidebar-form-fields input[type="text"]');
+    textFields.forEach(field => {
+        console.log('Adding listener to text field:', field.name);
+
+        field.addEventListener('input', function(e) {
+            const newValue = e.target.value;
+            const targetElements = getTargetElements();
+
+            targetElements.forEach(element => {
+                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                    element.value = newValue;
+                } else if (element.tagName === 'IMG') {
+                    element.alt = newValue;
+                } else {
+                    element.textContent = newValue;
+                }
+
+                // Add visual feedback
+                element.classList.add('field-updated');
+                setTimeout(() => {
+                    element.classList.remove('field-updated');
+                }, 300);
+            });
+
+            console.log(`Updated ${targetElements.length} elements with text: ${newValue}`);
+        });
+    });
+
+    // Handle textarea updates (WYSIWYG editor)
+    const wysiwygContainers = document.querySelectorAll('.single-sidebar-form-fields .wysiwyg-container');
+    wysiwygContainers.forEach(container => {
+        console.log('Found WYSIWYG container');
+
+        // Wait for Quill to initialize
+        const checkQuill = setInterval(() => {
+            const editorElement = container.querySelector('.ql-editor');
+            if (editorElement && window.Quill) {
+                clearInterval(checkQuill);
+
+                // Find the Quill instance
+                const quillContainer = container.querySelector('[data-wysiwyg-target="editor"]');
+                if (quillContainer && quillContainer.__quill) {
+                    const quill = quillContainer.__quill;
+
+                    quill.on('text-change', function() {
+                        const newValue = quill.root.innerHTML;
+                        const targetElements = getTargetElements();
+
+                        targetElements.forEach(element => {
+                            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                                element.value = newValue;
+                            } else {
+                                element.innerHTML = newValue;
+                            }
+
+                            // Add visual feedback
+                            element.classList.add('field-updated');
+                            setTimeout(() => {
+                                element.classList.remove('field-updated');
+                            }, 300);
+                        });
+
+                        console.log(`Updated ${targetElements.length} elements with WYSIWYG content`);
+                    });
+                } else {
+                    // Fallback: listen to the hidden input field changes
+                    const hiddenInput = container.querySelector('input[type="hidden"]');
+                    if (hiddenInput) {
+                        const observer = new MutationObserver(function(mutations) {
+                            const newValue = hiddenInput.value;
+                            const targetElements = getTargetElements();
+
+                            targetElements.forEach(element => {
+                                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                                    element.value = newValue;
+                                } else {
+                                    element.innerHTML = newValue;
+                                }
+
+                                // Add visual feedback
+                                element.classList.add('field-updated');
+                                setTimeout(() => {
+                                    element.classList.remove('field-updated');
+                                }, 300);
+                            });
+
+                            console.log(`Updated ${targetElements.length} elements with HTML content`);
+                        });
+
+                        // Observe value attribute changes
+                        observer.observe(hiddenInput, {
+                            attributes: true,
+                            attributeFilter: ['value']
+                        });
+
+                        // Also listen to input events
+                        hiddenInput.addEventListener('input', function(e) {
+                            const newValue = e.target.value;
+                            const targetElements = getTargetElements();
+
+                            targetElements.forEach(element => {
+                                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                                    element.value = newValue;
+                                } else {
+                                    element.innerHTML = newValue;
+                                }
+
+                                // Add visual feedback
+                                element.classList.add('field-updated');
+                                setTimeout(() => {
+                                    element.classList.remove('field-updated');
+                                }, 300);
+                            });
+
+                            console.log(`Updated ${targetElements.length} elements with content`);
+                        });
+                    }
+                }
+            }
+        }, 100);
+
+        // Clear interval after 5 seconds if Quill doesn't load
+        setTimeout(() => clearInterval(checkQuill), 5000);
+    });
+
+    // Handle image field updates
+    const imageFields = document.querySelectorAll('.single-sidebar-form-fields input[type="file"]');
+    imageFields.forEach(field => {
+        console.log('Adding listener to image field:', field.name);
+
+        field.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Create a FileReader to preview the image
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const imageUrl = event.target.result;
+                const targetElements = getTargetElements();
+
+                targetElements.forEach(element => {
+                    if (element.tagName === 'IMG') {
+                        element.src = imageUrl;
+                    } else {
+                        // If it's not an img tag, set as background image
+                        element.style.backgroundImage = `url('${imageUrl}')`;
+                        element.style.backgroundSize = 'cover';
+                        element.style.backgroundPosition = 'center';
+                    }
+
+                    // Add visual feedback
+                    element.classList.add('field-updated');
+                    setTimeout(() => {
+                        element.classList.remove('field-updated');
+                    }, 300);
+                });
+
+                console.log(`Updated ${targetElements.length} elements with new image`);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    });
+
+    console.log('Live content updates initialized');
 }
 
 // Drag and Drop for Pages Menu with Sub-page Support
