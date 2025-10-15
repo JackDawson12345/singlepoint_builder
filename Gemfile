@@ -85,3 +85,6 @@ gem 'useragent'
 gem 'geocoder'
 
 gem 'nokogiri'
+gem "ruby-openai", "~> 8.3"
+
+gem 'httparty'

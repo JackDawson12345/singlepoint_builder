@@ -1,0 +1,33 @@
+<% if results.any? %>
+  <% category_texts = search_pages_category_text %>
+  <% results.group_by { |r| r[:category] }.each do |category, items| %>
+    <div class="mb-4">
+      <h5 class="nata-sans text-sm font-semibold text-black uppercase py-y"><%= category %></h5>
+      <% category_info = category_texts.find { |c| c[:category] == category } %>
+      <% if category_info %>
+        <p class="nata-sans text-xs text-black pb-3"><%= category_info[:text] %></p>
+      <% end %>
+      <div class="space-y-3">
+        <% items.each do |result| %>
+          <a href="<%= result[:link] %>" class="block px-5 py-4 hover:bg-gray-100 rounded transition border">
+            <div class="flex items-center gap-3">
+              <div class="w-4/5 flex gap-3 items-center">
+                <span><%= raw(result[:icon]) %></span>
+                <span class="nata-sans text-sm font-medium"><%= result[:title] %></span>
+              </div>
+              <div class="w-1/5 flex justify-end">
+                <div class="border p-1.5 rounded-full" style="width: fit-content;">
+                  <svg style="transform: rotate(270deg)" class="w-5 h-5 transform transition-transform duration-200 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </a>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+<% else %>
+  <p class="nata-sans text-sm text-gray-500">No results found</p>
+<% end %>

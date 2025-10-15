@@ -1,0 +1,130 @@
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-700 text-white">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+      <%= @article.title %>
+    </h1>
+    <p class="text-xl md:text-2xl opacity-90 leading-relaxed max-w-2xl mx-auto">
+      <%= raw(@article.text.truncate(150)) %>
+    </p>
+  </div>
+</section>
+
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Mission -->
+    <div class="text-center mb-16">
+      <div class="">
+        <div class="article-content text-left nata-sans">
+          <%= sanitize(@article.text, tags: %w[p strong em u ol ul li br h1 h2 h3 h4 h5 h6 a img span div], attributes: %w[href src alt class style data-list contenteditable]) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+    .article-content {
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: #374151;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content p {
+        margin-bottom: 1rem !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content strong {
+        font-weight: 600 !important;
+        color: #111827 !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content em {
+        font-style: italic !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content u {
+        text-decoration: underline !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content ol {
+        list-style-type: decimal !important;
+        list-style-position: outside !important;
+        margin-left: 1.5rem !important;
+        margin-bottom: 1rem !important;
+        padding-left: 0.5rem !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content ul {
+        list-style-type: disc !important;
+        list-style-position: outside !important;
+        margin-left: 1.5rem !important;
+        margin-bottom: 1rem !important;
+        padding-left: 0.5rem !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content li {
+        margin-bottom: 0.5rem !important;
+        padding-left: 0.5rem !important;
+        display: list-item !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content h1 {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 1rem !important;
+        margin-top: 1.5rem !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content h2 {
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.75rem !important;
+        margin-top: 1.25rem !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content h3 {
+        font-size: 1.125rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.5rem !important;
+        margin-top: 1rem !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content h4 {
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.5rem !important;
+        margin-top: 0.75rem !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content a {
+        color: #4f46e5 !important;
+        text-decoration: underline !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content a:hover {
+        color: #4338ca !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+
+    .article-content img {
+        max-width: 100% !important;
+        height: auto !important;
+        border-radius: 0.5rem !important;
+        margin: 1rem 0 !important;
+        font-family: "Nata Sans", sans-serif;
+    }
+</style>

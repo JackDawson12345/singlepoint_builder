@@ -1,0 +1,70 @@
+<div class="flex items-center justify-between">
+  <div class="flex gap-5">
+    <div class="">
+      <div class="bg-green-500 p-2 rounded-full w-15 h-15">
+        <%= image_tag 'single-point-small-white-logo.png', class: '' %>
+      </div>
+    </div>
+    <div>
+      <p class="text-lg font-bold nata-sans">SinglePoint Support</p>
+      <p class="text-base font-base nata-sans text-gray-500">Support Chat Opened: <%= date %></p>
+    </div>
+  </div>
+  <div>
+    <div class="p-2 border rounded-full">
+      <svg class="cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" id="Dots-Three--Streamline-Phosphor" height="14" width="14">
+        <path d="M9.176 8c0 0.9052875 -0.98 1.4710875 -1.764 1.01844375 -0.784 -0.4526375 -0.784 -1.58425 0 -2.0368875 0.17875625 -0.10320625 0.3815875 -0.15755 0.588 -0.15755625 0.64950625 -0.00003125 1.176 0.52649375 1.176 1.176Zm5.488 -1.176c-0.9052875 -0.0000375 -1.47108125 0.97993125 -1.018475 1.76395625 0.4526125 0.78401875 1.58421875 0.78406875 2.03689375 0.0000875 0.10323125 -0.17878125 0.15758125 -0.38159375 0.15758125 -0.58804375 0 -0.64946875 -0.52653125 -1.17596875 -1.176 -1.176Zm-13.328 0c-0.9052875 -0.0000375 -1.47108125 0.97993125 -1.018475 1.76395625 0.4526125 0.78401875 1.58421875 0.78406875 2.03689375 0.0000875 0.10323125 -0.17878125 0.15758125 -0.38159375 0.15758125 -0.58804375 0 -0.64946875 -0.52653125 -1.17596875 -1.176 -1.176Z" stroke-width="0.0625"></path>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white p-3 rounded space-y-4" style="overflow: auto; min-height: calc(100vh - 320px); max-height: calc(100vh - 320px);">
+  <% messages.each do |message| %>
+    <% is_real_person = message.user.role != 0 %>
+    <div class="flex justify-<%= is_real_person ? 'end' : 'start' %>">
+      <div style="max-width: 60%" class="flex items-end gap-2 <%= is_real_person ? '' : 'flex-row-reverse' %>">
+        <div>
+          <div style="border-radius: 10px 10px 0px 10px; padding: 8px 20px;" class="<%= is_real_person ? 'bg-green-500' : '-ml-5 bg-gray-50' %>">
+            <p class="nata-sans text-sm <%= is_real_person ? 'text-white text-right' : '' %>"><%= message.message %></p>
+          </div>
+          <div class="mt-1">
+            <p class="text-xs nata-sans <%= is_real_person ? 'text-right' : '' %>">
+              <%= message.created_at.strftime('%I:%M%p') %> ~
+              <span class="font-semibold"><%= is_real_person ? message.get_users_name : 'Support' %></span>
+            </p>
+          </div>
+        </div>
+        <div>
+          <div class="bg-green-500 p-0.5 rounded-full w-3.5 h-3.5">
+            <%= image_tag 'single-point-small-white-logo.png', class: '' %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="flex">
+  <form id="old-chat-form" class="flex gap-3 w-full">
+    <input type="hidden" name="chat_id" value="<%= chat.id %>">
+    <div class="w-full relative">
+      <input type="text"
+             name="message"
+             required
+             class="h-11 border rounded w-full py-2 px-3 pr-20 nata-sans text-sm"
+             autocomplete="off"
+             placeholder="Type a message">
+      <div class="w-10 h-10 flex justify-center items-center absolute right-0 top-0.5">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="rgba(107,114,128)" id="Image-Light--Streamline-Phosphor" height="18" width="18">
+          <path d="M14.76391875 1.38980625H1.23608125c-0.59430625 0 -1.07608125 0.481775 -1.07608125 1.076075v11.0682375c0 0.5943 0.481775 1.076075 1.07608125 1.076075h13.5278375c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.076075V2.46588125c0 -0.5943 -0.481775 -1.076075 -1.07608125 -1.076075ZM1.23608125 2.31215625h13.5278375c0.0849 0.00000625 0.15373125 0.06883125 0.15373125 0.153725v8.268125L12.6525 8.4688625c-0.42024375 -0.4202875 -1.1016375 -0.4202875 -1.52188125 0l-1.6464 1.6464 -3.4903375 -3.49110625c-0.42024375 -0.4202875 -1.1016375 -0.4202875 -1.52188125 0l-3.38965 3.38965V2.46588125c0 -0.0849 0.068825 -0.15373125 0.15373125 -0.153725Zm-0.15373125 11.2219625v-2.21595625l4.04144375 -4.04144375c0.0601375 -0.060625 0.15815625 -0.060625 0.21829375 0l6.41111875 6.411125H1.23608125c-0.08490625 0 -0.15373125 -0.068825 -0.15373125 -0.153725Zm13.68156875 0.153725h-1.70635l-2.9207875 -2.9207875 1.64563125 -1.6464c0.06005 -0.0601125 0.157475 -0.0601125 0.217525 0l2.92078125 2.9207875v1.492675c0.00001875 0.0861125 -0.0707 0.15544375 -0.1568 0.153725Zm-5.3803875 -7.84c0 -0.5916875 0.64051875 -0.96149375 1.1529375 -0.66565 0.51241875 0.29584375 0.51241875 1.03545625 0 1.3313 -0.11684375 0.0674625 -0.2493875 0.102975 -0.3843125 0.102975 -0.4245 0 -0.768625 -0.344125 -0.768625 -0.768625Z" stroke-width="0.0625"></path>
+        </svg>
+      </div>
+    </div>
+    <button type="submit" class="p-2 rounded bg-green-500 w-11 h-11 flex items-center justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#fff" id="Paper-Plane-Tilt--Streamline-Phosphor" height="16" width="16">
+        <path d="M15.51434375 0.48780625c-0.28676875 -0.28658125 -0.70603125 -0.39581875 -1.0961875 -0.28559375h-0.0105L0.97205 4.27895625C0.14360625 4.5177125 -0.1157125 5.56375 0.50528125 6.161825c0.0860375 0.0828625 0.184775 0.15143125 0.292475 0.2031l5.9443125 2.89515625 2.89095625 5.9408125c0.1836 0.39180625 0.57810625 0.6412375 1.0107875 0.63909375q0.0483 0 0.0966 -0.0042c0.46289375 -0.03748125 0.8537 -0.35878125 0.9799875 -0.8056875l4.0739375 -13.43560625v-0.0105c0.11165 -0.38914375 0.0046 -0.80825 -0.27999375 -1.0961875ZM10.6501125 14.7095l-0.0035 0.0098v-0.0049l-2.80415625 -5.7609125 3.35995 -3.35995c0.29691875 -0.312525 0.14418125 -0.829275 -0.27493125 -0.93015625 -0.1845875 -0.04443125 -0.37911875 0.00769375 -0.51675625 0.1384625l-3.35995625 3.35995625L1.28775 5.3576375h-0.0049l13.42930625 -4.07744375Z" stroke-width="0.0625"></path>
+      </svg>
+    </button>
+  </form>
+</div>

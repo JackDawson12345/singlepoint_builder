@@ -26,6 +26,14 @@ class FrontendController < ApplicationController
     # Your existing contact method
   end
 
+  def help
+
+  end
+
+  def help_article
+    @article = HelpArticle.find(params[:id])
+  end
+
   # Handle page slug routes for www. domains
   def page_slug
     if is_custom_domain? && current_website

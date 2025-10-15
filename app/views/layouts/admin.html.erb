@@ -154,6 +154,23 @@
                 <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Reports</a></li>
               </ul>
             </li>
+            <!-- Page Templates with Dropdown -->
+            <li>
+              <button onclick="toggleDropdown('page-templates')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="#000000" id="File-Text-Light--Streamline-Phosphor" height="18" width="18">
+                  <path d="m16.28428359375 5.17454296875 -4.8423515625 -4.8423515625c-0.09720703125 -0.0973265625 -0.22908515625 -0.152071875 -0.3666375 -0.15219140625H2.7741164062499997c-0.6685875000000001 0 -1.2105843749999998 0.541996875 -1.2105843749999998 1.2105843749999998v15.218824218750001c0 0.66859453125 0.541996875 1.21059140625 1.2105843749999998 1.21059140625h12.4517671875c0.6685875000000001 0 1.2105843749999998 -0.541996875 1.2105843749999998 -1.21059140625V5.5411734375c-0.00011953125 -0.13755234375 -0.0548578125 -0.26943046875 -0.152184375 -0.36663046875Zm-4.6901671875 -3.22362421875 3.0714328125 3.0714328125h-3.0714328125Zm3.6317671875 14.83143046875H2.7741164062499997c-0.0955125 0.00000703125 -0.17294062500000001 -0.07742109375 -0.17294062500000001 -0.17294062500000001V1.39059140625c0 -0.09551953125 0.077428125 -0.17294765625000003 0.17294062500000001 -0.17294765625000003h7.78235625v4.3235296875c0 0.28654453125 0.232284375 0.51882890625 0.518821875 0.51882890625h4.3235296875v10.54940625c0 0.0955125 -0.07743515625 0.17294062500000001 -0.17294062500000001 0.17294765625000003Zm-2.9400046875 -7.09058671875c0 0.2865375 -0.232284375 0.518821875 -0.518821875 0.518821875H6.23294296875c-0.3993890625 0 -0.6490125 -0.4323515625 -0.44931796874999996 -0.7782328125 0.09267890625 -0.1605234375 0.26396015625 -0.2594109375 0.44931796874999996 -0.2594109375h5.5341140625000005c0.2865375 0 0.518821875 0.232284375 0.518821875 0.518821875Zm0 2.7670640625c0 0.28652343750000003 -0.23229140625 0.5188078125 -0.518821875 0.518821875H6.23294296875c-0.3993890625 0 -0.6490125 -0.4323515625 -0.44931796874999996 -0.77823984375 0.09267890625 -0.1605234375 0.26396015625 -0.2594109375 0.44931796874999996 -0.2594109375h5.5341140625000005c0.28653046875 0.0000140625 0.518821875 0.23229843749999998 0.518821875 0.518821875Z" stroke-width="0.0703"></path>
+                </svg>
+                <span class="font-medium sidebar-navigation pl-4 nata-sans">Page Templates</span>
+                <svg class="w-3 h-3 ml-auto transform transition-transform duration-200" id="page-templates-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              <ul class="mt-2 space-y-1 ml-8 hidden" id="page-templates-dropdown">
+                <li><%= link_to 'View All Page Templates', admin_page_templates_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><%= link_to 'Create New Page Templates', admin_components_new_path, class: 'nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors' %></li>
+                <li><a href="#" class="nata-sans block px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Reports</a></li>
+              </ul>
+            </li>
             <!-- Components with Dropdown -->
             <li>
               <button onclick="toggleDropdown('sales')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group">

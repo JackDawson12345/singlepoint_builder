@@ -19,6 +19,7 @@ Rails.application.routes.draw do
 
   # Admin routes - MUST come before wildcard routes
   namespace :admin do
+    get "inbox/index"
 
     mount Sidekiq::Web => "/sidekiq"
 
@@ -106,18 +107,63 @@ Rails.application.routes.draw do
     get '/themes/:id/settings', to: 'themes#settings', as: 'themes_settings'
     patch '/themes/:id/settings', to: 'themes#update_settings', as: 'themes_update_settings'
 
+    # Index - List all help articles
+    get "/help-articles", to: 'help_articles#index', as: 'help_articles'
+    get "/help-articles/new", to: 'help_articles#new', as: 'new_help_article'
+    post "/help-articles", to: 'help_articles#create'
+    get "/help-articles/:id", to: 'help_articles#show', as: 'help_article'
+    get "/help-articles/:id/edit", to: 'help_articles#edit', as: 'edit_help_article'
+    patch "/help-articles/:id", to: 'help_articles#update'
+    put "/help-articles/:id", to: 'help_articles#update'
+    delete "/help-articles/:id", to: 'help_articles#destroy'
+
+    get "/page-templates", to: 'page_templates#index', as: 'page_templates'
+    get "/page-templates/new", to: 'page_templates#new', as: 'new_page_template'
+    post "/page-templates", to: 'page_templates#create'
+    get "/page-templates/:id", to: 'page_templates#show', as: 'page_template'
+    get "/page-templates/:id/edit", to: 'page_templates#edit', as: 'edit_page_template'
+    patch "/page-templates/:id", to: 'page_templates#update'
+    put "/page-templates/:id", to: 'page_templates#update'
+    delete "/page-templates/:id", to: 'page_templates#destroy'
+    patch "/page-templates/:id/add", to: 'page_templates#add_component', as: 'page_template_add_component'
+    delete "/page-templates/:id/remove", to: 'page_templates#remove_component', as: 'page_template_remove_component'
+
+    patch "page_templates/:id/reorder_components", to: 'page_templates#reorder_components', as: 'page_template_reorder_components'
+
+    # Inbox Routes
+    get "inbox", to: "inbox#index", as: "inbox"
+    post "inbox/get_message", to: "inbox#get_message", as: "inbox_get_message"
+    post "inbox/get_new_chat", to: "inbox#get_new_chat", as: "inbox_get_new_chat"
+    post "inbox/new_chat_message", to: "inbox#new_chat_message", as: "inbox_new_chat_message"
+    post "inbox/old_chat_message", to: "inbox#old_chat_message", as: "inbox_old_chat_message"
+
+
   end
 
   # Manage routes - MUST come before wildcard routes
   namespace :manage do
+
+    post "/search-form", to: 'base#search', as: 'search_form'
+    post '/help_search', to: 'base#manage_help_search', as: 'help_search'
+
+
     namespace :website do
       namespace :editor do
+
+        post '/pages-reorder', to: 'website_editor#update_positions'
+
         get "/", to: "website_editor#index", as: "website_editor"
         get "/:page_slug", to: "website_editor#show", as: "website_editor_page"
         get "/:page_slug/:inner_page_slug", to: "website_editor#inner_page", as: "website_editor_inner_page"
 
         post "/sidebar_data", to: "website_editor#sidebar_data", as: "website_editor_sidebar_data"
         post "/single_field_data", to: "website_editor#single_field_data", as: "website_editor_single_field_data"
+        post "/page_type", to: "website_editor#page_type", as: "website_editor_page_type"
+        post "/add_page_template", to: "website_editor#add_page_template", as: "website_editor_add_page_template"
+        post "/show_in_menu", to: "website_editor#show_in_menu", as: "website_editor_show_in_menu"
+        post "/delete_from_menu", to: "website_editor#delete_from_menu", as: "website_editor_delete_from_menu"
+        post "/duplicate_in_menu", to: "website_editor#duplicate_in_menu", as: "website_editor_duplicate_in_menu"
+
 
         post '/sidebar_editor_fields_data', to: "website_editor#sidebar_editor_fields_data", as: "website_editor_sidebar_editor_fields_data"
         post '/sidebar_editor_fields_save', to: "website_editor#sidebar_editor_fields_save", as: "website_editor_sidebar_editor_fields_save"
@@ -129,6 +175,8 @@ Rails.application.routes.draw do
         patch 'update_colour_scheme', to: 'website_editor#update_colour_scheme'
         patch 'update_font_scheme', to: 'website_editor#update_font_scheme'
         patch 'update_background_scheme', to: 'website_editor#update_background_scheme'
+
+
       end
 
       get "/", to: "website#index", as: "website"
@@ -180,6 +228,13 @@ Rails.application.routes.draw do
     # Domain purchase retry route
     post "/setup/retry-domain-purchase", to: "setup#retry_domain_purchase", as: "setup_retry_domain_purchase"
     match "/set-website-theme/:theme_id", to: "setup#set_website_theme", as: "set_website_theme", via: [:get, :post]
+    # Inbox Routes
+    get "inbox", to: "inbox#index", as: "inbox"
+    post "inbox/get_message", to: "inbox#get_message", as: "inbox_get_message"
+    post "inbox/get_new_chat", to: "inbox#get_new_chat", as: "inbox_get_new_chat"
+    post "inbox/new_chat_message", to: "inbox#new_chat_message", as: "inbox_new_chat_message"
+    post "inbox/old_chat_message", to: "inbox#old_chat_message", as: "inbox_old_chat_message"
+
 
     resource :account_settings, only: [:show, :update], path: 'account-settings' do
       member do
@@ -236,6 +291,8 @@ Rails.application.routes.draw do
         get "/seo/product-categories-settings", to: "seo_settings#product_categories_settings", as: "seo_product_categories_settings"
         # Website Settings Controller
         get "/domains", to: "domains#index", as: "domains_index"
+        # Website Settings Controller
+        get "/pages", to: "pages_settings#index", as: "pages_index"
 
       end
       namespace :general do
@@ -253,7 +310,8 @@ Rails.application.routes.draw do
   get '/about', to: 'frontend#about', as: 'about'
   get '/contact', to: 'frontend#contact', as: 'contact'
   get '/themes', to: 'frontend#themes', as: 'themes'
-
+  get '/help/', to: 'frontend#help', as: 'help'
+  get '/help/articles/:id', to: 'frontend#help_article', as: :help_article
   # www. domain routes for custom domains (inner pages and single pages)
   get '/:page_slug/:inner_page_slug', to: 'frontend#page_slug', constraints: lambda { |req|
     req.host.start_with?('www.') &&

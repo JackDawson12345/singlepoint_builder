@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_22_130757) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_14_125953) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -54,6 +54,35 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_130757) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "help_articles", force: :cascade do |t|
+    t.string "title"
+    t.text "text"
+    t.json "images"
+    t.bigint "user_id", null: false
+    t.integer "priority"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.json "keywords"
+    t.index ["user_id"], name: "index_help_articles_on_user_id"
+  end
+
+  create_table "inbox_chats", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_inbox_chats_on_user_id"
+  end
+
+  create_table "inbox_messages", force: :cascade do |t|
+    t.bigint "inbox_chat_id", null: false
+    t.bigint "user_id", null: false
+    t.text "message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inbox_chat_id"], name: "index_inbox_messages_on_inbox_chat_id"
+    t.index ["user_id"], name: "index_inbox_messages_on_user_id"
+  end
+
   create_table "invoice_templates", force: :cascade do |t|
     t.bigint "website_id", null: false
     t.json "numbering"
@@ -92,6 +121,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_130757) do
     t.datetime "updated_at", null: false
     t.string "notification_type"
     t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
+  create_table "page_templates", force: :cascade do |t|
+    t.string "title"
+    t.string "page_type"
+    t.json "components"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
@@ -278,12 +315,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_130757) do
     t.datetime "updated_at", null: false
     t.json "settings"
     t.json "categories", default: {"blogs" => {}, "services" => {}, "products" => {}}
+    t.jsonb "menu", default: {}
     t.index ["theme_id"], name: "index_websites_on_theme_id"
     t.index ["user_id"], name: "index_websites_on_user_id", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "help_articles", "users"
+  add_foreign_key "inbox_chats", "users"
+  add_foreign_key "inbox_messages", "inbox_chats"
+  add_foreign_key "inbox_messages", "users"
   add_foreign_key "invoice_templates", "websites"
   add_foreign_key "login_activities", "users"
   add_foreign_key "notifications", "users"

@@ -1,0 +1,27 @@
+<%= render 'manage/settings/settings_header', page_name: "Page Settings", subpage_name: nil, subpage_path: nil, page_description: nil %>
+
+<div>
+
+  <div class="space-y-5">
+
+    <div class="bg-gray-50 rounded-lg">
+      <div class="py-4 px-6 border-b">
+        <h2 class="nata-sans text-lg font-semibold">Site Menu</h2>
+        <p class="nata-sans text-sm font-normal">Enter the web address you want your site. It can be a domain you want to buy or one you already own.</p>
+      </div>
+      <div class="py-4 px-6">
+        <div class="flex">
+          <div class="w-full">
+            <% (@pages.sort_by { |key, value| value["position"].to_i }).each do |page_name, data| %>
+              <div>
+                <%= page_name %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

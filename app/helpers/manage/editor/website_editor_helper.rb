@@ -28,14 +28,27 @@ module Manage::Editor::WebsiteEditorHelper
       field_values.each do |field_name, field_value|
         if field_value.is_a?(Hash)
           field_value.each do |sub_key, sub_value|
-            byebug
-            updated_content = updated_content.gsub("{{#{sub_key}}}", sub_value.to_s)
+            # Handle both nested patterns: {{background.background_image}} and {{background_image}}
+            nested_key = "#{field_name}.#{sub_key}"
+
+            # Try nested key first (e.g., {{background.background_image}})
+            if updated_content.include?("{{#{nested_key}}}")
+              updated_content = updated_content.gsub("{{#{nested_key}}}", sub_value.to_s)
+            end
+
+            # Also try flat key (e.g., {{background_image}})
+            if updated_content.include?("{{#{sub_key}}}")
+              clean_value = sub_value.to_s
+              if clean_value.match?(/^<p>(.*)<\/p>$/m) && updated_content.include?("<p class=\"#{theme_page_id}_#{component_page_id}_#{sub_key}")
+                clean_value = clean_value.gsub(/^<p>(.*)<\/p>$/m, '\1')
+              end
+              updated_content = updated_content.gsub("{{#{sub_key}}}", clean_value)
+            end
           end
         else
-          # Check if the field value contains HTML that matches the container
+          # Handle flat field values
           clean_value = field_value.to_s
           if clean_value.match?(/^<p>(.*)<\/p>$/m) && updated_content.include?("<p class=\"#{theme_page_id}_#{component_page_id}_#{field_name}")
-            # Extract content from p tags if we're inserting into a p tag
             clean_value = clean_value.gsub(/^<p>(.*)<\/p>$/m, '\1')
           end
           updated_content = updated_content.gsub("{{#{field_name}}}", clean_value)
@@ -456,27 +469,30 @@ module Manage::Editor::WebsiteEditorHelper
     # Return empty string if no template found
     return "" unless nav_template
 
-    current_user.website.pages["theme_pages"].sort_by { |name, data| data['position'].to_i }.map do |page_name, page_data|
-      page_name_str = page_name.to_s
-      page_slug = page_data['slug'].to_s
+    current_user.website.menu["menu_items"].sort_by { |name, data| data['position'].to_i }.map do |page_name, page_data|
+      if page_data['show_in_menu']
+        page_name_str = page_name.to_s
+        page_slug = page_data['slug'].to_s
 
-      # Create a copy of the template for this iteration
-      item_html = nav_template.dup
+        # Create a copy of the template for this iteration
+        item_html = nav_template.dup
 
-      # Replace nav_item placeholder
-      item_html.gsub!('{{nav_item}}', page_name_str)
+        # Replace nav_item placeholder
+        item_html.gsub!('{{nav_item}}', page_name_str)
 
-      # Build the link based on controller
-      if controller_name == "preview"
-        link = page_slug == '/' ? '/manage/website/preview/' : '/manage/website/preview/' + page_slug
-      elsif controller_name == "website_editor"
-        link = page_slug == '/' ? '/manage/website/editor/' : '/manage/website/editor/' + page_slug
+        # Build the link based on controller
+        if controller_name == "preview"
+          link = page_slug == '/' ? '/manage/website/preview/' : '/manage/website/preview/' + page_slug
+        elsif controller_name == "website_editor"
+          link = page_slug == '/' ? '/manage/website/editor/' : '/manage/website/editor/' + page_slug
+        end
+
+        # Replace nav_item_link placeholder
+        item_html.gsub!('{{nav_item_link}}', link)
+
+        item_html
       end
 
-      # Replace nav_item_link placeholder
-      item_html.gsub!('{{nav_item_link}}', link)
-
-      item_html
     end.join("\n")
   end
 
@@ -821,33 +837,55 @@ module Manage::Editor::WebsiteEditorHelper
       user_customisations = user.website&.customisations&.dig("customisations") || []
 
       user_customisations.each do |customisation|
+
         if customisation["component_id"] == component.id.to_s &&
            customisation["theme_page_id"] == theme_page_id.to_s &&
            customisation['component_page_id'] == component_page_id
 
-          field_values[customisation["field_name"]] = customisation["field_value"]
+          if customisation["field_name"].start_with?("background_")
+            field_values["background"] ||= {}
+            field_values["background"][customisation["field_name"]] = customisation["field_value"]
+          else
+            field_values[customisation["field_name"]] = customisation["field_value"]
+          end
 
-          # Add this customisation to our array with converted styling
+          # Add this customisation to our array with converted styling (only if styling exists)
           if customisation['field_styling'].present?
             styling = customisation['field_styling']
-            converted_customisation = {
-              "field_name" => customisation["field_name"],
-              "component_id" => customisation['component_id'],
-              "component_page_id" => customisation['component_page_id'],
-              "theme_page_id" => customisation['theme_page_id'],
-              "field_styling" => {
-                "text-align" => styling['alignment'],
-                "color" => styling['text_colour'],
-                "font-size" => styling['font_size'],
-                "font-weight" => styling['font_weight'],
-                "text-transform" => styling['font_transform'],
-                "font-style" => styling['font_style'],
-                "text-decoration" => styling['font_decoration'],
-                "line-height" => styling['line_height'],
-                "letter-spacing" => styling['letter_spacing'],
-                "word-spacing" => styling['word_spacing']
+
+            unless styling['object_fit'].nil?
+              converted_customisation = {
+                "field_name" => customisation["field_name"],
+                "component_id" => customisation['component_id'],
+                "component_page_id" => customisation['component_page_id'],
+                "theme_page_id" => customisation['theme_page_id'],
+                "field_styling" => {
+                  "height" => styling['height'],
+                  "object-fit" => styling['object_fit']
+                }
+                }
+            else
+              converted_customisation = {
+                "field_name" => customisation["field_name"],
+                "component_id" => customisation['component_id'],
+                "component_page_id" => customisation['component_page_id'],
+                "theme_page_id" => customisation['theme_page_id'],
+                "field_styling" => {
+                  "text-align" => styling['alignment'],
+                  "color" => styling['text_colour'],
+                  "font-size" => styling['font_size'],
+                  "font-weight" => styling['font_weight'],
+                  "text-transform" => styling['font_transform'],
+                  "font-style" => styling['font_style'],
+                  "text-decoration" => styling['font_decoration'],
+                  "line-height" => styling['line_height'],
+                  "letter-spacing" => styling['letter_spacing'],
+                  "word-spacing" => styling['word_spacing']
+                }
               }
-            }
+            end
+
+
             customisations << converted_customisation
           end
         end
@@ -856,7 +894,7 @@ module Manage::Editor::WebsiteEditorHelper
 
     {
       field_values: field_values,
-      customisations: customisations  # Return the array instead of single field_styling
+      customisations: customisations
     }
   end
 

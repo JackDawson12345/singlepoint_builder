@@ -18,3 +18,7 @@ pin "parchment" # @3.0.0
 pin "quill-delta" # @5.1.0
 
 pin "invoice_design", to: "invoice_design.js"
+pin "help_popup", to: "help_popup.js"
+pin "sortable_pages", to: "sortable_pages.js"
+pin "editor_pages", to: "editor_pages.js"
+pin "inbox", to: "inbox.js"

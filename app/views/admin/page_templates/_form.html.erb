@@ -1,0 +1,31 @@
+<%= form_with(model: [:admin, page_template], local: true, class: "mt-4") do |form| %>
+  <% if page_template.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><%= pluralize(page_template.errors.count, "error") %> prohibited this page template from being saved:</h4>
+      <ul>
+        <% page_template.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= form.label :title, class: "form-label" %>
+    <%= form.text_field :title, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :page_type, class: "form-label" %>
+    <%= form.text_field :page_type, class: "form-control" %>
+  </div>
+
+  <div>
+    <%= form.label :screenshot %>
+    <%= form.file_field :screenshot %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.submit class: "btn btn-primary" %>
+  </div>
+<% end %>

@@ -1,0 +1,63 @@
+<div class="flex gap-5">
+  <div class="w-3/10 bg-gray-50 rounded-lg p-4 space-y-5" style="min-height: calc(100vh - 144px); max-height: calc(100vh - 144px); overflow: auto;">
+    <div class="flex justify-between items-center">
+      <h2 class="nata-sans text-2xl font-bold">Inbox</h2>
+      <div onclick="newInboxChat()" class="bg-white rounded-full p-2.5 shadow cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="#000000" id="Pencil-Line-Light--Streamline-Phosphor" height="15" width="15">
+          <path d="m17.4509296875 4.5713953125 -4.0218750000000005 -4.0218750000000005c-0.49203984375 -0.49209609375 -1.2898546875 -0.49209609375 -1.78189453125 0L0.54897890625 11.64679453125c-0.23677734375 0.23596875 -0.36959765625 0.55667109375 -0.36897890625 0.89095078125v4.0218750000000005c0 0.695840625 0.5640890625 1.2599296875000001 1.2599296875000001 1.2599296875000001h15.11914921875c0.41566640624999995 0 0.6754640625 -0.44997890625000003 0.46762734375 -0.8099578125 -0.0964546875 -0.1670625 -0.2747109375 -0.2699859375 -0.46762734375 -0.2699859375H7.063713281249999L17.4509296875 6.353296875c0.49209609375 -0.492046875 0.49209609375 -1.2898617187499999 0 -1.7819015625ZM4.0038890625 14.75971875 11.879346093750002 6.88336171875l1.7567015625 1.7567015625L5.759690625 16.5155203125Zm-0.7640578125 -0.7631578125 -1.7558015624999999 -1.7566945312500002L9.359486718749999 4.364409375l1.7567015625 1.7558015624999999Zm-1.9798875 2.563059375v-3.0166312499999997l3.1966171875000002 3.19662421875H1.4399296874999998c-0.0994078125 0 -0.1799859375 -0.08058515625 -0.1799859375 -0.17999296874999998ZM16.686871875 5.5892390625l-2.28766640625 2.28766640625 -4.2756609375 -4.27655390625 2.28676640625 -2.2867734375000004c0.0703125 -0.07038281249999999 0.18438046875 -0.07038281249999999 0.2546859375 0l4.0218750000000005 4.020975c0.07038281249999999 0.07030546875 0.07038281249999999 0.18438046875 0 0.2546859375Z" stroke-width="0.0703"></path>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <%= form_with url: manage_search_form_path, method: :post, data: { turbo: false }, id: "quick-search-form" do |form| %>
+        <%= form.text_field :search,
+                            class: 'border rounded w-full pr-3 py-2 pl-8 nata-sans text-sm',
+                            autocomplete: 'off',
+                            id: 'quick-search-input',
+                            placeholder: 'Search...' %>
+      <% end %>
+    </div>
+    <div>
+      <div class="mb-2">
+        <p class="nata-sans text-gray-500 text-sm">All Messages</p>
+      </div>
+      <div class="space-y-4" id="chat-list-container">
+        <% @chats.each do |chat| %>
+          <% chat_info = @chat_data[chat.id] %>
+          <div onclick="adminOpenInboxChat('<%= chat.id %>')" class="flex gap-2 items-center inbox-chat-<%= chat.id %> cursor-pointer">
+            <div class="">
+              <div class="bg-green-500 p-2 rounded-full w-12 h-12">
+                <%= image_tag 'single-point-small-white-logo.png', class: '' %>
+              </div>
+            </div>
+            <div class="w-3/5">
+              <p class="text-sm font-bold nata-sans">SinglePoint Support</p>
+              <p class="text-xs font-base nata-sans text-gray-500"><%= chat_info[:preview] %></p>
+            </div>
+            <div class="w-1/5 flex flex-col items-end gap-0.5">
+              <p class="text-xs font-base nata-sans text-gray-500 text-right"><%= chat_info[:time] %></p>
+              <% if chat_info[:unread_count] > 0 %>
+                <div class="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                  <p style="font-size: 0.5rem" class="nata-sans text-white"><%= chat_info[:unread_count] %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
+  </div>
+  <div class="w-7/10 bg-gray-50 rounded-lg p-4" style="min-height: calc(100vh - 144px); max-height: calc(100vh - 144px);">
+    <div class="inbox-chat-notice">
+      <% if @chats.empty? %>
+        <p>Create New Chat</p>
+      <% else %>
+        <p>Click A Chat On the Left To view your chat</p>
+      <% end %>
+    </div>
+    <div class="inbox-chat-area space-y-3">
+
+    </div>
+  </div>
+</div>

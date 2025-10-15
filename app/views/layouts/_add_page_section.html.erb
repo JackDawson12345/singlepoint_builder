@@ -1,0 +1,72 @@
+<%
+  # Set default values for locals if not provided
+  type = local_assigns.fetch(:type, nil)
+  title = local_assigns.fetch(:title, nil)
+  text = local_assigns.fetch(:text, nil)
+  page_templates = local_assigns.fetch(:page_templates, [])
+%>
+
+<div class="">
+  <% if type.nil? %>
+    <div>
+      <h3 class="nata-sans text-xl font-semibold">Tell visitors about yourself</h3>
+      <p class="nata-sans text-base">Choose any page and customise it by changing the text, images and more.</p>
+    </div>
+
+    <div class="masonry-grid mt-5">
+      <% PageTemplate.where(page_type: 'About').each do |page_template| %>
+        <div onclick="addNewPage(<%= page_template.id %>)" class="masonry-item">
+          <%= image_tag page_template.screenshot %>
+          <p class="nata-sans text-base mt-1 capitalize"><%= page_template.title %></p>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div>
+      <h3 class="nata-sans text-xl font-semibold"><%= title %></h3>
+      <p class="nata-sans text-base"><%= text %></p>
+    </div>
+
+    <div class="masonry-grid mt-5">
+      <% page_templates.each do |page_template| %>
+        <div onclick="addNewPage(<%= page_template.id %>)" class="masonry-item">
+          <%= image_tag page_template.screenshot %>
+          <p class="nata-sans text-base mt-1 capitalize"><%= page_template.title %></p>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+    .masonry-grid {
+        column-count: 3;
+        column-gap: 1.5rem;
+    }
+
+    .masonry-item {
+        break-inside: avoid;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .masonry-item img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    /* Responsive: 2 columns on tablets */
+    @media (max-width: 768px) {
+        .masonry-grid {
+            column-count: 2;
+        }
+    }
+
+    /* Responsive: 1 column on mobile */
+    @media (max-width: 480px) {
+        .masonry-grid {
+            column-count: 1;
+        }
+    }
+</style>

@@ -1,0 +1,8 @@
+<div class="container">
+  <h1>Edit Page Template</h1>
+
+  <%= render "form", page_template: @page_template %>
+
+  <%= link_to "Show", admin_page_template_path(@page_template), class: "btn btn-info mt-3" %>
+  <%= link_to "Back", admin_page_templates_path, class: "btn btn-secondary mt-3" %>
+</div>

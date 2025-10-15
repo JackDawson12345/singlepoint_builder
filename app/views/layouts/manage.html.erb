@@ -34,25 +34,22 @@
   </div>
   <div class="flex gap-5" style="width: 31%">
     <div class="flex items-center gap-2">
-      <a href="" class="text-white montserrat text-sm">My Website</a>
+      <a href="" class="text-white nata-sans text-sm">My Website</a>
       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
         <path d="M11.7233 3.70549L6.37816 9.05067C6.16937 9.2597 5.83061 9.2597 5.62182 9.05067L0.276632 3.70549C-0.0144847 3.41438 0.118711 2.91728 0.516384 2.81073C0.700945 2.76128 0.897871 2.81404 1.03298 2.94915L5.99999 7.91683L10.967 2.94915C11.2581 2.65803 11.7552 2.79123 11.8618 3.1889C11.9112 3.37346 11.8585 3.57038 11.7233 3.70549Z" fill="white"/>
       </svg>
     </div>
     <div class="flex items-center gap-2">
-      <a href="" class="text-white montserrat text-sm">Explore</a>
+      <a href="" class="text-white nata-sans text-sm">Explore</a>
       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
         <path d="M11.7233 3.70549L6.37816 9.05067C6.16937 9.2597 5.83061 9.2597 5.62182 9.05067L0.276632 3.70549C-0.0144847 3.41438 0.118711 2.91728 0.516384 2.81073C0.700945 2.76128 0.897871 2.81404 1.03298 2.94915L5.99999 7.91683L10.967 2.94915C11.2581 2.65803 11.7552 2.79123 11.8618 3.1889C11.9112 3.37346 11.8585 3.57038 11.7233 3.70549Z" fill="white"/>
       </svg>
     </div>
     <div class="flex items-center gap-2">
-      <a href="" class="text-white montserrat text-sm">Hire A Professional</a>
+      <a href="" class="text-white nata-sans text-sm">Hire A Professional</a>
     </div>
     <div class="flex items-center gap-2">
-      <a href="" class="text-white montserrat text-sm">Help</a>
-      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <path d="M11.7233 3.70549L6.37816 9.05067C6.16937 9.2597 5.83061 9.2597 5.62182 9.05067L0.276632 3.70549C-0.0144847 3.41438 0.118711 2.91728 0.516384 2.81073C0.700945 2.76128 0.897871 2.81404 1.03298 2.94915L5.99999 7.91683L10.967 2.94915C11.2581 2.65803 11.7552 2.79123 11.8618 3.1889C11.9112 3.37346 11.8585 3.57038 11.7233 3.70549Z" fill="white"/>
-      </svg>
+      <p class="text-white text-sm nata-sans cursor-pointer" onclick="openHelpPopup()">Help</p>
     </div>
   </div>
   <div style="width: 34%;" class="min-h-full flex flex-items">
@@ -174,11 +171,11 @@
 
   <!-- Page Content -->
   <div class="flex">
-    <div class="w-2/10 bg-gray-50" style="border-radius: 20px 0px 0px 0px; width: 17.5%; min-height: calc(100vh - 64px); overflow: hidden">
-      <nav class="flex flex-col justify-between" style="min-height: calc(100vh - 64px); max-height: calc(100vh - 64px); overflow: scroll">
+    <div class="w-2/10 bg-gray-50" style="border-radius: 20px 0px 0px 0px; width: 17.5%; min-height: calc(100vh - 64px); overflow: visible">
+      <nav class="flex flex-col justify-between" style="min-height: calc(100vh - 64px); max-height: calc(100vh - 64px); overflow-y: auto; overflow-x: visible">
 
-        <div>
-          <div class="flex py-3 px-5 border-b">
+        <div class="">
+          <div class="flex py-3 px-5 border-b relative">
             <div class=" flex items-center">
               <div class="border p-1" style="border-radius: 100px; width: fit-content; border-color: #1A1A1A">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="#1A1A1A" id="Star-Light--Streamline-Phosphor" height="14" width="14">
@@ -186,11 +183,36 @@
                 </svg>
               </div>
             </div>
-            <div class="ml-2 text-white bg-black-gray h-6 flex items-center justify-center" style="border-radius: 100px; width: -webkit-fill-available;">
-              <p class="sidebar-navigation montserrat">Quick Actions</p>
-              <svg class="w-3 h-3 ml-1 transform transition-transform duration-200" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
+            <div style="width: -webkit-fill-available;">
+              <div class="ml-2 text-white bg-black-gray h-6 flex items-center justify-center cursor-pointer quick-actions-button relative" style="border-radius: 100px; width: -webkit-fill-available;">
+                <p class="sidebar-navigation montserrat">Quick Actions</p>
+                <svg class="w-3 h-3 ml-1 transform transition-transform duration-200" id="quick-actions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              <div class="quick-actions-popup fixed rounded-lg w-100 bg-white hidden flex flex-col" style="z-index: 100; left: 2px !important; height: calc(100vh - 106px); box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;">
+                <!-- Fixed Header -->
+                <div class="p-5 border-b flex-shrink-0">
+                  <h4 class="nata-sans text-base font-semibold">Quick Actions</h4>
+                  <p class="nata-sans text-xs">Add anything you need to your site or business</p>
+                </div>
+
+                <!-- Fixed Search Box -->
+                <div class="p-5 border-b flex-shrink-0">
+                  <p class="nata-sans text-xs mb-2">Search</p>
+                  <%= form_with url: manage_search_form_path, method: :post, data: { turbo: false }, id: "quick-search-form" do |form| %>
+                    <%= form.text_field :search,
+                                        class: 'border rounded w-full h-8 px-3',
+                                        autocomplete: 'off',
+                                        id: 'quick-search-input' %>
+                  <% end %>
+                </div>
+
+                <!-- Scrollable Results Area -->
+                <div class="p-5 space-y-4 overflow-y-auto flex-1" id="search-results">
+                  <%= render partial: "layouts/search_results", locals: { results: search_pages } %>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -484,7 +506,6 @@
         const notificationSection = document.querySelector('.notification-section');
 
         if (notificationIcon && notificationSection) {
-            // Remove existing listeners to prevent duplicates
             if (window.notificationToggleHandler) {
                 notificationIcon.removeEventListener('click', window.notificationToggleHandler);
             }
@@ -492,7 +513,6 @@
                 document.removeEventListener('click', window.notificationOutsideHandler);
             }
 
-            // Create new handlers
             window.notificationToggleHandler = function() {
                 notificationSection.classList.toggle('hidden');
             };
@@ -503,7 +523,6 @@
                 }
             };
 
-            // Add new listeners
             notificationIcon.addEventListener('click', window.notificationToggleHandler);
             document.addEventListener('click', window.notificationOutsideHandler);
         }
@@ -515,7 +534,6 @@
         const profileSection = document.querySelector('.profile-section');
 
         if (profileIcon && profileSection) {
-            // Remove existing listeners to prevent duplicates
             if (window.profileToggleHandler) {
                 profileIcon.removeEventListener('click', window.profileToggleHandler);
             }
@@ -523,7 +541,6 @@
                 document.removeEventListener('click', window.profileOutsideHandler);
             }
 
-            // Create new handlers
             window.profileToggleHandler = function() {
                 profileSection.classList.toggle('hidden');
             };
@@ -534,9 +551,46 @@
                 }
             };
 
-            // Add new listeners
             profileIcon.addEventListener('click', window.profileToggleHandler);
             document.addEventListener('click', window.profileOutsideHandler);
+        }
+    }
+
+    // Quick Actions popup functionality
+    function initializeQuickActionsPopup() {
+        const button = document.querySelector('.quick-actions-button');
+        const popup = document.querySelector('.quick-actions-popup');
+        const arrow = document.getElementById('quick-actions-arrow');
+
+        if (button && popup && arrow) {
+            // Remove any existing listeners by cloning
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+
+            // Re-get the arrow reference since it's inside the cloned button
+            const newArrow = newButton.querySelector('svg');
+
+            newButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const rect = newButton.getBoundingClientRect();
+
+                // Position popup below the button
+                popup.style.top = (rect.bottom + 5) + 'px';
+
+                // Toggle classes on the NEW button and arrow
+                newButton.classList.toggle('quick-actions-button-active');
+                popup.classList.toggle('hidden');
+                newArrow.classList.toggle('rotate-180');
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!newButton.contains(e.target) && !popup.contains(e.target)) {
+                    popup.classList.add('hidden');
+                    newArrow.classList.remove('rotate-180');
+                    newButton.classList.remove('quick-actions-button-active');
+                }
+            });
         }
     }
 
@@ -572,6 +626,7 @@
     function initializePageFunctionality() {
         initializeNotificationDropdown();
         initializeProfileDropdown();
+        initializeQuickActionsPopup();
 
         // Make toggleDropdown globally available
         window.toggleDropdown = toggleDropdown;
@@ -583,14 +638,132 @@
 
     // Optional: Clean up on page unload to prevent memory leaks
     document.addEventListener('turbo:before-visit', function() {
-        // Clean up global references
         window.toggleDropdown = null;
         window.notificationToggleHandler = null;
         window.notificationOutsideHandler = null;
         window.profileToggleHandler = null;
         window.profileOutsideHandler = null;
     });
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.querySelector('#quick-search-input');
+        const searchForm = document.querySelector('#quick-search-form');
+        const searchResults = document.getElementById('search-results');
+
+        if (searchInput && searchForm) {
+            let debounceTimer;
+
+            searchInput.addEventListener('keyup', (e) => {
+                clearTimeout(debounceTimer);
+
+                debounceTimer = setTimeout(() => {
+                    // If search is empty, don't submit the form
+                    if (searchInput.value.trim() === '') {
+                        // Reload the page's initial results by fetching the current page
+                        fetch(window.location.href, {
+                            headers: {
+                                'Accept': 'text/html'
+                            }
+                        })
+                            .then(response => response.text())
+                            .then(html => {
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                const newResults = doc.getElementById('search-results');
+                                if (newResults) {
+                                    searchResults.innerHTML = newResults.innerHTML;
+                                }
+                            });
+                        return;
+                    }
+
+                    // Show loading state
+                    searchResults.innerHTML = '<p class="nata-sans text-sm text-gray-500 px-5 py-3">Searching...</p>';
+
+                    const formData = new FormData(searchForm);
+
+                    fetch(searchForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+                            'Accept': 'text/javascript'
+                        }
+                    })
+                        .then(response => response.text())
+                        .then(script => {
+                            eval(script);
+                        })
+                        .catch(error => {
+                            console.error('Search error:', error);
+                            searchResults.innerHTML = '<p class="nata-sans text-sm text-red-500 px-5 py-3">Search failed. Please try again.</p>';
+                        });
+                }, 300);
+            });
+        }
+    });
+
+    // Also handle Turbo page loads
+    document.addEventListener('turbo:load', () => {
+        const searchInput = document.querySelector('#quick-search-input');
+        const searchForm = document.querySelector('#quick-search-form');
+        const searchResults = document.getElementById('search-results');
+
+        if (searchInput && searchForm) {
+            let debounceTimer;
+
+            searchInput.addEventListener('keyup', (e) => {
+                clearTimeout(debounceTimer);
+
+                debounceTimer = setTimeout(() => {
+                    // If search is empty, reload initial results
+                    if (searchInput.value.trim() === '') {
+                        fetch(window.location.href, {
+                            headers: {
+                                'Accept': 'text/html'
+                            }
+                        })
+                            .then(response => response.text())
+                            .then(html => {
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                const newResults = doc.getElementById('search-results');
+                                if (newResults) {
+                                    searchResults.innerHTML = newResults.innerHTML;
+                                }
+                            });
+                        return;
+                    }
+
+                    searchResults.innerHTML = '<p class="nata-sans text-sm text-gray-500 px-5 py-3">Searching...</p>';
+
+                    const formData = new FormData(searchForm);
+
+                    fetch(searchForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+                            'Accept': 'text/javascript'
+                        }
+                    })
+                        .then(response => response.text())
+                        .then(script => {
+                            eval(script);
+                        })
+                        .catch(error => {
+                            console.error('Search error:', error);
+                            searchResults.innerHTML = '<p class="nata-sans text-sm text-red-500 px-5 py-3">Search failed. Please try again.</p>';
+                        });
+                }, 300);
+            });
+        }
+    });
+
 </script>
+
+<%= render partial: "layouts/help_popup" %>
 
 </body>
 </html>

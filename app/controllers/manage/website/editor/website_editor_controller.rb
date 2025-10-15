@@ -6,14 +6,15 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
   layout 'editor'
   def index
     load_page_data("/")
+
+    @pages = current_user.website.theme.pages
     render :show
   end
-
   def inner_page
     load_inner_page_data(params[:page_slug], params[:inner_page_slug])
+    @pages = current_user.website.theme.pages
     render :show
   end
-
   def show
     load_page_data(params[:page_slug])
 
@@ -21,8 +22,9 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       redirect_to manage_website_website_editor_path, alert: "Page not found"
       return
     end
-  end
 
+    @pages = current_user.website.theme.pages
+  end
   def sidebar_data
     title = params[:title]
 
@@ -85,11 +87,10 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
         end
       end
     elsif title == 'Site Pages and Menu'
-      menu = ['Site Menu', 'Blog Pages', 'Service Pages', 'Shop Pages']
-      options = current_user.website.theme.pages
+      options = current_user.website.menu
       possible_pages_paths.each do |path|
         begin
-          test_render = render_to_string(partial: path, locals: { menu: menu, options: options["theme_pages"] })
+          test_render = render_to_string(partial: path, locals: {options: options["menu_items"] })
 
           respond_to do |format|
             format.json do
@@ -159,7 +160,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
 
 
   end
-
   def single_field_data
     field_name = params['field_name']
     theme_page_id = params['theme_page_id']
@@ -191,7 +191,57 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     end
 
   end
+  def page_type
+    type = params[:type]
+    title = params[:title]
+    text = params[:text]
 
+    @pageTemplates = PageTemplate.where(page_type: type)
+
+    possible_paths = [
+      'add_page_section',
+      'layouts/add_page_section',
+      'views/layouts/add_page_section'
+    ]
+
+    possible_paths.each do |path|
+      begin
+        test_render = render_to_string(
+          partial: path,
+          locals: {
+            page_templates: @pageTemplates,
+            type: type,
+            title: title,
+            text: text
+          }
+        )
+
+        respond_to do |format|
+          format.json do
+            render json: {
+              html: test_render,
+              success: true,
+              path_used: path
+            }
+          end
+        end
+
+        return
+      rescue => e
+        # Continue to next path if this one fails
+      end
+    end
+
+    # If no partial was found, return an error
+    respond_to do |format|
+      format.json do
+        render json: {
+          success: false,
+          error: 'Partial not found'
+        }, status: :not_found
+      end
+    end
+  end
   def sidebar_editor_fields_data
     component_id = params[:website_editor][:component_id]
     component_type = params[:website_editor][:component_type]
@@ -225,85 +275,177 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     end
 
   end
-
   def sidebar_editor_fields_save
     component = Component.find(params[:component_id])
     theme_page_id = params[:theme_page_id]
     user = User.find(params[:user_id])
     component_page_id = params[:component_page_id]
 
+    # Get the field name being edited directly from params
+    active_field_name = params[:field_name] ||
+                        params.dig(:manage_website_editor_website_editor, :field_name) ||
+                        params.dig(:website_editor, :field_name)
+
+    Rails.logger.debug "===== DEBUGGING ====="
+    Rails.logger.debug "active_field_name: #{active_field_name.inspect}"
+    Rails.logger.debug "All params keys: #{params.keys.inspect}"
+
     field_values = {}
     field_stylings = {}
 
-    # Define styling parameters that should be collected
-    styling_params = %w[
+    # Define styling parameters by field type
+    text_styling_params = %w[
     alignment text_colour font_family font_size font_weight
     font_transform font_style font_decoration line_height
     letter_spacing word_spacing
   ]
 
-    # Collect styling information from params
-    styling_data = {}
-    styling_params.each do |style_param|
-      param_value = params[style_param] || params.dig(:manage_website_editor_website_editor, style_param) || params.dig(:website_editor, style_param)
-      if param_value.present?
-        # Add 'px' suffix to size-related parameters if they're numeric
-        if %w[font_size line_height letter_spacing word_spacing].include?(style_param) && param_value.match?(/^\d+$/)
-          styling_data[style_param] = "#{param_value}px"
-        else
-          styling_data[style_param] = param_value
-        end
-      end
-    end
+    image_styling_params = %w[height object_fit]
 
-    # Process each field based on its type, handling images with Active Storage
-    component.field_types.each do |name, type|
-      # Skip styling parameters as they're not field values
-      next if styling_params.include?(name.to_s)
-
-      # Try multiple parameter locations
-      param_value = params[name] || params.dig(:manage_website_editor_website_editor, name) || params.dig(:website_editor, name)
-
-      if type == 'image'
-        remove_param = params["remove_#{name}"] || params.dig(:manage_website_editor_website_editor, "remove_#{name}")
-
-        if remove_param == '1'
-          field_values[name] = ''
-          field_stylings[name] = styling_data
-        elsif params[name].present? && params[name].respond_to?(:original_filename)
-          # Handle image upload with Active Storage
-          begin
-            blob = ActiveStorage::Blob.create_and_upload!(
-              io: params[name].open,
-              filename: params[name].original_filename,
-              content_type: params[name].content_type
-            )
-
-            # Store the blob URL as the field value
-            field_values[name] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
-            field_stylings[name] = styling_data
-          rescue => e
-            # Keep existing value if upload fails
-            next
-          end
-        elsif params[name].blank?
-          # If no new image and field is empty, keep existing value
-          # This will be handled by not including it in field_values,
-          # so existing customization will be preserved
-          next
-        end
-      else
-        # Handle text and textarea fields
-        if param_value.present?
-          field_values[name] = param_value
-          field_stylings[name] = styling_data
-        end
-      end
-    end
-
-    # Get current customisations
+    # Get current customisations BEFORE the loop
     website = user.website
     current_customisations = website.customisations&.dig("customisations") || []
+
+    # Process ONLY the active field
+    if active_field_name
+      # Convert to string for consistency
+      active_field_name = active_field_name.to_s
+
+      field_data = component.field_types[active_field_name]
+
+      Rails.logger.debug "field_data: #{field_data.inspect}"
+      Rails.logger.debug "component.field_types keys: #{component.field_types.keys.inspect}"
+
+      if field_data
+        type = field_data["type"]
+
+        Rails.logger.debug "type: #{type}"
+
+        param_value = params[active_field_name] ||
+                      params.dig(:manage_website_editor_website_editor, active_field_name) ||
+                      params.dig(:website_editor, active_field_name)
+
+        Rails.logger.debug "param_value: #{param_value.inspect}"
+
+        styling_data = {}
+
+        # Collect styling for this field
+        if type == 'text' || type == 'textarea'
+          text_styling_params.each do |style_param|
+            style_value = params[style_param] ||
+                          params.dig(:manage_website_editor_website_editor, style_param) ||
+                          params.dig(:website_editor, style_param)
+            if style_value.present?
+              if %w[font_size line_height letter_spacing word_spacing].include?(style_param) && style_value.match?(/^\d+$/)
+                styling_data[style_param] = "#{style_value}px"
+              else
+                styling_data[style_param] = style_value
+              end
+            end
+          end
+        elsif type == 'image'
+          image_styling_params.each do |style_param|
+            style_value = params[style_param] ||
+                          params.dig(:manage_website_editor_website_editor, style_param) ||
+                          params.dig(:website_editor, style_param)
+            if style_value.present?
+              if style_param == 'height' && style_value.match?(/^\d+$/)
+                styling_data[style_param] = "#{style_value}px"
+              else
+                styling_data[style_param] = style_value
+              end
+            end
+          end
+        end
+
+        Rails.logger.debug "styling_data: #{styling_data.inspect}"
+
+        # Process the field
+        if type == 'image'
+          remove_param = params["remove_#{active_field_name}"]
+
+          Rails.logger.debug "remove_param: #{remove_param.inspect}"
+
+          if remove_param == '1'
+            field_values[active_field_name] = ''
+            field_stylings[active_field_name] = styling_data
+          elsif param_value.present?
+            if param_value.is_a?(ActionDispatch::Http::UploadedFile) || param_value.respond_to?(:original_filename)
+              begin
+                blob = ActiveStorage::Blob.create_and_upload!(
+                  io: param_value.tempfile || param_value.open,
+                  filename: param_value.original_filename,
+                  content_type: param_value.content_type
+                )
+
+                field_values[active_field_name] = Rails.application.routes.url_helpers.rails_blob_path(blob, only_path: true)
+                field_stylings[active_field_name] = styling_data
+              rescue => e
+                Rails.logger.error "Failed to upload image: #{e.message}"
+              end
+            else
+              field_values[active_field_name] = param_value
+              field_stylings[active_field_name] = styling_data
+            end
+          elsif styling_data.present?
+            Rails.logger.debug "Looking for existing customisation..."
+
+            existing_customisation = current_customisations.find do |c|
+              c["component_id"] == component.id.to_s &&
+                c["theme_page_id"] == theme_page_id.to_s &&
+                c["component_page_id"] == component_page_id &&
+                c["field_name"] == active_field_name.to_s
+            end
+
+            Rails.logger.debug "existing_customisation: #{existing_customisation.inspect}"
+
+            if existing_customisation && existing_customisation["field_value"].present?
+              field_values[active_field_name] = existing_customisation["field_value"]
+              field_stylings[active_field_name] = styling_data
+              Rails.logger.debug "Set field_values from existing"
+            else
+              # No existing customisation - get the default value from component's editable_fields
+              default_value = component.editable_fields[active_field_name]
+
+              if default_value.present?
+                field_values[active_field_name] = default_value
+                field_stylings[active_field_name] = styling_data
+                Rails.logger.debug "Set field_values from default editable_fields"
+              else
+                Rails.logger.debug "No existing customisation and no default value found"
+              end
+            end
+          else
+            Rails.logger.debug "No styling_data present"
+          end
+        else
+          # Handle text and textarea fields
+          if param_value.present?
+            field_values[active_field_name] = param_value
+            field_stylings[active_field_name] = styling_data
+          elsif styling_data.present?
+            existing_customisation = current_customisations.find do |c|
+              c["component_id"] == component.id.to_s &&
+                c["theme_page_id"] == theme_page_id.to_s &&
+                c["component_page_id"] == component_page_id &&
+                c["field_name"] == active_field_name.to_s
+            end
+
+            if existing_customisation && existing_customisation["field_value"].present?
+              field_values[active_field_name] = existing_customisation["field_value"]
+              field_stylings[active_field_name] = styling_data
+            end
+          end
+        end
+      else
+        Rails.logger.debug "field_data was nil!"
+      end
+    else
+      Rails.logger.debug "active_field_name was nil!"
+    end
+
+    Rails.logger.debug "Final field_values: #{field_values.inspect}"
+    Rails.logger.debug "===== END DEBUGGING ====="
 
     # Determine which theme_page_ids to update
     if component.global == true
@@ -446,7 +588,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       format.js { render json: { error: 'An error occurred while saving' }, status: :internal_server_error }
     end
   end
-
   def add_section
     component = Component.find(params[:component_id])
     theme_page_id = params[:theme_page_id]
@@ -527,7 +668,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       }
     end
   end
-
   def add_section_above
     component = Component.find(params[:component_id])
     theme_page_id = params[:theme_page_id]
@@ -613,7 +753,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     end
 
   end
-
   def remove_section
     component = Component.find(params[:component_id])
     theme_page_id = params[:theme_page_id]
@@ -687,7 +826,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       }
     end
   end
-
   def reorder_components
     theme_page_id = params[:theme_page_id]
     user = User.find(params[:user_id])
@@ -738,7 +876,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       }
     end
   end
-
   def update_colour_scheme
     current_settings = current_user.website.settings || {}
 
@@ -808,8 +945,364 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       format.js # This will render sidebar_editor_fields_save.js.erb
     end
   end
+  def update_positions
+    pages = params[:pages]
+    current_page_slug = params[:current_page_slug]
+    current_menu = current_user.website.menu
+    old_menu_items = current_menu["menu_items"]
+
+    # Create a new menu structure
+    new_menu_items = {}
+
+    # First pass: Create all main pages
+    main_page_position = 1
+    pages.each do |page_data|
+      next if page_data["isSubPage"] # Skip sub-pages in first pass
+
+      page_name = page_data["name"]
+      existing_page = find_existing_page(old_menu_items, page_name)
+
+      unless existing_page
+        Rails.logger.warn "Page not found: #{page_name}"
+        next
+      end
+
+      new_menu_items[page_name] = {
+        "id" => existing_page["id"],
+        "slug" => existing_page["slug"],
+        "position" => main_page_position.to_s,
+        "inner_pages" => {}, # Start with empty inner_pages
+        "show_in_menu" => existing_page["show_in_menu"]
+      }
+      main_page_position += 1
+    end
+
+    # Second pass: Add sub-pages to their parents
+    pages.each do |page_data|
+      next unless page_data["isSubPage"] # Only process sub-pages
+
+      page_name = page_data["name"]
+      parent_page_name = page_data["parentPage"]
+
+      unless parent_page_name
+        Rails.logger.warn "Sub-page #{page_name} has no parent, skipping"
+        next
+      end
+
+      existing_page = find_existing_page(old_menu_items, page_name)
+      unless existing_page
+        Rails.logger.warn "Page not found: #{page_name}"
+        next
+      end
+
+      # Make sure parent exists in new structure
+      unless new_menu_items[parent_page_name]
+        Rails.logger.warn "Parent page #{parent_page_name} not found for sub-page #{page_name}"
+        next
+      end
+
+      # Calculate position within parent's inner_pages
+      inner_position = (new_menu_items[parent_page_name]["inner_pages"].keys.length + 1).to_s
+
+      # Add as inner page
+      new_menu_items[parent_page_name]["inner_pages"][page_name] = {
+        "id" => existing_page["id"],
+        "slug" => existing_page["slug"],
+        "position" => inner_position,
+        "show_in_menu" => existing_page["show_in_menu"]
+      }
+    end
+
+    # Update the menu
+    current_menu["menu_items"] = new_menu_items
+
+    if current_user.website.update(menu: current_menu)
+      # Load the current page data before rendering
+      load_page_data(current_page_slug)
+
+      # Render the updated partial HTML
+      updated_html = render_to_string(partial: "page_content", formats: [:html])
+
+      render json: {
+        success: true,
+        message: "Pages reordered successfully",
+        menu: new_menu_items,
+        html: updated_html
+      }
+    else
+      render json: {
+        success: false,
+        message: "Failed to update menu"
+      }, status: :unprocessable_entity
+    end
+  rescue => e
+    Rails.logger.error "Error reordering pages: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+
+    render json: {
+      success: false,
+      message: "Error: #{e.message}"
+    }, status: :unprocessable_entity
+  end
+  def add_page_template
+    page_template = PageTemplate.find(params['website_editor']['page_template_id'])
+    user = current_user
+    website = user.website
+    pages = website.pages
+    menu_data = website.menu
+
+    # Find all existing "new page" variants in pages
+    existing_keys = pages["theme_pages"].keys.select { |key| key.start_with?("new page") }
+
+    # Determine the next number
+    if existing_keys.empty?
+      new_title = "new page"
+      new_slug = "new-page"
+    else
+      numbers = existing_keys.map do |key|
+        if key == "new page"
+          0
+        elsif match = key.match(/^new page (\d+)$/)
+          match[1].to_i
+        end
+      end.compact
+
+      next_number = (numbers.max || 0) + 1
+      new_title = "new page #{next_number}"
+      new_slug = "new-page-#{next_number}"
+    end
+
+    # Generate theme_page_id
+    theme_page_id = SecureRandom.uuid
+
+    # Transform components from page_template and generate component_page_ids
+    components = page_template.components["components"].map do |comp|
+      {
+        "component_id" => comp["component_id"].to_i,
+        "component_page_id" => SecureRandom.uuid,
+        "position" => comp["position"]
+      }
+    end
+
+    # Get the last position from existing pages
+    last_page_position = pages["theme_pages"].values.map { |page| page["position"].to_i }.max || 0
+
+    # Create the new page structure in theme_pages
+    pages["theme_pages"][new_title] = {
+      "theme_page_id" => theme_page_id,
+      "components" => components,
+      "inner_pages_components" => [],
+      "inner_pages" => {},
+      "slug" => new_slug,
+      "package_type" => "Bespoke",
+      "position" => (last_page_position + 1).to_s,
+      "seo" => {
+        "focus_keyword" => "",
+        "title_tag" => "",
+        "meta_description" => ""
+      }
+    }
+
+    # Get the last position from menu
+    last_menu_position = menu_data["menu_items"].values.map { |item| item["position"].to_i }.max || 0
+
+    # Add the new menu item
+    menu_data["menu_items"][new_title] = {
+      "id" => SecureRandom.uuid,
+      "slug" => new_slug,
+      "position" => (last_menu_position + 1).to_s,
+      "inner_pages" => {},
+      'show_in_menu' => true
+    }
+
+    if website.save
+      render json: { redirect_url: "/manage/website/editor/#{new_slug}" }
+    else
+      render json: { error: 'Failed to create page' }, status: :unprocessable_entity
+    end
+  end
+  def show_in_menu
+    menu_item_id = params[:menu_item_id]
+    current_page_slug = params[:current_page_slug]
+    menu_items = current_user.website.menu["menu_items"]
+    menu_item_name, menu_item_data = menu_items.find { |key, value| value["id"] == menu_item_id }
+
+    if menu_item_data
+      menu_item_data["show_in_menu"] = !menu_item_data["show_in_menu"]
+
+      if current_user.website.save
+        # Load the current page data before rendering
+        load_page_data(current_page_slug)
+
+        # Render the updated partial HTML
+        updated_html = render_to_string(partial: "page_content", formats: [:html])
+
+        render json: {
+          success: true,
+          show_in_menu: menu_item_data["show_in_menu"],
+          menu_item_id: menu_item_id,
+          html: updated_html
+        }
+      else
+        render json: { success: false, errors: current_user.website.errors }, status: :unprocessable_entity
+      end
+    else
+      render json: { success: false, error: "Menu item not found" }, status: :not_found
+    end
+  end
+  def delete_from_menu
+    menu_item_id = params[:menu_item_id]
+    current_page_slug = params[:current_page_slug]
+    menu_items = current_user.website.menu["menu_items"]
+
+    menu_item_name, menu_item_data = menu_items.find { |key, value| value["id"] == menu_item_id }
+
+    if menu_item_name
+      slug = menu_item_data["slug"]
+      menu_items.delete(menu_item_name)
+      current_user.website.pages["theme_pages"].delete(menu_item_name)
+
+      if current_user.website.save
+        # Check if we're deleting the current page
+        if current_page_slug == slug
+          # Don't try to render - just return success and let JS redirect
+          render json: {
+            success: true,
+            message: "Menu item deleted",
+            menu_item_id: menu_item_id,
+            slug: slug,
+            is_current_page: true
+          }, status: :ok
+        else
+          # Load the current page data before rendering
+          load_page_data(current_page_slug)
+
+          # Render the updated partial HTML
+          updated_html = render_to_string(partial: "page_content", formats: [:html])
+
+          render json: {
+            success: true,
+            message: "Menu item deleted",
+            menu_item_id: menu_item_id,
+            slug: slug,
+            html: updated_html,
+            is_current_page: false
+          }, status: :ok
+        end
+      else
+        # Save failed
+        render json: { success: false, errors: current_user.website.errors }, status: :unprocessable_entity
+      end
+    else
+      # Menu item not found
+      render json: { success: false, message: "Menu item not found" }, status: :not_found
+    end
+  end
+  def duplicate_in_menu
+    menu_item_id = params[:menu_item_id]
+    menu_items = current_user.website.menu["menu_items"]
+    theme_pages = current_user.website.pages["theme_pages"]
+
+    menu_item_name, menu_item_data = menu_items.find { |key, value| value["id"] == menu_item_id }
+
+    if !menu_item_name || !menu_item_data
+      render json: { success: false, error: "Menu item not found" }, status: :not_found
+      return
+    end
+
+    # Generate new name (projects -> projects 1, projects 1 -> projects 2, etc.)
+    new_name = generate_unique_name(menu_items, menu_item_name)
+
+    # === Duplicate Menu Item ===
+    new_menu_item_data = menu_item_data.deep_dup
+    new_menu_item_data["id"] = SecureRandom.uuid
+    new_menu_item_data["slug"] = new_name.parameterize
+
+    # Set position to be after all existing menu items
+    max_menu_position = menu_items.values.map { |item| item["position"].to_i }.max
+    new_menu_item_data["position"] = (max_menu_position + 1).to_s
+
+    menu_items[new_name] = new_menu_item_data
+
+    # === Duplicate Page ===
+    original_page = theme_pages[menu_item_name]
+
+    if original_page
+      new_page_data = original_page.deep_dup
+
+      # Generate new theme_page_id
+      new_page_data["theme_page_id"] = SecureRandom.uuid
+
+      # Update slug to match new menu item
+      new_page_data["slug"] = new_name.parameterize
+
+      # Set position to be after all existing pages
+      max_page_position = theme_pages.values.map { |page| page["position"].to_i }.max
+      new_page_data["position"] = (max_page_position + 1).to_s
+
+      # Generate new component_page_id for each component
+      new_page_data["components"].each do |component|
+        component["component_page_id"] = SecureRandom.uuid
+      end
+
+      # Generate new component_page_id for each inner_pages_component
+      new_page_data["inner_pages_components"].each do |component|
+        component["component_page_id"] = SecureRandom.uuid
+      end
+
+      # Add duplicated page to theme_pages
+      theme_pages[new_name] = new_page_data
+    end
+
+    # Save everything back to database
+    website = current_user.website
+    website.update(
+      menu: website.menu,
+      pages: website.pages
+    )
+
+    # Return success with new slug for redirect
+    render json: {
+      success: true,
+      name: new_name,
+      slug: new_menu_item_data["slug"]
+    }
+  end
+
 
   private
+
+  def generate_unique_name(menu_items, base_name)
+    if base_name =~ /^(.+)\s+(\d+)$/
+      prefix = $1
+      number = $2.to_i
+    else
+      prefix = base_name
+      number = 0
+    end
+
+    loop do
+      number += 1
+      new_name = "#{prefix} #{number}"
+      return new_name unless menu_items.key?(new_name)
+    end
+  end
+
+  def find_existing_page(menu_items, page_name)
+    # Check main pages
+    if menu_items[page_name]
+      return menu_items[page_name]
+    end
+
+    # Check inner pages of all main pages
+    menu_items.each do |parent_name, parent_data|
+      if parent_data["inner_pages"] && parent_data["inner_pages"][page_name]
+        return parent_data["inner_pages"][page_name]
+      end
+    end
+
+    nil
+  end
 
   def load_page_data(slug)
     @website = current_user.website # Adjust this to however you're finding the website
@@ -831,7 +1324,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
 
     @page_name = pages['theme_pages'].find { |name, data| data['theme_page_id'] == theme_page_id }&.first
   end
-
   def load_inner_page_data(slug, inner_slug)
     @website = current_user.website
     @page_slug = slug
@@ -860,7 +1352,6 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
     end
 
   end
-
   def ensure_manage!
     if current_user.role == 1
 
@@ -870,13 +1361,11 @@ class Manage::Website::Editor::WebsiteEditorController < ApplicationController
       redirect_to root_path, alert: 'Access denied. Manage privileges required.'
     end
   end
-
   def has_website
     unless current_user.website
       redirect_to manage_setup_path, alert: 'Please Set Up Your Website.'
     end
   end
-
   def start_editing
     if current_user.user_setup.built_website == 'Not Started'
       current_user.user_setup.update(built_website: 'Started')

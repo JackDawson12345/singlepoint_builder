@@ -19,9 +19,17 @@ window.showBackgroundOption = showBackgroundOption;
 window.showEditorFields = showEditorFields;
 window.singleFieldTab = singleFieldTab;
 window.initializeLiveStyleUpdates = initializeLiveStyleUpdates;
+window.managePagesSidebar = managePagesSidebar;
+window.openEditorPopup = openEditorPopup;
+window.hideEditorPopup = hideEditorPopup;
+
 
 function hideSidebar(){
     const sidebar = document.querySelector('.editor-sidebar');
+    const editorPopup = document.querySelector('.editor-edit-popup-outer');
+    if (editorPopup) {
+        editorPopup.classList.add('hidden');
+    }
     if (sidebar) {
         sidebar.classList.remove('show');
         // Call the function when needed
@@ -30,6 +38,14 @@ function hideSidebar(){
         console.log("Sidebar element not found!");
     }
 }
+
+function hideEditorPopup(){
+    const editorPopup = document.querySelector('.editor-edit-popup-outer');
+    if (editorPopup) {
+        editorPopup.classList.toggle('hidden');
+    }
+}
+
 
 function showSectionsSidebar(title, theme_page_id, area, current_component_id) {
     const sidebar = document.querySelector('.editor-sidebar');
@@ -41,6 +57,22 @@ function showSectionsSidebar(title, theme_page_id, area, current_component_id) {
 
         // If sidebar is being shown, fetch data via AJAX
         if (sidebar.classList.contains('show')) {
+            // Show loader, hide content
+            const loader = sidebar.querySelector('.side-popup-loader');
+            const titleElement = sidebar.querySelector('.side-popup-title');
+            const content = sidebar.querySelector('.side-popup-content');
+
+            loader.style.display = 'flex';
+            titleElement.style.display = 'none';
+            content.style.display = 'none';
+
+            // After 1 second, hide loader and show content
+            setTimeout(() => {
+                loader.style.display = 'none';
+                titleElement.style.display = 'flex';
+                content.style.display = 'block';
+            }, 700);
+
             fetchSectionsSidebarData(title, theme_page_id, area, current_component_id)
         }
 
@@ -63,6 +95,60 @@ function showPagesSidebar(title) {
 
         // If sidebar is being shown, fetch data via AJAX
         if (sidebar.classList.contains('show')) {
+            // Show loader, hide content
+            const loader = sidebar.querySelector('.side-popup-loader');
+            const titleElement = sidebar.querySelector('.side-popup-title');
+            const content = sidebar.querySelector('.side-popup-content');
+
+            loader.style.display = 'flex';
+            titleElement.style.display = 'none';
+            content.style.display = 'none';
+
+            // After 1 second, hide loader and show content
+            setTimeout(() => {
+                loader.style.display = 'none';
+                titleElement.style.display = 'flex';
+                content.style.display = 'block';
+            }, 500);
+
+            fetchSidebarData(title);
+        }
+
+        if (title) {
+            const titleElement = sidebar.querySelector('.sidebar-title');
+            if (titleElement) {
+                titleElement.textContent = title;
+            }
+        }
+    }
+}
+
+function managePagesSidebar(title){
+    const sidebar = document.querySelector('.editor-sidebar');
+    if (sidebar) {
+        sidebar.classList.toggle('show');
+
+        // Call the function when needed
+        updateContentWidth();
+
+        // If sidebar is being shown, fetch data via AJAX
+        if (sidebar.classList.contains('show')) {
+            // Show loader, hide content
+            const loader = sidebar.querySelector('.side-popup-loader');
+            const titleElement = sidebar.querySelector('.side-popup-title');
+            const content = sidebar.querySelector('.side-popup-content');
+
+            loader.style.display = 'flex';
+            titleElement.style.display = 'none';
+            content.style.display = 'none';
+
+            // After 1 second, hide loader and show content
+            setTimeout(() => {
+                loader.style.display = 'none';
+                titleElement.style.display = 'flex';
+                content.style.display = 'block';
+            }, 500);
+
             fetchSidebarData(title);
         }
 
@@ -85,6 +171,22 @@ function showColourSidebar(title) {
 
         // If sidebar is being shown, fetch data via AJAX
         if (sidebar.classList.contains('show')) {
+            // Show loader, hide content
+            const loader = sidebar.querySelector('.side-popup-loader');
+            const titleElement = sidebar.querySelector('.side-popup-title');
+            const content = sidebar.querySelector('.side-popup-content');
+
+            loader.style.display = 'flex';
+            titleElement.style.display = 'none';
+            content.style.display = 'none';
+
+            // After 1 second, hide loader and show content
+            setTimeout(() => {
+                loader.style.display = 'none';
+                titleElement.style.display = 'flex';
+                content.style.display = 'block';
+            }, 500);
+
             fetchSidebarData(title);
         }
 
@@ -107,6 +209,22 @@ function showNavigatorSidebar(title, theme_page_id) {
 
         // If sidebar is being shown, fetch data via AJAX
         if (sidebar.classList.contains('show')) {
+            // Show loader, hide content
+            const loader = sidebar.querySelector('.side-popup-loader');
+            const titleElement = sidebar.querySelector('.side-popup-title');
+            const content = sidebar.querySelector('.side-popup-content');
+
+            loader.style.display = 'flex';
+            titleElement.style.display = 'none';
+            content.style.display = 'none';
+
+            // After 1 second, hide loader and show content
+            setTimeout(() => {
+                loader.style.display = 'none';
+                titleElement.style.display = 'flex';
+                content.style.display = 'block';
+            }, 500);
+
             fetchNavigatorSidebarData(title, theme_page_id)
         }
 
@@ -161,10 +279,17 @@ function updateSidebarContent(data) {
 
         // Initialize component sidebar functionality after content is loaded
         if (data.html && data.html.includes('menu-item')) {
-            // Small delay to ensure DOM is ready
             setTimeout(() => {
                 initializeComponentSidebar();
             }, 50);
+        }
+
+        // ADD THIS: Initialize drag and drop for pages sidebar
+        if (data.html && data.html.includes('draggable-page')) {
+            setTimeout(() => {
+                console.log('Sidebar loaded, initializing page drag-drop...');
+                initializePageMenuDragDrop();
+            }, 100);
         }
     }
 }
@@ -307,13 +432,29 @@ function showEditorFieldsSidebar(component_id, component_type, theme_page_id, us
 
         // If sidebar is being shown, fetch data via AJAX
         if (sidebar.classList.contains('show')) {
+            // Show loader, hide content
+            const loader = sidebar.querySelector('.side-popup-loader');
+            const titleElement = sidebar.querySelector('.side-popup-title');
+            const content = sidebar.querySelector('.side-popup-content');
+
+            loader.style.display = 'flex';
+            titleElement.style.display = 'none';
+            content.style.display = 'none';
+
+            // After 1 second, hide loader and show content
+            setTimeout(() => {
+                loader.style.display = 'none';
+                titleElement.style.display = 'flex';
+                content.style.display = 'block';
+            }, 500);
+
             fetchEditorFieldsData(component_id, component_type, theme_page_id, user_id, component_page_id)
         }
 
         if (component_type) {
             const titleElement = sidebar.querySelector('.sidebar-title');
             if (titleElement) {
-                titleElement.textContent = component_type;
+                titleElement.textContent = component_type + ' Background';
             }
         }
     }
@@ -817,6 +958,22 @@ function showEditorFields(field_class){
 
         // If sidebar is being shown, fetch data via AJAX
         if (sidebar.classList.contains('show')) {
+            // Show loader, hide content
+            const loader = sidebar.querySelector('.side-popup-loader');
+            const title = sidebar.querySelector('.side-popup-title');
+            const content = sidebar.querySelector('.side-popup-content');
+
+            loader.style.display = 'flex';
+            title.style.display = 'none';
+            content.style.display = 'none';
+
+            // After 1 second, hide loader and show content
+            setTimeout(() => {
+                loader.style.display = 'none';
+                title.style.display = 'flex';
+                content.style.display = 'block';
+            }, 500);
+
             fetchSingleFieldSidebarData(classes.fieldName, themePageId, componentPageId)
         }
 
@@ -826,6 +983,7 @@ function showEditorFields(field_class){
                 titleElement.textContent = 'Edit ' + fieldNameWithSpaces;
             }
         }
+
     }
 }
 
@@ -880,11 +1038,11 @@ function singleFieldTab(tabType){
         document.querySelector('.single-sidebar-form-fields').style.display = 'block';
 
         // Update tab styling
-        document.querySelector('.content-tab-title').classList.add('text-blue-500');
-        document.querySelector('.style-tab-title').classList.remove('text-blue-500');
+        document.querySelector('.content-tab-title').classList.add('text-green-500');
+        document.querySelector('.style-tab-title').classList.remove('text-green-500');
 
-        document.querySelector('.content-tab-icon').classList.add('fill-blue-500');
-        document.querySelector('.style-tab-icon').classList.remove('fill-blue-500');
+        document.querySelector('.content-tab-icon').classList.add('fill-green-500');
+        document.querySelector('.style-tab-icon').classList.remove('fill-green-500');
 
     } else if(tabType === 'style'){
         // Show style form, hide content form
@@ -892,11 +1050,11 @@ function singleFieldTab(tabType){
         document.querySelector('.single-sidebar-form-fields').style.display = 'none';
 
         // Update tab styling
-        document.querySelector('.style-tab-title').classList.add('text-blue-500');
-        document.querySelector('.content-tab-title').classList.remove('text-blue-500');
+        document.querySelector('.style-tab-title').classList.add('text-green-500');
+        document.querySelector('.content-tab-title').classList.remove('text-green-500');
 
-        document.querySelector('.style-tab-icon').classList.add('fill-blue-500');
-        document.querySelector('.content-tab-icon').classList.remove('fill-blue-500');
+        document.querySelector('.style-tab-icon').classList.add('fill-green-500');
+        document.querySelector('.content-tab-icon').classList.remove('fill-green-500');
     }
 }
 
@@ -1048,4 +1206,319 @@ function initializeLiveStyleUpdates() {
             updateElementStyle('fontFamily', value, '');
         });
     }
+}
+
+// Drag and Drop for Pages Menu with Sub-page Support
+// Drag and Drop for Pages Menu with Sub-page Support (including dragging sub-pages out)
+function initializePageMenuDragDrop() {
+    console.log('Initializing page menu drag and drop...');
+
+    const draggablePages = document.querySelectorAll('.draggable-page');
+    console.log('Found draggable pages:', draggablePages.length);
+
+    if (draggablePages.length === 0) {
+        console.error('No draggable pages found!');
+        return;
+    }
+
+    let draggedElement = null;
+    let placeholder = null;
+    const INDENT_THRESHOLD = 40; // pixels from left to trigger sub-page
+
+    // Create placeholder element
+    function createPlaceholder(isSubPage = false) {
+        const div = document.createElement('div');
+        div.className = 'drag-placeholder';
+        const marginLeft = isSubPage ? '1.5rem' : '0';
+        div.style.cssText = `
+            height: 50px;
+            border: 2px dashed #10b981;
+            background-color: #d1fae5;
+            border-radius: 0.375rem;
+            margin: 0.5rem 0;
+            margin-left: ${marginLeft};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #059669;
+            font-size: 0.875rem;
+            pointer-events: none;
+            transition: margin-left 0.2s ease;
+        `;
+        div.innerHTML = isSubPage
+            ? '<span>↳ Drop here as sub-page</span>'
+            : '<span>Drop here</span>';
+        return div;
+    }
+
+    draggablePages.forEach((page, index) => {
+        page.draggable = true;
+
+        page.addEventListener('dragstart', (e) => {
+            console.log('Drag started');
+            draggedElement = e.currentTarget;
+            const element = e.currentTarget;
+            element.style.opacity = '0.4';
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', index);
+
+            setTimeout(() => {
+                if (element) {
+                    element.classList.add('dragging');
+                }
+            }, 0);
+        });
+
+        page.addEventListener('dragend', (e) => {
+            console.log('Drag ended');
+            if (e.currentTarget) {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.classList.remove('dragging');
+            }
+
+            if (placeholder && placeholder.parentNode) {
+                placeholder.parentNode.removeChild(placeholder);
+                placeholder = null;
+            }
+
+            draggedElement = null;
+        });
+
+        page.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!draggedElement || e.currentTarget === draggedElement || e.currentTarget.classList.contains('dragging')) {
+                return;
+            }
+
+            e.dataTransfer.dropEffect = 'move';
+
+            // Get horizontal position relative to page element
+            const rect = e.currentTarget.getBoundingClientRect();
+            const relativeX = e.clientX - rect.left;
+            const midpoint = rect.top + rect.height / 2;
+            const isTopHalf = e.clientY < midpoint;
+
+            // Check if target is already a sub-page
+            const isTargetSubPage = e.currentTarget.classList.contains('ml-6');
+
+            // Check if dragged element is a sub-page
+            const isDraggedSubPage = draggedElement.classList.contains('ml-6');
+
+            // Determine if this should be a sub-page drop
+            let shouldBeSubPage = false;
+
+            if (!isTopHalf && !isTargetSubPage && relativeX > INDENT_THRESHOLD) {
+                // Dragging below a main page with indentation = make it a sub-page
+                shouldBeSubPage = true;
+            } else if (isTargetSubPage && !isDraggedSubPage) {
+                // Dragging onto an existing sub-page area from a main page = keep as sub-page
+                shouldBeSubPage = true;
+            } else if (isTargetSubPage && isDraggedSubPage && relativeX > INDENT_THRESHOLD) {
+                // Dragging a sub-page onto another sub-page = keep as sub-page
+                shouldBeSubPage = true;
+            } else if (isDraggedSubPage && relativeX < INDENT_THRESHOLD) {
+                // Dragging a sub-page to the left (outside threshold) = make it a main page
+                shouldBeSubPage = false;
+            }
+
+            // Remove existing placeholder
+            if (placeholder && placeholder.parentNode) {
+                placeholder.parentNode.removeChild(placeholder);
+            }
+
+            // Create new placeholder
+            placeholder = createPlaceholder(shouldBeSubPage);
+
+            // Store metadata on placeholder for drop event
+            placeholder.dataset.isSubPage = shouldBeSubPage;
+            placeholder.dataset.targetPageId = e.currentTarget.dataset.pageId || '';
+
+            // Insert placeholder in correct position
+            if (isTopHalf) {
+                e.currentTarget.parentNode.insertBefore(placeholder, e.currentTarget);
+            } else {
+                if (e.currentTarget.nextSibling) {
+                    e.currentTarget.parentNode.insertBefore(placeholder, e.currentTarget.nextSibling);
+                } else {
+                    e.currentTarget.parentNode.appendChild(placeholder);
+                }
+            }
+        });
+
+        page.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+        });
+
+        page.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Drop event fired on page!');
+
+            if (!draggedElement) {
+                console.log('No dragged element');
+                return;
+            }
+
+            if (placeholder && placeholder.parentNode) {
+                const isSubPage = placeholder.dataset.isSubPage === 'true';
+                console.log('Is sub-page:', isSubPage);
+
+                // Insert element at placeholder position
+                placeholder.parentNode.insertBefore(draggedElement, placeholder);
+
+                // Add or remove sub-page styling
+                if (isSubPage) {
+                    draggedElement.classList.add('ml-6');
+                    console.log('Added ml-6 class for sub-page');
+                } else {
+                    draggedElement.classList.remove('ml-6');
+                    console.log('Removed ml-6 class for main page');
+                }
+
+                placeholder.parentNode.removeChild(placeholder);
+                placeholder = null;
+                draggedElement.style.opacity = '1';
+                draggedElement.classList.remove('dragging');
+
+                console.log('Item moved successfully');
+                updatePageMenuOrder();
+            }
+        });
+    });
+
+    // Handle drop on the container itself (fallback)
+    const container = draggablePages[0]?.parentNode;
+    if (container) {
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        });
+
+        container.addEventListener('drop', (e) => {
+            e.preventDefault();
+            console.log('Drop on container - moving element');
+
+            if (!draggedElement || !placeholder || !placeholder.parentNode) {
+                console.log('Missing draggedElement or placeholder');
+                return;
+            }
+
+            const isSubPage = placeholder.dataset.isSubPage === 'true';
+
+            placeholder.parentNode.insertBefore(draggedElement, placeholder);
+            placeholder.parentNode.removeChild(placeholder);
+            placeholder = null;
+
+            if (draggedElement) {
+                draggedElement.style.opacity = '1';
+                draggedElement.classList.remove('dragging');
+
+                // Add or remove sub-page styling
+                if (isSubPage) {
+                    draggedElement.classList.add('ml-6');
+                } else {
+                    draggedElement.classList.remove('ml-6');
+                }
+            }
+
+            console.log('Item moved successfully via container');
+            updatePageMenuOrder();
+
+            draggedElement = null;
+        });
+    }
+
+    console.log('Page menu drag setup complete!');
+}
+
+function updatePageMenuOrder() {
+    const pages = document.querySelectorAll('.draggable-page');
+    const order = [];
+    let currentParent = null;
+
+    pages.forEach((page, index) => {
+        const link = page.querySelector('a');
+        const isSubPage = page.classList.contains('ml-6');
+
+        if (link) {
+            const pageData = {
+                name: link.textContent.trim(),
+                position: index,
+                isSubPage: isSubPage
+            };
+
+            // If it's a sub-page, track which parent it belongs to
+            if (isSubPage && currentParent) {
+                pageData.parentPage = currentParent;
+            } else if (!isSubPage) {
+                currentParent = link.textContent.trim();
+            }
+
+            order.push(pageData);
+        }
+    });
+
+    console.log('New page order with hierarchy:', order);
+
+    // Get the current page slug (you'll need to add this to your page)
+    // Option 1: From data attribute
+    const currentPageSlug = document.querySelector('[data-current-page-slug]')?.dataset.currentPageSlug;
+
+    // Option 2: From a hidden input or meta tag
+    // const currentPageSlug = document.querySelector('input[name="current_page_slug"]')?.value;
+
+    // Send to server
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (token) {
+        fetch('/manage/website/editor/pages-reorder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': token,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                pages: order,
+                current_page_slug: currentPageSlug
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server response:', data);
+                if (data.success) {
+                    // Update the entire page content with the new HTML
+                    document.querySelector('.w-19\\/20').innerHTML = data.html;
+                }
+            })
+            .catch(error => {
+                console.error('Error updating order:', error);
+            });
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initializePageMenuDragDrop);
+
+// Initialize on Turbo load (if using Turbo)
+document.addEventListener('turbo:load', initializePageMenuDragDrop);
+
+// Initialize on turbolinks load (if using older Turbolinks)
+document.addEventListener('turbolinks:load', initializePageMenuDragDrop);
+
+function openEditorPopup(title){
+
+    const editorPopup = document.querySelector('.editor-edit-popup-outer');
+    if (editorPopup) {
+        editorPopup.classList.toggle('hidden');
+    }
+
+    if (title) {
+        const titleElement = editorPopup.querySelector('.editor-edit-popup-title');
+        if (titleElement) {
+            titleElement.textContent = title;
+        }
+    }
+
 }
